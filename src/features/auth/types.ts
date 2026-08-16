@@ -1,4 +1,4 @@
-export type Gender = "male" | "female";
+export type Gender = "male" | "female" | "other";
 
 export type BasicInfo = {
   name: string;
