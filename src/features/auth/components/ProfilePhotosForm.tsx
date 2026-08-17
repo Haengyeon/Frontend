@@ -33,7 +33,9 @@ export default function ProfilePhotosForm() {
       </div>
 
       <div className="mt-auto">
-        <Button onClick={() => router.push("/profile-setup/preferences")}>다음</Button>
+        <Button className="w-full" onClick={() => router.push("/profile-setup/preferences")}>
+          다음
+        </Button>
       </div>
     </div>
   );

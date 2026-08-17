@@ -9,7 +9,7 @@ export default function Page() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-16 px-8">
       <h1 className="text-4xl font-bold tracking-wide text-ink">LOGO</h1>
-      <Button variant="kakao" onClick={() => router.push("/signup")}>
+      <Button variant="kakao" className="w-full" onClick={() => router.push("/signup")}>
         💬 카카오로 시작하기
       </Button>
     </div>

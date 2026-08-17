@@ -1,11 +1,11 @@
 import Header from "@/components/layout/Header";
-import ThemeCardSelector from "@/features/matching/components/ThemeCardSelector";
+import ConditionStepOne from "@/features/matching/components/ConditionStepOne";
 
 export default function Page() {
   return (
     <div className="flex flex-1 flex-col">
-      <Header title="테마 선택" />
-      <ThemeCardSelector />
+      <Header title="매칭 조건 설정" />
+      <ConditionStepOne />
     </div>
   );
 }
