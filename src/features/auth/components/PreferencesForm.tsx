@@ -14,7 +14,9 @@ export default function PreferencesForm() {
       <MbtiSelector />
 
       <div className="mt-auto">
-        <Button onClick={() => router.push("/home")}>다음</Button>
+        <Button className="w-full" onClick={() => router.push("/home")}>
+          다음
+        </Button>
       </div>
     </div>
   );

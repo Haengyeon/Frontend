@@ -1,8 +1,8 @@
 import type { CourseSummary, Mission } from "./types";
 
 export const RECOMMENDED_COURSES: CourseSummary[] = [
-  { courseId: "course-1", title: "남해 힐링 코스", imageUrl: "", region: "경남 남해" },
-  { courseId: "course-2", title: "전주 한옥 골목 코스", imageUrl: "", region: "전북 전주" },
+  { courseId: "course-1", title: "LOVE DIVE!", imageUrl: "/코스_1.png", region: "경남 남해" },
+  { courseId: "course-2", title: "여름을 칠하다", imageUrl: "/코스_2.png", region: "전북 전주" },
 ];
 
 export const MOCK_MISSIONS: Mission[] = [

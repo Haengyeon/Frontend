@@ -1,11 +1,11 @@
 import Header from "@/components/layout/Header";
-import ThemeCardSelector from "@/features/matching/components/ThemeCardSelector";
+import PaymentSummary from "@/features/matching/components/PaymentSummary";
 
 export default function Page() {
   return (
     <div className="flex flex-1 flex-col">
-      <Header title="테마 선택" />
-      <ThemeCardSelector />
+      <Header title="결제" />
+      <PaymentSummary />
     </div>
   );
 }

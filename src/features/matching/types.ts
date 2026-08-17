@@ -1,12 +1,14 @@
 export type MatchingStatus =
   | "none"
   | "searching"
+  | "found"
+  | "pending"
   | "payment_pending"
   | "confirmed"
   | "completed";
 
 export type MatchingCondition = {
-  region: string;
+  regions: string[];
   ageRange: [number, number];
   preferredGender: "male" | "female" | "any";
   availableDates: string[];
@@ -16,6 +18,7 @@ export type MatchingCondition = {
 export type MatchingTheme = {
   id: string;
   label: string;
+  description: string;
   imageUrl: string;
 };
 
