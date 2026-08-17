@@ -11,13 +11,22 @@ const TABS = [
   { href: "/mypage", label: "마이페이지", icon: User },
 ] as const;
 
+function isTabActive(pathname: string, href: string) {
+  if (pathname === href || pathname.startsWith(`${href}/`)) return true;
+  // 매칭 플로우는 별도 탭이 없고 홈에서 진입하므로 홈 탭을 활성 상태로 표시한다.
+  if (href === "/home" && (pathname === "/matching" || pathname.startsWith("/matching/"))) {
+    return true;
+  }
+  return false;
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
 
   return (
     <nav className="fixed bottom-0 left-1/2 flex h-16 w-full max-w-md -translate-x-1/2 border-t border-line bg-cream-card/60 backdrop-blur-md">
       {TABS.map(({ href, label, icon: Icon }) => {
-        const active = pathname.startsWith(href);
+        const active = isTabActive(pathname, href);
         return (
           <Link
             key={href}

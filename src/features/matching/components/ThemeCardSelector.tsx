@@ -71,6 +71,7 @@ export default function ThemeCardSelector() {
               type="button"
               onClick={() => toggleTheme(theme.id)}
               disabled={isDisabled}
+              aria-pressed={isSelected}
               className={`relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-forest-light to-forest/50 disabled:opacity-40 ${
                 isSelected ? "ring-2 ring-forest ring-offset-2 ring-offset-cream" : ""
               }`}

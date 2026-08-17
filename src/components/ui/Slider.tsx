@@ -46,6 +46,7 @@ export default function Slider({
         />
         <input
           type="range"
+          aria-label="최소값"
           min={min}
           max={max}
           value={low}
@@ -54,6 +55,7 @@ export default function Slider({
         />
         <input
           type="range"
+          aria-label="최대값"
           min={min}
           max={max}
           value={high}

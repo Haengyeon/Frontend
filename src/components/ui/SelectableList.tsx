@@ -14,6 +14,7 @@ export default function SelectableList({ items, isSelected, onSelect }: Selectab
             <button
               type="button"
               onClick={() => onSelect(item)}
+              aria-pressed={selected}
               className={`flex w-full items-center justify-between border-b border-line py-3 text-left text-sm ${
                 selected ? "font-medium text-forest" : "text-ink"
               }`}

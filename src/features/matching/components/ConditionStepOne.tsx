@@ -91,6 +91,7 @@ export default function ConditionStepOne() {
               key={date.value}
               type="button"
               onClick={() => toggleDate(date.value)}
+              aria-pressed={availableDates.includes(date.value)}
               className={`rounded-full border px-3 py-1.5 text-sm ${
                 availableDates.includes(date.value)
                   ? "border-forest bg-forest-light text-forest"

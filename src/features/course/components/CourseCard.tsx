@@ -12,7 +12,7 @@ export default function CourseCard({ title, region, imageUrl }: CourseCardProps)
         <div className="h-full w-full bg-gradient-to-br from-forest-light to-forest/40" />
       )}
       <div className="absolute inset-x-0 bottom-0 bg-white p-3 backdrop-blur-sm">
-        <p className="text-m font-semibold text-ink">{title}</p>
+        <p className="text-base font-semibold text-ink">{title}</p>
         <p className="text-xs text-ink/70">{region}</p>
       </div>
     </div>
