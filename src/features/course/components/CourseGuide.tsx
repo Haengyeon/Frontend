@@ -30,6 +30,9 @@ export default function CourseGuide() {
   const availableDates = useMatchingDraftStore((state) => state.availableDates);
   const daysUntilTrip = getDaysUntilTrip(availableDates);
   const [selectedMissionId, setSelectedMissionId] = useState(MOCK_MISSIONS[0].missionId);
+  const [capturedMissionIds, setCapturedMissionIds] = useState(() =>
+    MOCK_MISSIONS.filter((mission) => mission.done).map((mission) => mission.missionId),
+  );
 
   if (daysUntilTrip === null) {
     return <GuideNotice icon={MapPinOff} title="진행중인 코스가 없어요" />;
@@ -53,9 +56,18 @@ export default function CourseGuide() {
       <MissionStoryPath
         missions={MOCK_MISSIONS}
         selectedMissionId={selectedMission.missionId}
+        completedMissionIds={capturedMissionIds}
         onSelect={setSelectedMissionId}
       />
-      <MissionCard mission={selectedMission} />
+      <MissionCard
+        mission={selectedMission}
+        isCaptured={capturedMissionIds.includes(selectedMission.missionId)}
+        onCapture={() =>
+          setCapturedMissionIds((prev) =>
+            prev.includes(selectedMission.missionId) ? prev : [...prev, selectedMission.missionId],
+          )
+        }
+      />
     </div>
   );
 }

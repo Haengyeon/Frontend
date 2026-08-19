@@ -5,12 +5,14 @@ import type { Mission } from "@/features/course/types";
 type MissionStoryPathProps = {
   missions: Mission[];
   selectedMissionId: string;
+  completedMissionIds: string[];
   onSelect: (missionId: string) => void;
 };
 
 export default function MissionStoryPath({
   missions,
   selectedMissionId,
+  completedMissionIds,
   onSelect,
 }: MissionStoryPathProps) {
   const total = missions.length;
@@ -46,7 +48,7 @@ export default function MissionStoryPath({
               <span className="absolute left-1.5 top-1.5 rounded-full bg-forest px-2 py-0.5 text-xs font-medium text-white">
                 {mission.order}/{total}
               </span>
-              {mission.done ? (
+              {completedMissionIds.includes(mission.missionId) ? (
                 <span className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-forest text-white">
                   <Check size={12} strokeWidth={3} />
                 </span>

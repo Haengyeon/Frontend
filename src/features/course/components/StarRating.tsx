@@ -11,14 +11,15 @@ const SCORES = [1, 2, 3, 4, 5];
 
 export default function StarRating({ value, onChange }: StarRatingProps) {
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1" role="radiogroup" aria-label="별점">
       {SCORES.map((score) => (
         <button
           key={score}
           type="button"
           onClick={() => onChange(score)}
+          role="radio"
           aria-label={`${score}점`}
-          aria-pressed={value >= score}
+          aria-checked={value === score}
         >
           <Star
             size={28}

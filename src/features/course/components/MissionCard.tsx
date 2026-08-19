@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { MapPin, Camera, CheckCircle2 } from "lucide-react";
 import type { Mission } from "@/features/course/types";
 
 type MissionCardProps = {
   mission: Mission;
+  isCaptured: boolean;
+  onCapture: () => void;
 };
 
-export default function MissionCard({ mission }: MissionCardProps) {
-  const [isCaptured, setIsCaptured] = useState(false);
-
+export default function MissionCard({ mission, isCaptured, onCapture }: MissionCardProps) {
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-line bg-cream-card p-5">
       <div className="flex flex-col gap-1">
@@ -40,16 +39,16 @@ export default function MissionCard({ mission }: MissionCardProps) {
             완료!
           </span>
         ) : (
-          <label className="flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-forest px-4 text-sm font-medium text-white">
+          <label className="flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-forest px-4 text-sm font-medium text-white focus-within:ring-2 focus-within:ring-forest focus-within:ring-offset-2 focus-within:ring-offset-cream">
             <Camera size={16} strokeWidth={1.5} />
             사진 촬영하기
             <input
               type="file"
               accept="image/*"
               capture="environment"
-              className="hidden"
+              className="sr-only"
               onChange={(e) => {
-                if (e.target.files?.[0]) setIsCaptured(true);
+                if (e.target.files?.[0]) onCapture();
               }}
             />
           </label>
