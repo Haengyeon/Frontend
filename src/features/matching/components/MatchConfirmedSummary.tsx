@@ -3,22 +3,13 @@
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import MatchConfirmedBadge from "@/features/matching/components/MatchConfirmedBadge";
+import { getDaysUntilTrip } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
-
-function getDDay(availableDates: string[]): number | null {
-  if (availableDates.length === 0) return null;
-  const earliest = [...availableDates].sort()[0];
-  const target = new Date(`${earliest}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  return diff > 0 ? diff : 0;
-}
 
 export default function MatchConfirmedSummary() {
   const router = useRouter();
   const { regions, availableDates } = useMatchingDraftStore();
-  const dDay = getDDay(availableDates);
+  const dDay = getDaysUntilTrip(availableDates);
   const location = regions[0] ?? "여행지 미정";
 
   return (
@@ -39,7 +30,7 @@ export default function MatchConfirmedSummary() {
         <Button variant="secondary" className="flex-1" onClick={() => router.push("/chat")}>
           채팅하기
         </Button>
-        <Button className="flex-1" onClick={() => router.push("/course/current")}>
+        <Button className="flex-1" onClick={() => router.push("/course")}>
           코스 보기
         </Button>
       </div>

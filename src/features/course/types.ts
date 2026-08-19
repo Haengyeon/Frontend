@@ -3,14 +3,20 @@ export type CourseSummary = {
   title: string;
   imageUrl: string;
   region: string;
+  description: string;
 };
-
-export type MissionStatus = "locked" | "current" | "done";
 
 export type Mission = {
   missionId: string;
   order: number;
   placeName: string;
+  location: string;
   description: string;
-  status: MissionStatus;
+  imageUrl: string;
+  done: boolean;
+};
+
+export type StampRegion = {
+  name: string;
+  visited: boolean;
 };
