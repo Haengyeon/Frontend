@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
-import PhotoUploadBox from "@/features/auth/components/PhotoUploadBox";
+import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 
 export default function ProfilePhotosForm() {
   const router = useRouter();

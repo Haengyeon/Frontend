@@ -94,6 +94,16 @@ export function getAvailableDateOptions(days = 14) {
   });
 }
 
+export function getDaysUntilTrip(availableDates: string[]): number | null {
+  if (availableDates.length === 0) return null;
+  const earliest = [...availableDates].sort()[0];
+  const target = new Date(`${earliest}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+}
+
 export const MOCK_MATCHING_ID = "mock-matching-1";
 
 export const MOCK_MATCH_PROFILE: MatchProfile = {

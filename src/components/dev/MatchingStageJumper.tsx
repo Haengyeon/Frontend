@@ -1,9 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MOCK_MATCHING_ID, MOCK_MATCH_PROFILE } from "@/features/matching/mocks";
+import {
+  MOCK_MATCHING_ID,
+  MOCK_MATCH_PROFILE,
+  getAvailableDateOptions,
+} from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import type { MatchingStatus } from "@/features/matching/types";
+
+const DATE_OPTIONS = getAvailableDateOptions(14);
+
+const COURSE_STAGES = [
+  { label: "코스 열림 (D-1)", dateValue: DATE_OPTIONS[0].value },
+  { label: "코스 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
+];
 
 const STAGES: { label: string; status: MatchingStatus; href: string }[] = [
   { label: "노매칭", status: "none", href: "/home" },
@@ -22,6 +33,7 @@ const STAGES: { label: string; status: MatchingStatus; href: string }[] = [
 export default function MatchingStageJumper() {
   const router = useRouter();
   const setStatus = useMatchingDraftStore((state) => state.setStatus);
+  const setAvailableDates = useMatchingDraftStore((state) => state.setAvailableDates);
 
   return (
     <div className="fixed left-4 top-1/2 z-[100] flex -translate-y-1/2 flex-col gap-1.5 rounded-2xl bg-black/80 p-3 text-white shadow-lg backdrop-blur-sm">
@@ -33,6 +45,21 @@ export default function MatchingStageJumper() {
           onClick={() => {
             setStatus(stage.status);
             router.push(stage.href);
+          }}
+          className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
+        >
+          {stage.label}
+        </button>
+      ))}
+
+      <span className="mt-2 px-1 text-[11px] font-semibold text-white/60">코스 테스트</span>
+      {COURSE_STAGES.map((stage) => (
+        <button
+          key={stage.label}
+          type="button"
+          onClick={() => {
+            setAvailableDates([stage.dateValue]);
+            router.push("/course");
           }}
           className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
         >

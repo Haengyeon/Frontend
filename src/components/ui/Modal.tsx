@@ -11,9 +11,9 @@ export default function Modal({ open, onClose, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center">
-      <div className="w-full max-w-sm rounded-t-2xl bg-white p-6 sm:rounded-2xl">
+      <div className="w-full max-w-sm rounded-t-2xl bg-cream-card p-6 sm:rounded-2xl">
         {children}
-        <button type="button" onClick={onClose} className="mt-4 text-sm text-zinc-400">
+        <button type="button" onClick={onClose} className="mt-4 text-sm text-muted">
           닫기
         </button>
       </div>
