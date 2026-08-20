@@ -1,12 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 type HeaderProps = {
   title?: string;
+  children?: ReactNode;
 };
 
-export default function Header({ title }: HeaderProps) {
+export default function Header({ title, children }: HeaderProps) {
   const router = useRouter();
 
   return (
@@ -19,7 +21,7 @@ export default function Header({ title }: HeaderProps) {
       >
         ←
       </button>
-      {title ? <h1 className="text-base font-medium text-ink">{title}</h1> : null}
+      {children ?? (title ? <h1 className="text-base font-medium text-ink">{title}</h1> : null)}
     </header>
   );
 }

@@ -21,6 +21,8 @@ export function getGenderLabel(value: MatchingCondition["preferredGender"]) {
   return GENDER_OPTIONS.find((option) => option.value === value)?.label ?? "";
 }
 
+export const MAX_THEMES = 3;
+
 export const MATCHING_THEMES: MatchingTheme[] = [
   {
     id: "nature",

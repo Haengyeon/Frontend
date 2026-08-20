@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import MatchConfirmedBadge from "@/features/matching/components/MatchConfirmedBadge";
-import { getDaysUntilTrip } from "@/features/matching/mocks";
+import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 
 export default function MatchConfirmedSummary() {
   const router = useRouter();
-  const { regions, availableDates } = useMatchingDraftStore();
-  const dDay = getDaysUntilTrip(availableDates);
+  const regions = useMatchingDraftStore((state) => state.regions);
+  const dDay = useDaysUntilTrip();
   const location = regions[0] ?? "여행지 미정";
 
   return (

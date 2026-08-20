@@ -5,8 +5,7 @@ import { Lock, MapPinOff, type LucideIcon } from "lucide-react";
 import MissionStoryPath from "@/features/course/components/MissionStoryPath";
 import MissionCard from "@/features/course/components/MissionCard";
 import { MOCK_MISSIONS } from "@/features/course/mocks";
-import { getDaysUntilTrip } from "@/features/matching/mocks";
-import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
 
 function GuideNotice({
   icon: Icon,
@@ -27,8 +26,7 @@ function GuideNotice({
 }
 
 export default function CourseGuide() {
-  const availableDates = useMatchingDraftStore((state) => state.availableDates);
-  const daysUntilTrip = getDaysUntilTrip(availableDates);
+  const daysUntilTrip = useDaysUntilTrip();
   const [selectedMissionId, setSelectedMissionId] = useState(MOCK_MISSIONS[0].missionId);
   const [capturedMissionIds, setCapturedMissionIds] = useState(() =>
     MOCK_MISSIONS.filter((mission) => mission.done).map((mission) => mission.missionId),
