@@ -11,9 +11,21 @@ import type { MatchingStatus } from "@/features/matching/types";
 
 const DATE_OPTIONS = getAvailableDateOptions(14);
 
+function toDateValue(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+const TODAY_VALUE = toDateValue(new Date());
+
 const COURSE_STAGES = [
   { label: "코스 열림 (D-1)", dateValue: DATE_OPTIONS[0].value },
   { label: "코스 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
+];
+
+const CHAT_STAGES = [
+  { label: "채팅 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
+  { label: "채팅 제한 (D-1)", dateValue: DATE_OPTIONS[0].value },
+  { label: "채팅 전체공개 (D-Day)", dateValue: TODAY_VALUE },
 ];
 
 const STAGES: { label: string; status: MatchingStatus; href: string }[] = [
@@ -60,6 +72,21 @@ export default function MatchingStageJumper() {
           onClick={() => {
             setAvailableDates([stage.dateValue]);
             router.push("/course");
+          }}
+          className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
+        >
+          {stage.label}
+        </button>
+      ))}
+
+      <span className="mt-2 px-1 text-[11px] font-semibold text-white/60">채팅 테스트</span>
+      {CHAT_STAGES.map((stage) => (
+        <button
+          key={stage.label}
+          type="button"
+          onClick={() => {
+            setAvailableDates([stage.dateValue]);
+            router.push("/chat/chat-1");
           }}
           className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
         >
