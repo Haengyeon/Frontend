@@ -17,7 +17,9 @@ export default function ChatRoomHeader({ room }: ChatRoomHeaderProps) {
       <Avatar src={room.partnerPhotoUrl} alt={room.partnerName} size={32} />
       <div>
         <p className="text-sm font-medium text-ink">{room.partnerName}</p>
-        {daysUntilTrip !== null ? <p className="text-xs text-muted">D-{daysUntilTrip}</p> : null}
+        {!room.isPast && daysUntilTrip !== null ? (
+          <p className="text-xs text-muted">D-{daysUntilTrip}</p>
+        ) : null}
       </div>
     </Header>
   );

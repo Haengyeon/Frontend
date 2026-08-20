@@ -5,7 +5,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 type BottomSheetProps = {
   open: boolean;
   onClose: () => void;
-  labelledBy?: string;
+  labelledBy: string;
   children: ReactNode;
 };
 
@@ -25,7 +25,8 @@ export default function BottomSheet({ open, onClose, labelledBy, children }: Bot
     if (!open) return;
 
     previouslyFocused.current = document.activeElement as HTMLElement | null;
-    panelRef.current?.focus();
+    const initialFocusable = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    (initialFocusable ?? panelRef.current)?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -37,7 +38,11 @@ export default function BottomSheet({ open, onClose, labelledBy, children }: Bot
       if (event.key !== "Tab" || !panelRef.current) return;
 
       const focusable = panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-      if (focusable.length === 0) return;
+      if (focusable.length === 0) {
+        event.preventDefault();
+        panelRef.current.focus();
+        return;
+      }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
 

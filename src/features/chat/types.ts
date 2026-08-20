@@ -1,11 +1,3 @@
-export type ChatRoomSummary = {
-  chatId: string;
-  partnerName: string;
-  partnerPhotoUrl: string;
-  lastMessage: string;
-  isPast: boolean;
-};
-
 export type ChatMessage = {
   id: string;
   senderId: "me" | "partner";
@@ -18,4 +10,14 @@ export type ChatCourseInfo = {
   modeLabel: string;
   durationLabel: string;
   stopOrder: string[];
+};
+
+export type ChatRoomSummary = {
+  chatId: string;
+  partnerName: string;
+  partnerPhotoUrl: string;
+  lastMessage: string;
+  isPast: boolean;
+  messages: ChatMessage[];
+  courseInfo: ChatCourseInfo;
 };

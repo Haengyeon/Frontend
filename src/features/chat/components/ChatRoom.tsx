@@ -5,19 +5,23 @@ import { Lock } from "lucide-react";
 import CourseInfoAccordion from "@/features/chat/components/CourseInfoAccordion";
 import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
-import { MOCK_MESSAGES, MOCK_CHAT_COURSE_INFO } from "@/features/chat/mocks";
 import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
-import type { ChatMessage } from "@/features/chat/types";
+import type { ChatMessage, ChatRoomSummary } from "@/features/chat/types";
 
 const LIMITED_MESSAGE_CAP = 10;
 
-export default function ChatRoom() {
-  const daysUntilTrip = useDaysUntilTrip();
-  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
+type ChatRoomProps = {
+  room: ChatRoomSummary;
+};
 
-  const isLocked = daysUntilTrip === null || daysUntilTrip > 1;
-  const isLimited = daysUntilTrip === 1;
-  const capReached = isLimited && messages.length >= LIMITED_MESSAGE_CAP;
+export default function ChatRoom({ room }: ChatRoomProps) {
+  const daysUntilTrip = useDaysUntilTrip();
+  const [messages, setMessages] = useState<ChatMessage[]>(room.messages);
+
+  const isLocked = !room.isPast && (daysUntilTrip === null || daysUntilTrip > 1);
+  const isLimited = !room.isPast && daysUntilTrip === 1;
+  const sentMessageCount = messages.filter((message) => message.senderId === "me").length;
+  const capReached = isLimited && sentMessageCount >= LIMITED_MESSAGE_CAP;
 
   if (isLocked) {
     return (
@@ -37,7 +41,7 @@ export default function ChatRoom() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <CourseInfoAccordion courseInfo={MOCK_CHAT_COURSE_INFO} />
+      <CourseInfoAccordion courseInfo={room.courseInfo} />
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-6">
         {messages.map((message) => (

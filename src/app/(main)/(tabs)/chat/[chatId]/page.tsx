@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: Promise<{ chatId: strin
   return (
     <div className="flex flex-1 flex-col">
       <ChatRoomHeader room={room} />
-      <ChatRoom />
+      <ChatRoom room={room} />
     </div>
   );
 }

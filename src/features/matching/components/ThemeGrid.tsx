@@ -51,7 +51,7 @@ export default function ThemeGrid({ selectedIds, onToggle }: ThemeGridProps) {
               <>
                 <Image
                   src={theme.imageUrl}
-                  alt={theme.label}
+                  alt=""
                   fill
                   sizes="200px"
                   className="object-cover"

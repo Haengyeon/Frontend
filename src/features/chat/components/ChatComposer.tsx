@@ -29,12 +29,12 @@ export default function ChatComposer({ limited, onSend, disabled = false }: Chat
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSend();
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSend();
           }}
           maxLength={limited ? MAX_LENGTH : undefined}
           disabled={disabled}
           placeholder="메시지 입력..."
-          className="h-8 flex-1 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none disabled:opacity-50"
+          className="h-8 flex-1 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-forest disabled:opacity-50"
         />
         <button
           type="button"
