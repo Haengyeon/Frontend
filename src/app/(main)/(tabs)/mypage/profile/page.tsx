@@ -1,7 +1,11 @@
+import Header from "@/components/layout/Header";
+import ProfileEditForm from "@/features/mypage/components/ProfileEditForm";
+
 export default function Page() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
-      <p className="text-sm text-zinc-400">프로필 수정</p>
+    <div className="flex flex-1 flex-col">
+      <Header title="프로필 수정" />
+      <ProfileEditForm />
     </div>
   );
 }

@@ -7,9 +7,17 @@ type MissionCardProps = {
   mission: Mission;
   isCaptured: boolean;
   onCapture: () => void;
+  comment: string;
+  onCommentChange: (comment: string) => void;
 };
 
-export default function MissionCard({ mission, isCaptured, onCapture }: MissionCardProps) {
+export default function MissionCard({
+  mission,
+  isCaptured,
+  onCapture,
+  comment,
+  onCommentChange,
+}: MissionCardProps) {
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-line bg-cream-card p-5">
       <div className="flex flex-col gap-1">
@@ -54,6 +62,17 @@ export default function MissionCard({ mission, isCaptured, onCapture }: MissionC
           </label>
         )}
       </div>
+
+      {isCaptured ? (
+        <input
+          type="text"
+          value={comment}
+          onChange={(e) => onCommentChange(e.target.value)}
+          maxLength={50}
+          placeholder="이 순간을 한 줄로 남겨보세요 (선택)"
+          className="rounded-xl border border-line bg-transparent px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:border-forest focus:outline-none"
+        />
+      ) : null}
     </div>
   );
 }

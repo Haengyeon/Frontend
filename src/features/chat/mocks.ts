@@ -11,7 +11,6 @@ const CHAT_1_COURSE_INFO: ChatCourseInfo = {
   courseTitle: "경주 역사 기행",
   modeLabel: "실내 · 도보",
   durationLabel: "3시간 소요",
-  stopOrder: ["코스1", "코스2", "코스3", "코스4"],
 };
 
 const CHAT_2_MESSAGES: ChatMessage[] = [
@@ -23,7 +22,6 @@ const CHAT_2_COURSE_INFO: ChatCourseInfo = {
   courseTitle: "부산 야경 산책",
   modeLabel: "야외 · 도보",
   durationLabel: "2시간 소요",
-  stopOrder: ["코스1", "코스2", "코스3"],
 };
 
 export const CHAT_ROOMS: ChatRoomSummary[] = [

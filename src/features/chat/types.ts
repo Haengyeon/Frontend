@@ -9,7 +9,6 @@ export type ChatCourseInfo = {
   courseTitle: string;
   modeLabel: string;
   durationLabel: string;
-  stopOrder: string[];
 };
 
 export type ChatRoomSummary = {

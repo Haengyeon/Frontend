@@ -19,8 +19,7 @@ type ConditionConfirmSheetProps = {
 };
 
 export default function ConditionConfirmSheet({ open, onEdit, onConfirm }: ConditionConfirmSheetProps) {
-  const { regions, ageRange, preferredGender, availableDates, themeIds } =
-    useMatchingDraftStore();
+  const { regions, ageRange, preferredGender, availableDates, themeIds } = useMatchingDraftStore();
 
   const rows = [
     { icon: MapPin, label: "여행 지역", value: regions.join(", ") || "미선택" },
