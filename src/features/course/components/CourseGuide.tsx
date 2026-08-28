@@ -31,6 +31,7 @@ export default function CourseGuide() {
   const [capturedMissionIds, setCapturedMissionIds] = useState(() =>
     MOCK_MISSIONS.filter((mission) => mission.done).map((mission) => mission.missionId),
   );
+  const [comments, setComments] = useState<Record<string, string>>({});
 
   if (daysUntilTrip === null) {
     return <GuideNotice icon={MapPinOff} title="진행중인 코스가 없어요" />;
@@ -64,6 +65,10 @@ export default function CourseGuide() {
           setCapturedMissionIds((prev) =>
             prev.includes(selectedMission.missionId) ? prev : [...prev, selectedMission.missionId],
           )
+        }
+        comment={comments[selectedMission.missionId] ?? ""}
+        onCommentChange={(comment) =>
+          setComments((prev) => ({ ...prev, [selectedMission.missionId]: comment }))
         }
       />
     </div>

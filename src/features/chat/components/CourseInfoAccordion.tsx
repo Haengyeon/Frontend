@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Map as MapIcon, Clock, Footprints } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, Clock, Footprints, ArrowRight } from "lucide-react";
 import type { ChatCourseInfo } from "@/features/chat/types";
 
 type CourseInfoAccordionProps = {
@@ -28,20 +29,22 @@ export default function CourseInfoAccordion({ courseInfo }: CourseInfoAccordionP
       </button>
 
       {isOpen ? (
-        <div className="flex flex-col gap-2 px-5 pb-4 text-sm text-ink/80">
-          <span className="flex items-center gap-1.5">
-            <Footprints size={14} strokeWidth={1.5} />
-            {courseInfo.modeLabel}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock size={14} strokeWidth={1.5} />
-            {courseInfo.durationLabel}
-          </span>
-          <span className="text-muted">{courseInfo.stopOrder.join(" → ")}</span>
-          <button type="button" className="flex items-center gap-1 self-start text-forest">
-            <MapIcon size={14} strokeWidth={1.5} />
-            지도 보기
-          </button>
+        <div className="flex flex-col gap-3 px-5 pb-4 text-sm text-ink/80">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <Footprints size={14} strokeWidth={1.5} />
+              {courseInfo.modeLabel}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock size={14} strokeWidth={1.5} />
+              {courseInfo.durationLabel}
+            </span>
+          </div>
+
+          <Link href="/course" className="flex items-center gap-1 self-start text-forest">
+            코스 보러가기
+            <ArrowRight size={14} strokeWidth={1.5} />
+          </Link>
         </div>
       ) : null}
     </div>

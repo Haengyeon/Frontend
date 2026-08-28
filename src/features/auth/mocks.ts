@@ -1,3 +1,20 @@
+import type { ProfileDraft } from "./types";
+
+export const MOCK_MY_PROFILE: ProfileDraft = {
+  basicInfo: {
+    name: "정우진",
+    age: 27,
+    gender: "male",
+    jobCategory: "IT・개발",
+    isJobCategoryPrivate: false,
+  },
+  photos: [],
+  bio: "함께 걸으며 이야기 나누는 걸 좋아해요",
+  mbti: { EI: "E", SN: "N", TF: "F", JP: "P" },
+  isMbtiPrivate: false,
+  interestTags: ["카페", "사진", "여행"],
+};
+
 export const JOB_CATEGORIES = [
   "IT・개발",
   "디자인",
