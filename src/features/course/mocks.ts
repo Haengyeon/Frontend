@@ -24,8 +24,9 @@ export const MOCK_MISSIONS: Mission[] = [
     placeName: "경복궁",
     location: "서울 종로구",
     description: "조선 왕조의 법궁으로, 웅장한 전각과 아름다운 후원을 함께 볼 수 있어요.",
-    imageUrl: "/코스_1.png",
+    imageUrl: "/경복궁.png",
     done: true,
+    photoMissionHint: "경회루를 배경으로 멋진 사진을 찍어보세요!",
   },
   {
     missionId: "m2",
@@ -33,8 +34,9 @@ export const MOCK_MISSIONS: Mission[] = [
     placeName: "창덕궁",
     location: "서울 종로구",
     description: "조선 시대의 궁궐로 자연과 건축이 조화를 이루는 아름다운 궁궐이에요.",
-    imageUrl: "/코스_2.png",
+    imageUrl: "/창덕궁.png",
     done: false,
+    photoMissionHint: "인정전의 단청을 배경으로 멋진 사진을 찍어보세요!",
   },
   {
     missionId: "m3",
@@ -42,8 +44,9 @@ export const MOCK_MISSIONS: Mission[] = [
     placeName: "국립중앙박물관",
     location: "서울 용산구",
     description: "우리나라를 대표하는 역사와 문화유산을 만날 수 있는 박물관이에요.",
-    imageUrl: "/테마_문화.png",
+    imageUrl: "/국립중앙박물관.png",
     done: false,
+    photoMissionHint: "대표 소장품 앞에서 인증샷을 남겨보세요!",
   },
   {
     missionId: "m4",
@@ -51,8 +54,9 @@ export const MOCK_MISSIONS: Mission[] = [
     placeName: "북촌한옥마을",
     location: "서울 종로구",
     description: "전통 한옥이 모여있는 골목길을 거닐며 옛 정취를 느껴보세요.",
-    imageUrl: "/테마_카페.png",
+    imageUrl: "/북촌한옥마을.png",
     done: false,
+    photoMissionHint: "한옥 골목길을 배경으로 인증샷을 남겨보세요!",
   },
 ];
 

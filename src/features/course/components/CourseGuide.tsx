@@ -47,15 +47,16 @@ export default function CourseGuide() {
     );
   }
 
-  const selectedMission =
-    MOCK_MISSIONS.find((mission) => mission.missionId === selectedMissionId) ?? MOCK_MISSIONS[0];
+  const selectedIndex = MOCK_MISSIONS.findIndex(
+    (mission) => mission.missionId === selectedMissionId,
+  );
+  const selectedMission = MOCK_MISSIONS[selectedIndex] ?? MOCK_MISSIONS[0];
 
   return (
     <div className="flex flex-col gap-5">
       <MissionStoryPath
         missions={MOCK_MISSIONS}
         selectedMissionId={selectedMission.missionId}
-        completedMissionIds={capturedMissionIds}
         onSelect={setSelectedMissionId}
       />
       <MissionCard

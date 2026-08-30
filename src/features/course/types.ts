@@ -14,6 +14,7 @@ export type Mission = {
   description: string;
   imageUrl: string;
   done: boolean;
+  photoMissionHint: string;
 };
 
 export type StampRegion = {
