@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Clover } from "lucide-react";
-import StepNavButtons from "@/features/matching/components/StepNavButtons";
+import StepNavButtons from "@/components/ui/StepNavButtons";
 import ConditionConfirmSheet from "@/features/matching/components/ConditionConfirmSheet";
 import ThemeGrid from "@/features/matching/components/ThemeGrid";
 import { MAX_THEMES } from "@/features/matching/mocks";

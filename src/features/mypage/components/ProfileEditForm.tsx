@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PersonStanding, Smile } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
@@ -41,8 +42,8 @@ export default function ProfileEditForm() {
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
       <div className="flex gap-3">
-        <PhotoUploadBox label="전신샷 업로드" icon="🧍" />
-        <PhotoUploadBox label="얼굴사진 업로드" icon="🙂" />
+        <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} />
+        <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} />
       </div>
 
       <Input label="이름" value={name} onChange={(e) => setName(e.target.value)} />

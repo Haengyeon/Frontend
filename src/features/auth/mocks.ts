@@ -12,7 +12,7 @@ export const MOCK_MY_PROFILE: ProfileDraft = {
   bio: "함께 걸으며 이야기 나누는 걸 좋아해요",
   mbti: { EI: "E", SN: "N", TF: "F", JP: "P" },
   isMbtiPrivate: false,
-  interestTags: ["카페", "사진", "여행"],
+  interestTags: ["카페", "사진", "바다"],
 };
 
 export const JOB_CATEGORIES = [
@@ -41,10 +41,12 @@ export const INTEREST_TAGS = [
   "운동",
   "IT",
   "요리",
-  "뮤직",
+  "바다",
   "영화",
-  "만화",
+  "전시",
   "사진",
-  "애니메이션",
-  "여행",
+  "동물",
+  "음악",
+  "액티비티",
+  "역사",
 ];

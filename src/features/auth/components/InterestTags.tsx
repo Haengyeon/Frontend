@@ -9,12 +9,14 @@ import {
   Dumbbell,
   Laptop,
   ChefHat,
-  Music,
+  Sailboat,
   Film,
-  PenTool,
+  Frame,
   Camera,
-  Clapperboard,
-  Plane,
+  PawPrint,
+  Music,
+  Zap,
+  Landmark,
   type LucideIcon,
 } from "lucide-react";
 import { INTEREST_TAGS } from "@/features/auth/mocks";
@@ -27,12 +29,14 @@ const TAG_ICONS: Record<string, LucideIcon> = {
   운동: Dumbbell,
   IT: Laptop,
   요리: ChefHat,
-  뮤직: Music,
+  바다: Sailboat,
   영화: Film,
-  만화: PenTool,
+  전시: Frame,
   사진: Camera,
-  애니메이션: Clapperboard,
-  여행: Plane,
+  동물: PawPrint,
+  음악: Music,
+  액티비티: Zap,
+  역사: Landmark,
 };
 
 export default function InterestTags() {

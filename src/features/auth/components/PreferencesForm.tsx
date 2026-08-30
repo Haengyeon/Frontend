@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
+import StepNavButtons from "@/components/ui/StepNavButtons";
 import MbtiSelector from "@/features/auth/components/MbtiSelector";
 import InterestTags from "@/features/auth/components/InterestTags";
 
@@ -14,9 +14,7 @@ export default function PreferencesForm() {
       <MbtiSelector />
 
       <div className="mt-auto">
-        <Button className="w-full" onClick={() => router.push("/home")}>
-          다음
-        </Button>
+        <StepNavButtons onNext={() => router.push("/home")} />
       </div>
     </div>
   );
