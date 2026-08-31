@@ -11,12 +11,6 @@ import type { MatchingStatus } from "@/features/matching/types";
 
 const DATE_OPTIONS = getAvailableDateOptions(14);
 
-function toDateValue(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-const TODAY_VALUE = toDateValue(new Date());
-
 const COURSE_STAGES = [
   { label: "코스 열림 (D-1)", dateValue: DATE_OPTIONS[0].value },
   { label: "코스 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
@@ -25,7 +19,6 @@ const COURSE_STAGES = [
 const CHAT_STAGES = [
   { label: "채팅 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
   { label: "채팅 제한 (D-1)", dateValue: DATE_OPTIONS[0].value },
-  { label: "채팅 전체공개 (D-Day)", dateValue: TODAY_VALUE },
 ];
 
 const STAGES: { label: string; status: MatchingStatus; href: string }[] = [

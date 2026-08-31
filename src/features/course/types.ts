@@ -17,7 +17,3 @@ export type Mission = {
   photoMissionHint: string;
 };
 
-export type StampRegion = {
-  name: string;
-  visited: boolean;
-};

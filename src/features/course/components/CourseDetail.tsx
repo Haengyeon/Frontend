@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MapPin } from "lucide-react";
+import Button from "@/components/ui/Button";
 import MissionStoryPath from "@/features/course/components/MissionStoryPath";
 import { MOCK_MISSIONS } from "@/features/course/mocks";
 import type { CourseSummary } from "@/features/course/types";
@@ -11,6 +13,9 @@ type CourseDetailProps = {
 };
 
 export default function CourseDetail({ course }: CourseDetailProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCompleted = searchParams.get("from") === "stamp";
   const [selectedMissionId, setSelectedMissionId] = useState(MOCK_MISSIONS[0].missionId);
   const selectedIndex = MOCK_MISSIONS.findIndex(
     (mission) => mission.missionId === selectedMissionId,
@@ -42,6 +47,15 @@ export default function CourseDetail({ course }: CourseDetailProps) {
         </span>
         <p className="text-sm leading-relaxed text-ink/80">{selectedMission.description}</p>
       </div>
+
+      {isCompleted ? (
+        <Button
+          className="mt-auto w-full"
+          onClick={() => router.push(`/course/${course.courseId}/review`)}
+        >
+          후기 작성하기
+        </Button>
+      ) : null}
     </div>
   );
 }

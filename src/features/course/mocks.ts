@@ -1,4 +1,4 @@
-import type { CourseSummary, Mission, StampRegion } from "./types";
+import type { CourseSummary, Mission } from "./types";
 
 export const RECOMMENDED_COURSES: CourseSummary[] = [
   {
@@ -60,24 +60,32 @@ export const MOCK_MISSIONS: Mission[] = [
   },
 ];
 
-const VISITED_REGIONS = new Set(["경남", "전북"]);
+// KOSTAT 시도 코드(skorea-provinces.json의 properties.code) → 지역 약칭 매핑
+export const PROVINCE_CODE_TO_REGION: Record<string, string> = {
+  "11": "서울",
+  "21": "부산",
+  "22": "대구",
+  "23": "인천",
+  "24": "광주",
+  "25": "대전",
+  "26": "울산",
+  "29": "세종",
+  "31": "경기",
+  "32": "강원",
+  "33": "충북",
+  "34": "충남",
+  "35": "전북",
+  "36": "전남",
+  "37": "경북",
+  "38": "경남",
+  "39": "제주",
+};
 
-export const STAMP_REGIONS: StampRegion[] = [
-  "서울",
-  "부산",
-  "대구",
-  "인천",
-  "광주",
-  "대전",
-  "울산",
-  "세종",
-  "경기",
-  "강원",
-  "충북",
-  "충남",
-  "전북",
-  "전남",
-  "경북",
-  "경남",
-  "제주",
-].map((name) => ({ name, visited: VISITED_REGIONS.has(name) }));
+// KOSTAT 시군구 코드(skorea-municipalities.json의 properties.code) — 다녀온 코스/미션 장소 기준
+export const VISITED_DISTRICT_CODES = new Set([
+  "38350", // 남해군 — LOVE DIVE! 코스
+  "35011", // 전주시완산구 — 여름을 칠하다 코스
+  "35012", // 전주시덕진구 — 여름을 칠하다 코스
+  "11010", // 종로구 — 경복궁·창덕궁·북촌한옥마을 미션
+  "11030", // 용산구 — 국립중앙박물관 미션
+]);
