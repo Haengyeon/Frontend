@@ -12,16 +12,23 @@ export default function MatchFoundBanner() {
 
   return (
     <div className="mx-6 flex flex-col items-center gap-3 rounded-3xl bg-forest-light p-6 text-center">
-      <Avatar src={profile.photoUrl} alt={profile.name} size={64} />
+      <div className="flex w-full items-center gap-3">
+        <span className="h-px flex-1 bg-forest/20" />
+        <p className="shrink-0 text-lg font-semibold text-forest">새로운 인연이 매칭되었어요!</p>
+        <span className="h-px flex-1 bg-forest/20" />
+      </div>
 
-      <p className="text-base font-semibold text-forest">새로운 인연이 매칭되었어요!</p>
+      <Avatar src={profile.photoUrl} alt={profile.name} size={104} />
+
       <p className="text-sm text-forest/70">
         {profile.age}세 · {profile.job}
       </p>
 
       <div className="flex flex-wrap justify-center gap-1.5">
         {profile.interestTags.map((tag) => (
-          <Badge key={tag}>#{tag}</Badge>
+          <Badge key={tag} className="bg-pink-50 text-forest">
+            #{tag}
+          </Badge>
         ))}
       </div>
 
@@ -31,7 +38,7 @@ export default function MatchFoundBanner() {
           router.push(`/matching/${MOCK_MATCHING_ID}/attempts/${profile.attemptId}`)
         }
       >
-        매칭하러 가기
+        프로필 보러가기
       </Button>
     </div>
   );

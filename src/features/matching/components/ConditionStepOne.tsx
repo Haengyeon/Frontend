@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Users, Heart, CalendarDays } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -8,8 +8,14 @@ import Slider from "@/components/ui/Slider";
 import RemovableTag from "@/components/ui/RemovableTag";
 import GenderPreferenceSelect from "@/features/matching/components/GenderPreferenceSelect";
 import RegionSelectModal from "@/features/matching/components/RegionSelectModal";
+import MatchingDateCalendar from "@/features/matching/components/MatchingDateCalendar";
 import SectionLabel from "@/features/matching/components/SectionLabel";
-import { AGE_RANGE_MIN, AGE_RANGE_MAX, getAvailableDateOptions } from "@/features/matching/mocks";
+import {
+  CURRENT_YEAR,
+  MIN_BIRTH_YEAR,
+  MAX_BIRTH_YEAR,
+  formatDateLabel,
+} from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 
 export default function ConditionStepOne() {
@@ -25,7 +31,21 @@ export default function ConditionStepOne() {
     setAvailableDates,
   } = useMatchingDraftStore();
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
-  const dateOptions = useMemo(() => getAvailableDateOptions(14), []);
+
+  // ageRange = [젊은 나이, 나이 든 나이] → 출생연도로는 [나이 든 쪽 연도(작음), 젊은 쪽 연도(큼)]
+  const birthYearRange: [number, number] = [
+    CURRENT_YEAR - ageRange[1],
+    CURRENT_YEAR - ageRange[0],
+  ];
+
+  const handleBirthYearRangeChange = ([low, high]: [number, number]) => {
+    setAgeRange([CURRENT_YEAR - high, CURRENT_YEAR - low]);
+  };
+
+  const formatAgeFromBirthYear = (year: number) => {
+    const age = CURRENT_YEAR - year;
+    return year <= MIN_BIRTH_YEAR ? `${age}세+` : `${age}세`;
+  };
 
   const toggleDate = (value: string) => {
     setAvailableDates(
@@ -67,14 +87,16 @@ export default function ConditionStepOne() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <SectionLabel icon={Users}>나이 범위</SectionLabel>
+        <SectionLabel icon={Users}>상대방 출생연도</SectionLabel>
         <Slider
-          min={AGE_RANGE_MIN}
-          max={AGE_RANGE_MAX}
-          value={ageRange}
-          onChange={setAgeRange}
-          unit="세"
-          openEndedMax
+          min={MIN_BIRTH_YEAR}
+          max={MAX_BIRTH_YEAR}
+          value={birthYearRange}
+          onChange={handleBirthYearRangeChange}
+          unit="년생"
+          openEndedMin
+          reverse
+          extraLabel={formatAgeFromBirthYear}
         />
       </div>
 
@@ -85,23 +107,19 @@ export default function ConditionStepOne() {
 
       <div className="flex flex-col gap-3">
         <SectionLabel icon={CalendarDays}>여행 가능 날짜</SectionLabel>
-        <div className="flex flex-wrap gap-2">
-          {dateOptions.map((date) => (
-            <button
-              key={date.value}
-              type="button"
-              onClick={() => toggleDate(date.value)}
-              aria-pressed={availableDates.includes(date.value)}
-              className={`rounded-full border px-3 py-1.5 text-sm ${
-                availableDates.includes(date.value)
-                  ? "border-forest bg-forest-light text-forest"
-                  : "border-line text-muted"
-              }`}
-            >
-              {date.label}
-            </button>
-          ))}
-        </div>
+        <MatchingDateCalendar selectedDates={availableDates} onToggle={toggleDate} />
+
+        {availableDates.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {[...availableDates].sort().map((date) => (
+              <RemovableTag
+                key={date}
+                label={formatDateLabel(date)}
+                onRemove={() => toggleDate(date)}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-auto">

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 
 type PhotoUploadBoxProps = {
   label: string;
-  icon: string;
+  icon: LucideIcon;
 };
 
-export default function PhotoUploadBox({ label, icon }: PhotoUploadBoxProps) {
+export default function PhotoUploadBox({ label, icon: Icon }: PhotoUploadBoxProps) {
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function PhotoUploadBox({ label, icon }: PhotoUploadBoxProps) {
         <img src={preview} alt={label} className="h-full w-full rounded-2xl object-cover" />
       ) : (
         <>
-          <span className="text-2xl text-muted">{icon}</span>
+          <Icon size={28} strokeWidth={1.5} className="text-muted" />
           <span className="text-xs text-muted">{label}</span>
         </>
       )}

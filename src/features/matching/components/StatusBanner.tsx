@@ -4,6 +4,7 @@ import { useEffect, type ComponentType } from "react";
 import NoMatchBanner from "@/features/matching/components/NoMatchBanner";
 import SearchingLoader from "@/features/matching/components/SearchingLoader";
 import MatchFoundBanner from "@/features/matching/components/MatchFoundBanner";
+import MatchPendingBanner from "@/features/matching/components/MatchPendingBanner";
 import PaymentPendingBanner from "@/features/matching/components/PaymentPendingBanner";
 import MatchConfirmedSummary from "@/features/matching/components/MatchConfirmedSummary";
 import TripCompleteSummary from "@/features/matching/components/TripCompleteSummary";
@@ -16,6 +17,7 @@ const STATUS_BANNERS: Partial<Record<MatchingStatus, ComponentType>> = {
   none: NoMatchBanner,
   searching: SearchingLoader,
   found: MatchFoundBanner,
+  pending: MatchPendingBanner,
   payment_pending: PaymentPendingBanner,
   confirmed: MatchConfirmedSummary,
   completed: TripCompleteSummary,

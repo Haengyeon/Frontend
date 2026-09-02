@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { MapPin } from "lucide-react";
+import { MapPin, Camera } from "lucide-react";
 import Button from "@/components/ui/Button";
 import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import StarRating from "@/features/course/components/StarRating";
@@ -53,7 +53,7 @@ export default function ReviewForm({ course }: ReviewFormProps) {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-ink">사진 첨부 (선택)</span>
         <div className="flex gap-3">
-          <PhotoUploadBox label="사진 추가" icon="📷" />
+          <PhotoUploadBox label="사진 추가" icon={Camera} />
         </div>
       </div>
 

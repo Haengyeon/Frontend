@@ -6,6 +6,7 @@ import Input from "@/components/ui/Input";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
+import { MIN_BIRTH_YEAR, MAX_BIRTH_YEAR } from "@/features/matching/mocks";
 import type { Gender } from "@/features/auth/types";
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
@@ -17,11 +18,18 @@ const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
 export default function BasicInfoForm() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [age, setAge] = useState("");
+  const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [jobCategory, setJobCategory] = useState("");
   const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(false);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
+
+  const birthYearNum = Number(birthYear);
+  const isBirthYearValid =
+    birthYear.trim() !== "" &&
+    Number.isInteger(birthYearNum) &&
+    birthYearNum >= MIN_BIRTH_YEAR &&
+    birthYearNum <= MAX_BIRTH_YEAR;
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8">
@@ -29,11 +37,13 @@ export default function BasicInfoForm() {
 
       <Input label="이름" placeholder="이름을 입력해주세요" value={name} onChange={(e) => setName(e.target.value)} />
       <Input
-        label="나이"
+        label="출생연도"
         type="number"
-        placeholder="나이를 입력해주세요"
-        value={age}
-        onChange={(e) => setAge(e.target.value)}
+        placeholder={`예: ${MAX_BIRTH_YEAR}`}
+        min={MIN_BIRTH_YEAR}
+        max={MAX_BIRTH_YEAR}
+        value={birthYear}
+        onChange={(e) => setBirthYear(e.target.value)}
       />
 
       <div className="flex flex-col gap-2">
@@ -82,7 +92,11 @@ export default function BasicInfoForm() {
       />
 
       <div className="mt-auto">
-        <Button className="w-full" onClick={() => router.push("/profile-setup/photos")}>
+        <Button
+          className="w-full"
+          disabled={!isBirthYearValid}
+          onClick={() => router.push("/profile-setup/photos")}
+        >
           다음
         </Button>
       </div>

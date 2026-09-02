@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MapPin } from "lucide-react";
 import Button from "@/components/ui/Button";
+import MissionStoryPath from "@/features/course/components/MissionStoryPath";
 import { MOCK_MISSIONS } from "@/features/course/mocks";
 import type { CourseSummary } from "@/features/course/types";
 
@@ -13,56 +14,48 @@ type CourseDetailProps = {
 
 export default function CourseDetail({ course }: CourseDetailProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCompleted = searchParams.get("from") === "stamp";
+  const [selectedMissionId, setSelectedMissionId] = useState(MOCK_MISSIONS[0].missionId);
+  const selectedIndex = MOCK_MISSIONS.findIndex(
+    (mission) => mission.missionId === selectedMissionId,
+  );
+  const selectedMission = MOCK_MISSIONS[selectedIndex] ?? MOCK_MISSIONS[0];
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-forest-light">
-        {course.imageUrl ? (
-          <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2 rounded-2xl border border-line bg-forest-light p-5">
         <h2 className="text-lg font-semibold text-ink">{course.title}</h2>
         <span className="flex items-center gap-1 text-sm text-muted">
           <MapPin size={14} strokeWidth={1.5} />
           {course.region}
         </span>
+        <p className="text-sm leading-relaxed text-ink/80">{course.description}</p>
       </div>
 
-      <p className="text-sm leading-relaxed text-ink/80">{course.description}</p>
+      <MissionStoryPath
+        missions={MOCK_MISSIONS}
+        selectedMissionId={selectedMissionId}
+        onSelect={setSelectedMissionId}
+      />
 
-      <div className="flex flex-col gap-3">
-        <span className="text-sm font-medium text-ink">다녀온 장소</span>
-        <div className="grid grid-cols-2 gap-3">
-          {MOCK_MISSIONS.map((mission) => (
-            <div
-              key={mission.missionId}
-              className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-forest-light to-forest/40"
-            >
-              {mission.imageUrl ? (
-                <Image
-                  src={mission.imageUrl}
-                  alt={mission.placeName}
-                  fill
-                  sizes="200px"
-                  className="object-cover"
-                />
-              ) : null}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                <span className="text-xs font-medium text-white">{mission.placeName}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="flex flex-col gap-2 rounded-2xl border border-line bg-cream-card p-5">
+        <p className="text-base font-semibold text-ink">{selectedMission.placeName}</p>
+        <span className="flex items-center gap-1 text-xs text-muted">
+          <MapPin size={13} strokeWidth={1.5} />
+          {selectedMission.location}
+        </span>
+        <p className="text-sm leading-relaxed text-ink/80">{selectedMission.description}</p>
       </div>
 
-      <Button
-        className="mt-auto w-full"
-        onClick={() => router.push(`/course/${course.courseId}/review`)}
-      >
-        후기 작성하기
-      </Button>
+      {isCompleted ? (
+        <Button
+          className="mt-auto w-full"
+          onClick={() => router.push(`/course/${course.courseId}/review`)}
+        >
+          후기 작성하기
+        </Button>
+      ) : null}
     </div>
   );
 }

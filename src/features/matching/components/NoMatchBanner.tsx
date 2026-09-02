@@ -23,7 +23,10 @@ export default function NoMatchBanner() {
           <br />
           친구도, 연인도 될 수 있는 특별한 여정이 시작됩니다.
         </p>
-        <Button className="mt-2 px-6" onClick={() => router.push("/matching/condition")}>
+        <Button
+          className="mt-2 bg-[#2F5D3A]! px-6"
+          onClick={() => router.push("/matching/condition")}
+        >
           매칭 시작하기
         </Button>
       </div>

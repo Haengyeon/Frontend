@@ -19,7 +19,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(room.messages);
 
   const isLocked = !room.isPast && (daysUntilTrip === null || daysUntilTrip > 1);
-  const isLimited = !room.isPast && daysUntilTrip === 1;
+  const isLimited = !room.isPast && daysUntilTrip !== null && daysUntilTrip <= 1;
   const sentMessageCount = messages.filter((message) => message.senderId === "me").length;
   const capReached = isLimited && sentMessageCount >= LIMITED_MESSAGE_CAP;
 

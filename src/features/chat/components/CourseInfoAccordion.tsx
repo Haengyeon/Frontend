@@ -41,6 +41,8 @@ export default function CourseInfoAccordion({ courseInfo }: CourseInfoAccordionP
             </span>
           </div>
 
+          <span className="text-muted">{courseInfo.stopOrder.join(" → ")}</span>
+
           <Link href="/course" className="flex items-center gap-1 self-start text-forest">
             코스 보러가기
             <ArrowRight size={14} strokeWidth={1.5} />
