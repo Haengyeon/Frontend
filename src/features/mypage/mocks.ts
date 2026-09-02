@@ -1,5 +1,5 @@
 import { CHAT_ROOMS } from "@/features/chat/mocks";
-import { MATCHING_SERVICE_FEE, REGIONAL_FUND_FEE } from "@/features/matching/mocks";
+import { MATCHING_SERVICE_FEE } from "@/features/matching/mocks";
 import type { PaymentRecord, Notice, ReportCategory, PointRecord } from "./types";
 
 export const MOCK_POINTS = 1250;
@@ -14,7 +14,7 @@ export const PAYMENT_HISTORY: PaymentRecord[] = [
     paymentId: "pay-1",
     courseTitle: CHAT_ROOMS[0].courseInfo.courseTitle,
     partnerName: CHAT_ROOMS[0].partnerName,
-    amount: MATCHING_SERVICE_FEE + REGIONAL_FUND_FEE,
+    amount: MATCHING_SERVICE_FEE,
     paidAt: "2026-08-10",
     status: "결제완료",
   },

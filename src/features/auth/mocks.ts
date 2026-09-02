@@ -33,6 +33,8 @@ export const JOB_CATEGORIES = [
   "서비스업",
 ];
 
+export const MAX_INTEREST_TAGS = 5;
+
 export const INTEREST_TAGS = [
   "예술",
   "카페",

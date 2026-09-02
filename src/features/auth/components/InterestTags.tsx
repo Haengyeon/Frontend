@@ -19,7 +19,7 @@ import {
   Landmark,
   type LucideIcon,
 } from "lucide-react";
-import { INTEREST_TAGS } from "@/features/auth/mocks";
+import { INTEREST_TAGS, MAX_INTEREST_TAGS } from "@/features/auth/mocks";
 
 const TAG_ICONS: Record<string, LucideIcon> = {
   예술: Palette,
@@ -43,24 +43,33 @@ export default function InterestTags() {
   const [selected, setSelected] = useState<string[]>([]);
 
   const toggle = (tag: string) => {
-    setSelected((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
-    );
+    setSelected((prev) => {
+      if (prev.includes(tag)) return prev.filter((item) => item !== tag);
+      if (prev.length >= MAX_INTEREST_TAGS) return prev;
+      return [...prev, tag];
+    });
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-sm font-medium text-ink">취향 · 관심사</span>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-ink">취향 · 관심사</span>
+        <span className="text-xs text-muted">
+          {selected.length}/{MAX_INTEREST_TAGS}개 선택됨
+        </span>
+      </div>
       <div className="grid grid-cols-3 gap-2">
         {INTEREST_TAGS.map((tag) => {
           const Icon = TAG_ICONS[tag];
           const isSelected = selected.includes(tag);
+          const isDisabled = !isSelected && selected.length >= MAX_INTEREST_TAGS;
           return (
             <button
               key={tag}
               type="button"
               onClick={() => toggle(tag)}
-              className={`flex items-center gap-1.5 rounded-xl border px-2 py-2.5 text-sm ${
+              disabled={isDisabled}
+              className={`flex items-center gap-1.5 rounded-xl border px-2 py-2.5 text-sm disabled:opacity-40 ${
                 isSelected ? "border-forest bg-forest-light text-forest" : "border-line text-muted"
               }`}
             >

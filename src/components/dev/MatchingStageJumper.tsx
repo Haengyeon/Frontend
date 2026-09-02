@@ -5,15 +5,18 @@ import {
   MOCK_MATCHING_ID,
   MOCK_MATCH_PROFILE,
   getAvailableDateOptions,
+  toDateValue,
 } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import type { MatchingStatus } from "@/features/matching/types";
 
 const DATE_OPTIONS = getAvailableDateOptions(14);
 
-const COURSE_STAGES = [
-  { label: "코스 열림 (D-1)", dateValue: DATE_OPTIONS[0].value },
-  { label: "코스 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
+const COURSE_STAGES: { label: string; dateValue: string | null }[] = [
+  { label: "코스 전체공개 (D-Day)", dateValue: toDateValue(new Date()) },
+  { label: "코스 소요시간·복장 (D-1)", dateValue: DATE_OPTIONS[0].value },
+  { label: "코스 지역·테마만 (D-5)", dateValue: DATE_OPTIONS[4].value },
+  { label: "코스 없음 (매칭 안 됨)", dateValue: null },
 ];
 
 const CHAT_STAGES = [
@@ -30,7 +33,12 @@ const STAGES: { label: string; status: MatchingStatus; href: string }[] = [
     status: "found",
     href: `/matching/${MOCK_MATCHING_ID}/attempts/${MOCK_MATCH_PROFILE.attemptId}`,
   },
-  { label: "결제", status: "payment_pending", href: `/matching/${MOCK_MATCHING_ID}/payment` },
+  {
+    label: "매칭 응답 대기 (12h)",
+    status: "pending",
+    href: `/matching/${MOCK_MATCHING_ID}/pending`,
+  },
+  { label: "결제 (6h)", status: "payment_pending", href: `/matching/${MOCK_MATCHING_ID}/payment` },
   { label: "확정", status: "confirmed", href: "/home" },
   { label: "완료", status: "completed", href: "/home" },
 ];
@@ -63,7 +71,7 @@ export default function MatchingStageJumper() {
           key={stage.label}
           type="button"
           onClick={() => {
-            setAvailableDates([stage.dateValue]);
+            setAvailableDates(stage.dateValue ? [stage.dateValue] : []);
             router.push("/course");
           }}
           className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"

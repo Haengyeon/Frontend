@@ -22,6 +22,11 @@ export default function ChatRoomListItem({ room }: ChatRoomListItemProps) {
         <p className="text-sm font-semibold text-ink">{room.partnerName}</p>
         <p className="truncate text-xs text-muted">{room.lastMessage}</p>
       </div>
+      {room.unreadCount > 0 ? (
+        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-forest px-1.5 text-[11px] font-medium text-white">
+          {room.unreadCount}
+        </span>
+      ) : null}
     </button>
   );
 }

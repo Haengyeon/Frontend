@@ -9,6 +9,7 @@ export type ChatCourseInfo = {
   courseTitle: string;
   modeLabel: string;
   durationLabel: string;
+  stopOrder: string[];
 };
 
 export type ChatRoomSummary = {
@@ -17,6 +18,7 @@ export type ChatRoomSummary = {
   partnerPhotoUrl: string;
   lastMessage: string;
   isPast: boolean;
+  unreadCount: number;
   messages: ChatMessage[];
   courseInfo: ChatCourseInfo;
 };

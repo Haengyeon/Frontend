@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 
 type ChatComposerProps = {
@@ -10,31 +10,48 @@ type ChatComposerProps = {
 };
 
 const MAX_LENGTH = 300;
+const MAX_TEXTAREA_HEIGHT = 120;
 
 export default function ChatComposer({ limited, onSend, disabled = false }: ChatComposerProps) {
   const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const resize = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
+  };
 
   const handleSend = () => {
     const content = value.trim();
     if (!content || disabled) return;
     onSend(content);
     setValue("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
     <div className="flex flex-col gap-1 p-3">
-      <div className="flex items-center gap-2 rounded-full border border-line bg-cream-card px-4 py-1.5">
-        <input
-          type="text"
+      <div className="flex items-end gap-2 rounded-2xl border border-line bg-cream-card px-4 py-2">
+        <textarea
+          ref={textareaRef}
+          rows={1}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSend();
+          onChange={(e) => {
+            setValue(e.target.value);
+            resize(e.target);
           }}
+          onKeyDown={handleKeyDown}
           maxLength={limited ? MAX_LENGTH : undefined}
           disabled={disabled}
           placeholder="메시지 입력..."
-          className="h-8 flex-1 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-forest disabled:opacity-50"
+          className="max-h-[120px] flex-1 resize-none bg-transparent py-1 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-forest disabled:opacity-50"
         />
         <button
           type="button"

@@ -11,6 +11,7 @@ const CHAT_1_COURSE_INFO: ChatCourseInfo = {
   courseTitle: "경주 역사 기행",
   modeLabel: "실내 · 도보",
   durationLabel: "3시간 소요",
+  stopOrder: ["코스1", "코스2", "코스3", "코스4"],
 };
 
 const CHAT_2_MESSAGES: ChatMessage[] = [
@@ -22,6 +23,7 @@ const CHAT_2_COURSE_INFO: ChatCourseInfo = {
   courseTitle: "부산 야경 산책",
   modeLabel: "야외 · 도보",
   durationLabel: "2시간 소요",
+  stopOrder: ["코스1", "코스2", "코스3"],
 };
 
 export const CHAT_ROOMS: ChatRoomSummary[] = [
@@ -31,6 +33,7 @@ export const CHAT_ROOMS: ChatRoomSummary[] = [
     partnerPhotoUrl: MOCK_MATCH_PROFILE.photoUrl,
     lastMessage: "이번 주말 기대되네요! 몇 시에 만날까요?",
     isPast: false,
+    unreadCount: 1,
     messages: CHAT_1_MESSAGES,
     courseInfo: CHAT_1_COURSE_INFO,
   },
@@ -40,6 +43,7 @@ export const CHAT_ROOMS: ChatRoomSummary[] = [
     partnerPhotoUrl: "",
     lastMessage: "덕분에 즐거운 여행이었어요, 다음에 또 만나요!",
     isPast: true,
+    unreadCount: 0,
     messages: CHAT_2_MESSAGES,
     courseInfo: CHAT_2_COURSE_INFO,
   },

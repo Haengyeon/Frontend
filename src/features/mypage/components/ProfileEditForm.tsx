@@ -9,7 +9,8 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
-import { MOCK_MY_PROFILE, INTEREST_TAGS } from "@/features/auth/mocks";
+import { MOCK_MY_PROFILE, INTEREST_TAGS, MAX_INTEREST_TAGS } from "@/features/auth/mocks";
+import { CURRENT_YEAR, MIN_BIRTH_YEAR, MAX_BIRTH_YEAR } from "@/features/matching/mocks";
 import type { Gender } from "@/features/auth/types";
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
@@ -23,7 +24,7 @@ export default function ProfileEditForm() {
   const { basicInfo, bio, interestTags } = MOCK_MY_PROFILE;
 
   const [name, setName] = useState(basicInfo.name);
-  const [age, setAge] = useState(String(basicInfo.age));
+  const [birthYear, setBirthYear] = useState(String(CURRENT_YEAR - basicInfo.age));
   const [gender, setGender] = useState<Gender>(basicInfo.gender);
   const [jobCategory, setJobCategory] = useState(basicInfo.jobCategory);
   const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(
@@ -34,9 +35,11 @@ export default function ProfileEditForm() {
   const [selectedTags, setSelectedTags] = useState<string[]>(interestTags);
 
   const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
-    );
+    setSelectedTags((prev) => {
+      if (prev.includes(tag)) return prev.filter((item) => item !== tag);
+      if (prev.length >= MAX_INTEREST_TAGS) return prev;
+      return [...prev, tag];
+    });
   };
 
   return (
@@ -48,10 +51,12 @@ export default function ProfileEditForm() {
 
       <Input label="이름" value={name} onChange={(e) => setName(e.target.value)} />
       <Input
-        label="나이"
+        label="출생연도"
         type="number"
-        value={age}
-        onChange={(e) => setAge(e.target.value)}
+        min={MIN_BIRTH_YEAR}
+        max={MAX_BIRTH_YEAR}
+        value={birthYear}
+        onChange={(e) => setBirthYear(e.target.value)}
       />
 
       <div className="flex flex-col gap-2">
@@ -112,13 +117,19 @@ export default function ProfileEditForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-ink">취향 · 관심사</span>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-ink">취향 · 관심사</span>
+          <span className="text-xs text-muted">
+            {selectedTags.length}/{MAX_INTEREST_TAGS}개 선택됨
+          </span>
+        </div>
         <div className="flex flex-wrap gap-2">
           {INTEREST_TAGS.map((tag) => (
             <Chip
               key={tag}
               label={tag}
               selected={selectedTags.includes(tag)}
+              disabled={!selectedTags.includes(tag) && selectedTags.length >= MAX_INTEREST_TAGS}
               onClick={() => toggleTag(tag)}
             />
           ))}

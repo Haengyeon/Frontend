@@ -27,7 +27,10 @@ export type MatchProfile = {
   name: string;
   age: number;
   job: string;
+  mbti: string;
   interestTags: string[];
   bio: string;
   photoUrl: string;
+  fullBodyPhotoUrl: string;
+  availableDates: string[];
 };

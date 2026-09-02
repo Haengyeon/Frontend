@@ -4,7 +4,9 @@ type SliderProps = {
   value: [number, number];
   onChange: (value: [number, number]) => void;
   unit?: string;
-  openEndedMax?: boolean;
+  openEndedMin?: boolean;
+  reverse?: boolean;
+  extraLabel?: (value: number) => string;
 };
 
 const THUMB_CLASS =
@@ -22,23 +24,34 @@ export default function Slider({
   value,
   onChange,
   unit = "",
-  openEndedMax = false,
+  openEndedMin = false,
+  reverse = false,
+  extraLabel,
 }: SliderProps) {
   const [low, high] = value;
   const lowPct = ((low - min) / (max - min)) * 100;
   const highPct = ((high - min) / (max - min)) * 100;
-  const highLabel = openEndedMax && high >= max ? `${high}${unit}+` : `${high}${unit}`;
+  const lowBase = openEndedMin && low <= min ? `${low}${unit} 이전` : `${low}${unit}`;
+  const highBase = `${high}${unit}`;
+  const lowLabel = extraLabel ? `${lowBase} (${extraLabel(low)})` : lowBase;
+  const highLabel = extraLabel ? `${highBase} (${extraLabel(high)})` : highBase;
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-between text-sm font-medium text-forest">
-        <span>
-          {low}
-          {unit}
-        </span>
-        <span>{highLabel}</span>
+        {reverse ? (
+          <>
+            <span>{highLabel}</span>
+            <span>{lowLabel}</span>
+          </>
+        ) : (
+          <>
+            <span>{lowLabel}</span>
+            <span>{highLabel}</span>
+          </>
+        )}
       </div>
-      <div className="relative h-5">
+      <div className="relative h-5" style={reverse ? { transform: "scaleX(-1)" } : undefined}>
         <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-line" />
         <div
           className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-forest"

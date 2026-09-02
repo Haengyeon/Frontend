@@ -60,6 +60,10 @@ export const MOCK_MISSIONS: Mission[] = [
   },
 ];
 
+// D-1에 공개되는 코스 예상 소요 시간·복장 추천 (당일 전까지는 코스 세부 일정 비공개)
+export const MOCK_COURSE_DURATION = "약 3시간 소요";
+export const MOCK_COURSE_DRESS_CODE = "편한 운동화와 걷기 편한 옷차림을 추천해요";
+
 // KOSTAT 시도 코드(skorea-provinces.json의 properties.code) → 지역 약칭 매핑
 export const PROVINCE_CODE_TO_REGION: Record<string, string> = {
   "11": "서울",
