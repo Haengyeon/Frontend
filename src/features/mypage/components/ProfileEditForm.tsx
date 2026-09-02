@@ -10,7 +10,7 @@ import Chip from "@/components/ui/Chip";
 import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
 import { MOCK_MY_PROFILE, INTEREST_TAGS, MAX_INTEREST_TAGS } from "@/features/auth/mocks";
-import { CURRENT_YEAR, MIN_BIRTH_YEAR, MAX_BIRTH_YEAR } from "@/features/matching/mocks";
+import { MIN_BIRTH_YEAR, MAX_BIRTH_YEAR } from "@/features/matching/mocks";
 import type { Gender } from "@/features/auth/types";
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
@@ -24,7 +24,7 @@ export default function ProfileEditForm() {
   const { basicInfo, bio, interestTags } = MOCK_MY_PROFILE;
 
   const [name, setName] = useState(basicInfo.name);
-  const [birthYear, setBirthYear] = useState(String(CURRENT_YEAR - basicInfo.age));
+  const [birthYear, setBirthYear] = useState(String(basicInfo.birthYear));
   const [gender, setGender] = useState<Gender>(basicInfo.gender);
   const [jobCategory, setJobCategory] = useState(basicInfo.jobCategory);
   const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type PointerEvent, type WheelEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import provincesGeoJson from "@/features/course/data/skorea-provinces.json";
 import municipalitiesGeoJson from "@/features/course/data/skorea-municipalities.json";
@@ -53,6 +53,7 @@ export default function RegionColorMap() {
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const dragState = useRef<{ pointerId: number; startX: number; startY: number; origin: { x: number; y: number } } | null>(
     null,
@@ -124,10 +125,21 @@ export default function RegionColorMap() {
     if (dragState.current?.pointerId === e.pointerId) dragState.current = null;
   };
 
-  const handleWheel = (e: WheelEvent<SVGSVGElement>) => {
-    e.preventDefault();
-    zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15);
-  };
+  // React attaches onWheel as a passive listener, so preventDefault() there can't
+  // stop the page from scrolling underneath the map. Register a native listener
+  // with { passive: false } instead so pinch/scroll-to-zoom doesn't scroll the page.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const handleWheel = (e: globalThis.WheelEvent) => {
+      e.preventDefault();
+      zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15);
+    };
+
+    svg.addEventListener("wheel", handleWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", handleWheel);
+  }, []);
 
   const districtLabelOpacity = Math.min(1, transform.scale - DISTRICT_LABEL_MIN_SCALE);
   const provinceLabelOpacity = Math.max(0, 1 - (transform.scale - 1) / 2);
@@ -135,6 +147,7 @@ export default function RegionColorMap() {
   return (
     <div ref={containerRef} className="relative overflow-hidden rounded-2xl border border-line">
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${width} ${height}`}
         className="w-full touch-none"
         style={{ aspectRatio: `${width} / ${height}` }}
@@ -144,7 +157,6 @@ export default function RegionColorMap() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        onWheel={handleWheel}
       >
         <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
           {districtShapes.map(({ feature, d }) => {

@@ -37,15 +37,15 @@ const INITIAL_STATE: MatchingCondition & {
 export const useMatchingDraftStore = create<MatchingDraftState>((set, get) => ({
   ...INITIAL_STATE,
   setStatus: (status) => {
-    // 매칭/결제 대기 상태로 들어가는 순간 데드라인을 한 번만 잡아준다 —
-    // 실제 흐름이든 테스트 패널로 바로 점프하든 항상 새 카운트다운이 시작된다.
-    const { matchDeadlineAt, paymentDeadlineAt } = get();
+    // 매칭/결제 대기 상태로 새로 진입할 때마다 데드라인을 다시 잡아준다 —
+    // 동일 상태를 반복 설정할 때만(예: 리렌더) 기존 카운트다운을 유지한다.
+    const { status: currentStatus } = get();
     set({
       status,
-      ...(status === "pending" && matchDeadlineAt === null
+      ...(status === "pending" && currentStatus !== "pending"
         ? { matchDeadlineAt: Date.now() + MATCH_DEADLINE_MS }
         : null),
-      ...(status === "payment_pending" && paymentDeadlineAt === null
+      ...(status === "payment_pending" && currentStatus !== "payment_pending"
         ? { paymentDeadlineAt: Date.now() + PAYMENT_DEADLINE_MS }
         : null),
     });

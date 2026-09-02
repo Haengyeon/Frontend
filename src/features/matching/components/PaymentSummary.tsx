@@ -22,8 +22,10 @@ export default function PaymentSummary() {
   const profile = MOCK_MATCH_PROFILE;
 
   const matchedDate = getEarliestCommonDate(availableDates, profile.availableDates);
+  const isPaymentExpired = paymentDeadlineAt !== null && Date.now() > paymentDeadlineAt;
 
   const handlePay = () => {
+    if (isPaymentExpired) return;
     setStatus("confirmed");
     router.push("/home");
   };
@@ -63,8 +65,13 @@ export default function PaymentSummary() {
             취소돼요.
           </p>
         ) : null}
-        <Button variant="kakao" className="w-full" onClick={handlePay}>
-          카카오페이로 결제하기
+        <Button
+          variant="kakao"
+          className="w-full"
+          disabled={isPaymentExpired}
+          onClick={handlePay}
+        >
+          {isPaymentExpired ? "결제 시간이 만료됐어요" : "카카오페이로 결제하기"}
         </Button>
       </div>
     </div>

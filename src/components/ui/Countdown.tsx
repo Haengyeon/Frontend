@@ -16,12 +16,15 @@ function formatRemaining(ms: number) {
 }
 
 export default function Countdown({ deadlineAt, className = "" }: CountdownProps) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  return <span className={className}>{formatRemaining(deadlineAt - now)}</span>;
+  return (
+    <span className={className}>{now === null ? formatRemaining(0) : formatRemaining(deadlineAt - now)}</span>
+  );
 }
