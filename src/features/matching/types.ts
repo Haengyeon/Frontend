@@ -3,6 +3,7 @@ export type MatchingStatus =
   | "searching"
   | "found"
   | "pending"
+  | "retry_ready"
   | "payment_pending"
   | "confirmed"
   | "completed";

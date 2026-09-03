@@ -4,11 +4,16 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
-import { MOCK_MATCHING_ID, MOCK_MATCH_PROFILE } from "@/features/matching/mocks";
+import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { useMatchAttempt } from "@/features/matching/api/useMatchingApi";
+import { hobbyToLocal, jobCategoryToLocal } from "@/features/matching/api/enumMap";
 
 export default function MatchFoundBanner() {
   const router = useRouter();
-  const profile = MOCK_MATCH_PROFILE;
+  const matchingId = useMatchingDraftStore((state) => state.matchingId);
+  const matchAttemptId = useMatchingDraftStore((state) => state.matchAttemptId);
+  const { data } = useMatchAttempt(matchAttemptId);
+  const partner = data?.partner;
 
   return (
     <div className="mx-6 flex flex-col items-center gap-3 rounded-3xl bg-forest-light p-6 text-center">
@@ -18,25 +23,30 @@ export default function MatchFoundBanner() {
         <span className="h-px flex-1 bg-forest/20" />
       </div>
 
-      <Avatar src={profile.photoUrl} alt={profile.name} size={104} />
+      {partner ? (
+        <>
+          <Avatar src={partner.fullBodyImageUrl} alt={partner.name} size={104} />
 
-      <p className="text-sm text-forest/70">
-        {profile.age}세 · {profile.job}
-      </p>
+          <p className="text-sm text-forest/70">
+            {partner.age}세{partner.jobCategory ? ` · ${jobCategoryToLocal(partner.jobCategory)}` : ""}
+          </p>
 
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {profile.interestTags.map((tag) => (
-          <Badge key={tag} className="bg-pink-50 text-forest">
-            #{tag}
-          </Badge>
-        ))}
-      </div>
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {partner.hobbies.map((hobby) => (
+              <Badge key={hobby} className="bg-pink-50 text-forest">
+                #{hobbyToLocal(hobby)}
+              </Badge>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="h-[104px] w-[104px] animate-pulse rounded-full bg-forest/10" />
+      )}
 
       <Button
         className="mt-2 px-6"
-        onClick={() =>
-          router.push(`/matching/${MOCK_MATCHING_ID}/attempts/${profile.attemptId}`)
-        }
+        disabled={!matchingId || !matchAttemptId}
+        onClick={() => router.push(`/matching/${matchingId}/attempts/${matchAttemptId}`)}
       >
         프로필 보러가기
       </Button>

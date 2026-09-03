@@ -9,6 +9,10 @@ type MatchingDraftState = MatchingCondition & {
   status: MatchingStatus;
   matchDeadlineAt: number | null;
   paymentDeadlineAt: number | null;
+  /** 서버가 발급한 실제 Matching 리소스 id (수정/재탐색 API 호출에 필요) */
+  matchingId: string | null;
+  /** 서버가 발급한 현재 MatchAttempt id (상대 프로필 조회에 필요) */
+  matchAttemptId: string | null;
   setStatus: (status: MatchingStatus) => void;
   setRegions: (regions: string[]) => void;
   toggleRegion: (region: string) => void;
@@ -16,6 +20,8 @@ type MatchingDraftState = MatchingCondition & {
   setPreferredGender: (gender: MatchingCondition["preferredGender"]) => void;
   setAvailableDates: (dates: string[]) => void;
   setThemeIds: (themeIds: string[]) => void;
+  setMatchingId: (matchingId: string | null) => void;
+  setMatchAttemptId: (matchAttemptId: string | null) => void;
   reset: () => void;
 };
 
@@ -23,6 +29,8 @@ const INITIAL_STATE: MatchingCondition & {
   status: MatchingStatus;
   matchDeadlineAt: number | null;
   paymentDeadlineAt: number | null;
+  matchingId: string | null;
+  matchAttemptId: string | null;
 } = {
   status: "none",
   regions: [],
@@ -32,6 +40,8 @@ const INITIAL_STATE: MatchingCondition & {
   themeIds: [],
   matchDeadlineAt: null,
   paymentDeadlineAt: null,
+  matchingId: null,
+  matchAttemptId: null,
 };
 
 export const useMatchingDraftStore = create<MatchingDraftState>((set, get) => ({
@@ -64,5 +74,7 @@ export const useMatchingDraftStore = create<MatchingDraftState>((set, get) => ({
   setPreferredGender: (preferredGender) => set({ preferredGender }),
   setAvailableDates: (availableDates) => set({ availableDates }),
   setThemeIds: (themeIds) => set({ themeIds }),
+  setMatchingId: (matchingId) => set({ matchingId }),
+  setMatchAttemptId: (matchAttemptId) => set({ matchAttemptId }),
   reset: () => set({ ...INITIAL_STATE }),
 }));

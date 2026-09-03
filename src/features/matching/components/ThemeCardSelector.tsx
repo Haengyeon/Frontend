@@ -8,11 +8,37 @@ import ConditionConfirmSheet from "@/features/matching/components/ConditionConfi
 import ThemeGrid from "@/features/matching/components/ThemeGrid";
 import { MAX_THEMES } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { useCreateMatching, useUpdateMatching } from "@/features/matching/api/useMatchingApi";
+import {
+  regionToApi,
+  themeIdToApi,
+  preferredGenderToApi,
+  matchingStatusToLocal,
+} from "@/features/matching/api/enumMap";
+import type { MatchingResponse } from "@/features/matching/api/types";
+import { ApiError } from "@/lib/api/client";
 
 export default function ThemeCardSelector() {
   const router = useRouter();
-  const { themeIds, setThemeIds, setStatus } = useMatchingDraftStore();
+  const {
+    regions,
+    ageRange,
+    preferredGender,
+    availableDates,
+    themeIds,
+    setThemeIds,
+    setStatus,
+    setMatchingId,
+    matchingId,
+  } = useMatchingDraftStore();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const createMatching = useCreateMatching();
+  // retry_ready 상태에서 "조건 수정하기"로 들어오면 matchingId가 이미 있다 —
+  // 이 경우엔 새로 만들지 않고 기존 매칭을 PATCH로 고쳐야 한다.
+  const updateMatching = useUpdateMatching(matchingId ?? "");
+  const isEditing = Boolean(matchingId);
+  const isSubmitting = isEditing ? updateMatching.isPending : createMatching.isPending;
 
   const toggleTheme = (id: string) => {
     if (themeIds.includes(id)) {
@@ -21,6 +47,36 @@ export default function ThemeCardSelector() {
     }
     if (themeIds.length >= MAX_THEMES) return;
     setThemeIds([...themeIds, id]);
+  };
+
+  const handleConfirm = () => {
+    setErrorMessage(null);
+    const payload = {
+      regions: regions.map(regionToApi),
+      ageMin: ageRange[0],
+      ageMax: ageRange[1],
+      preferredGender: preferredGenderToApi(preferredGender),
+      themes: themeIds.map(themeIdToApi),
+      availableDates,
+    };
+    const handlers = {
+      onSuccess: (data: MatchingResponse) => {
+        setMatchingId(data.id);
+        setStatus(matchingStatusToLocal(data.status));
+        router.push("/home");
+      },
+      onError: (error: unknown) => {
+        setErrorMessage(
+          error instanceof ApiError ? error.message : "매칭 조건 저장에 실패했어요.",
+        );
+      },
+    };
+
+    if (isEditing) {
+      updateMatching.mutate(payload, handlers);
+    } else {
+      createMatching.mutate(payload, handlers);
+    }
   };
 
   return (
@@ -37,6 +93,8 @@ export default function ThemeCardSelector() {
 
       <ThemeGrid selectedIds={themeIds} onToggle={toggleTheme} />
 
+      {errorMessage ? <p className="text-center text-sm text-red-500">{errorMessage}</p> : null}
+
       <div className="mt-auto">
         <StepNavButtons
           onBack={() => router.push("/matching/condition")}
@@ -49,10 +107,8 @@ export default function ThemeCardSelector() {
       <ConditionConfirmSheet
         open={isConfirmOpen}
         onEdit={() => setIsConfirmOpen(false)}
-        onConfirm={() => {
-          setStatus("searching");
-          router.push("/home");
-        }}
+        onConfirm={handleConfirm}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
