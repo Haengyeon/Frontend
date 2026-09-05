@@ -1,7 +1,10 @@
 import Image from "next/image";
-import type { CourseSummary } from "@/features/course/types";
 
-type CourseCardProps = CourseSummary;
+type CourseCardProps = {
+  title: string;
+  region: string;
+  imageUrl: string;
+};
 
 export default function CourseCard({ title, region, imageUrl }: CourseCardProps) {
   return (
@@ -13,7 +16,7 @@ export default function CourseCard({ title, region, imageUrl }: CourseCardProps)
           <div className="h-full w-full bg-gradient-to-br from-forest-light to-forest/40" />
         )}
       </div>
-      <div className="bg-white p-3">
+      <div className="flex-1 bg-white p-3">
         <p className="text-base font-semibold text-ink">{title}</p>
         <p className="text-xs text-ink/70">{region}</p>
       </div>

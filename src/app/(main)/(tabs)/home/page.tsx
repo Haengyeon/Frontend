@@ -1,5 +1,5 @@
 import StatusBanner from "@/features/matching/components/StatusBanner";
-import RecommendedCoursesSection from "@/features/course/components/RecommendedCoursesSection";
+import RecommendedSpotsSection from "@/features/course/components/RecommendedSpotsSection";
 
 export default function Page() {
   return (
@@ -8,7 +8,7 @@ export default function Page() {
 
       <StatusBanner />
 
-      <RecommendedCoursesSection />
+      <RecommendedSpotsSection />
     </div>
   );
 }
