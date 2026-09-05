@@ -24,6 +24,13 @@ export default function BasicInfoForm() {
   const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(false);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
 
+  const birthYearNum = Number(birthYear);
+  const isBirthYearValid =
+    birthYear.trim() !== "" &&
+    Number.isInteger(birthYearNum) &&
+    birthYearNum >= MIN_BIRTH_YEAR &&
+    birthYearNum <= MAX_BIRTH_YEAR;
+
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8">
       <h1 className="text-lg font-semibold text-ink">기본 정보</h1>
@@ -85,7 +92,11 @@ export default function BasicInfoForm() {
       />
 
       <div className="mt-auto">
-        <Button className="w-full" onClick={() => router.push("/profile-setup/photos")}>
+        <Button
+          className="w-full"
+          disabled={!isBirthYearValid}
+          onClick={() => router.push("/profile-setup/photos")}
+        >
           다음
         </Button>
       </div>

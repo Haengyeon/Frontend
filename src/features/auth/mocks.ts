@@ -1,9 +1,10 @@
+import { CURRENT_YEAR } from "@/features/matching/mocks";
 import type { ProfileDraft } from "./types";
 
 export const MOCK_MY_PROFILE: ProfileDraft = {
   basicInfo: {
     name: "정우진",
-    age: 27,
+    birthYear: CURRENT_YEAR - 27,
     gender: "male",
     jobCategory: "IT・개발",
     isJobCategoryPrivate: false,

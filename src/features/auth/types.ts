@@ -2,7 +2,7 @@ export type Gender = "male" | "female" | "other";
 
 export type BasicInfo = {
   name: string;
-  age: number;
+  birthYear: number;
   gender: Gender;
   jobCategory: string;
   isJobCategoryPrivate: boolean;
