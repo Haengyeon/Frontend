@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { configureApiClient } from "@/lib/api/client";
+import { queryClient } from "@/lib/queryClient";
 
 type AuthState = {
   accessToken: string | null;
@@ -14,8 +15,16 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       accessToken: null,
       hasProfile: null,
-      setSession: (accessToken, hasProfile) => set({ accessToken, hasProfile }),
-      clearSession: () => set({ accessToken: null, hasProfile: null }),
+      // 계정 전환/로그아웃 시 QueryClient는 그대로 유지되므로, 이전 사용자의 매칭·코스
+      // 캐시를 지우지 않으면 새 세션의 화면에 잠깐 이전 계정 데이터가 보일 수 있다.
+      setSession: (accessToken, hasProfile) => {
+        queryClient.clear();
+        set({ accessToken, hasProfile });
+      },
+      clearSession: () => {
+        queryClient.clear();
+        set({ accessToken: null, hasProfile: null });
+      },
     }),
     { name: "haengyeon-auth" },
   ),

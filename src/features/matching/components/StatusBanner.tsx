@@ -30,6 +30,7 @@ export default function StatusBanner() {
   const setStatus = useMatchingDraftStore((state) => state.setStatus);
   const setMatchingId = useMatchingDraftStore((state) => state.setMatchingId);
   const setMatchAttemptId = useMatchingDraftStore((state) => state.setMatchAttemptId);
+  const syncDeadlines = useMatchingDraftStore((state) => state.syncDeadlines);
 
   // GET /matchings/me를 폴링해서 서버 상태를 로컬 상태에 그대로 반영한다 —
   // "탐색 중 → 매칭 발견" 같은 전환은 더 이상 가짜 타이머가 아니라 실제 서버 응답으로 일어난다.
@@ -46,7 +47,18 @@ export default function StatusBanner() {
     const baseStatus = matchingStatusToLocal(data.status);
     const resolvedStatus = baseStatus === "found" && attempt?.myResponded ? "pending" : baseStatus;
     setStatus(resolvedStatus);
-  }, [data, attempt, attemptId, setMatchingId, setMatchAttemptId, setStatus]);
+
+    // setStatus는 상태가 막 바뀐 시점에만 로컬 추정 만료 시각(12h/6h)을 잡아준다 — 새로고침
+    // 등으로 이미 진행 중이던 카운트다운을 다시 읽는 경우엔 서버가 내려준 실제 만료 시각으로
+    // 덮어써서, 추정치 때문에 만료 시간이 잘못 연장되어 보이는 일이 없게 한다.
+    const respondDeadlineAt = data.currentAttempt?.respondDeadlineAt ?? null;
+    const paymentDeadlineAt = attempt?.paymentDeadlineAt ?? data.currentAttempt?.paymentDeadlineAt ?? null;
+    if (resolvedStatus === "pending" && respondDeadlineAt) {
+      syncDeadlines({ matchDeadlineAt: new Date(respondDeadlineAt).getTime() });
+    } else if (resolvedStatus === "payment_pending" && paymentDeadlineAt) {
+      syncDeadlines({ paymentDeadlineAt: new Date(paymentDeadlineAt).getTime() });
+    }
+  }, [data, attempt, attemptId, setMatchingId, setMatchAttemptId, setStatus, syncDeadlines]);
 
   const Banner = STATUS_BANNERS[status];
   if (Banner) return <Banner />;

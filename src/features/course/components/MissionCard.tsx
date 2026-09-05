@@ -77,7 +77,11 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
               capture="environment"
               className="sr-only"
               disabled={upload.isPending}
-              onChange={(e) => handleFileChange(e.target.files?.[0])}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.currentTarget.value = "";
+                handleFileChange(file);
+              }}
             />
           </label>
         )}

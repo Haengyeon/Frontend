@@ -16,6 +16,7 @@ export default function PaymentSummary() {
   const { matchAttemptId, themeIds, paymentDeadlineAt, setStatus } = useMatchingDraftStore();
   const { data } = useMatchAttempt(matchAttemptId);
   const partner = data?.partner;
+  const isPaymentExpired = paymentDeadlineAt !== null && Date.now() > paymentDeadlineAt;
 
   const handlePay = () => {
     if (isPaymentExpired) return;

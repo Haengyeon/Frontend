@@ -7,7 +7,7 @@ import HorizontalScroller from "@/components/ui/HorizontalScroller";
 import { useCourseHistory, useVisitedDistrictCodes } from "@/features/course/api/useCourseApi";
 
 export default function RegionMap() {
-  const { data, isLoading } = useCourseHistory();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCourseHistory();
   const items = data?.pages.flatMap((page) => page.items) ?? [];
   const visitedCodes = useVisitedDistrictCodes(items.map((item) => item.id));
 
@@ -36,6 +36,16 @@ export default function RegionMap() {
                   />
                 </Link>
               ))}
+              {hasNextPage ? (
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="shrink-0 self-center whitespace-nowrap text-xs text-muted underline disabled:opacity-50"
+                >
+                  {isFetchingNextPage ? "불러오는 중..." : "더 보기"}
+                </button>
+              ) : null}
             </HorizontalScroller>
           </div>
         )}

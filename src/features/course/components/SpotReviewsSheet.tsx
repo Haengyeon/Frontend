@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { useSpotReviews } from "@/features/course/api/useCourseApi";
 import { extractDistrict } from "@/features/course/lib/address";
+import { ApiError } from "@/lib/api/client";
 
 type SpotReviewsSheetProps = {
   contentId: string | null;
@@ -18,7 +19,8 @@ export default function SpotReviewsSheet({
   address,
   onClose,
 }: SpotReviewsSheetProps) {
-  const { data, isLoading } = useSpotReviews(contentId);
+  const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSpotReviews(contentId);
   const items = data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = data?.pages[0]?.totalCount ?? 0;
   const district = extractDistrict(address);
@@ -39,14 +41,30 @@ export default function SpotReviewsSheet({
       <div className="flex max-h-80 flex-col gap-3 overflow-y-auto">
         {isLoading ? (
           <p className="text-sm text-muted">불러오는 중...</p>
+        ) : isError ? (
+          <p className="text-sm text-muted">
+            {error instanceof ApiError ? error.message : "후기를 불러오지 못했어요."}
+          </p>
         ) : items.length === 0 ? (
           <p className="text-sm text-muted">아직 후기가 없어요</p>
         ) : (
-          items.map((review) => (
-            <div key={review.id} className="rounded-2xl border border-line bg-cream p-3 text-sm text-ink">
-              {review.content}
-            </div>
-          ))
+          <>
+            {items.map((review) => (
+              <div key={review.id} className="rounded-2xl border border-line bg-cream p-3 text-sm text-ink">
+                {review.content}
+              </div>
+            ))}
+            {hasNextPage ? (
+              <button
+                type="button"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="text-xs text-muted underline disabled:opacity-50"
+              >
+                {isFetchingNextPage ? "불러오는 중..." : "더 보기"}
+              </button>
+            ) : null}
+          </>
         )}
       </div>
     </BottomSheet>

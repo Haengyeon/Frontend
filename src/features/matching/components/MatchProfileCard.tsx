@@ -14,7 +14,7 @@ export default function MatchProfileCard() {
   const params = useParams<{ matchingId: string; attemptId: string }>();
   const setStatus = useMatchingDraftStore((state) => state.setStatus);
   const themeIds = useMatchingDraftStore((state) => state.themeIds);
-  const { data, isLoading } = useMatchAttempt(params.attemptId);
+  const { data, isLoading, isError, error, refetch } = useMatchAttempt(params.attemptId);
   const respond = useRespondToMatchAttempt(params.attemptId);
 
   const partner = data?.partner;
@@ -42,6 +42,21 @@ export default function MatchProfileCard() {
       },
     );
   };
+
+  if (isError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 pb-8 pt-4 text-sm text-muted">
+        <p>{error instanceof ApiError ? error.message : "프로필을 불러오지 못했어요."}</p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="rounded-full border border-line px-4 py-2 text-xs text-ink"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading || !data || !partner) {
     return (

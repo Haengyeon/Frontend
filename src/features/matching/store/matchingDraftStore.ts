@@ -22,6 +22,8 @@ type MatchingDraftState = MatchingCondition & {
   setThemeIds: (themeIds: string[]) => void;
   setMatchingId: (matchingId: string | null) => void;
   setMatchAttemptId: (matchAttemptId: string | null) => void;
+  /** 서버가 내려준 실제 만료 시각으로 카운트다운을 덮어쓴다 (새로고침 시 로컬 추정치 대신 이 값을 신뢰). */
+  syncDeadlines: (updates: { matchDeadlineAt?: number | null; paymentDeadlineAt?: number | null }) => void;
   reset: () => void;
 };
 
@@ -76,5 +78,6 @@ export const useMatchingDraftStore = create<MatchingDraftState>((set, get) => ({
   setThemeIds: (themeIds) => set({ themeIds }),
   setMatchingId: (matchingId) => set({ matchingId }),
   setMatchAttemptId: (matchAttemptId) => set({ matchAttemptId }),
+  syncDeadlines: (updates) => set(updates),
   reset: () => set({ ...INITIAL_STATE }),
 }));

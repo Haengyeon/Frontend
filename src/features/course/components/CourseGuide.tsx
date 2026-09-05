@@ -57,11 +57,23 @@ function CoursePreview({
 
 export default function CourseGuide() {
   const router = useRouter();
-  const { data: current, isLoading: isCurrentLoading } = useCurrentCourse();
+  const {
+    data: current,
+    isLoading: isCurrentLoading,
+    isError: isCurrentError,
+  } = useCurrentCourse();
   const courseId = current?.course?.id ?? null;
-  const { data: detail, isLoading: isDetailLoading } = useCourseDetail(courseId);
+  const {
+    data: detail,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+  } = useCourseDetail(courseId);
 
   if (isCurrentLoading) return null;
+
+  if (isCurrentError || isDetailError) {
+    return <GuideNotice icon={MapPinOff} title="코스 정보를 불러오지 못했어요" subtitle="잠시 후 다시 시도해주세요" />;
+  }
 
   if (current?.generating) {
     return <GuideNotice icon={MapPinOff} title="코스를 만드는 중이에요" subtitle="곧 준비될 거예요" />;

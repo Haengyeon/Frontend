@@ -15,7 +15,7 @@ type ReviewFormProps = {
 
 export default function ReviewForm({ courseId }: ReviewFormProps) {
   const router = useRouter();
-  const { data: detail, isLoading } = useCourseDetail(courseId);
+  const { data: detail, isLoading, isError, error } = useCourseDetail(courseId);
   const submitReview = useSubmitCourseReview(courseId);
   const [partnerReview, setPartnerReview] = useState("");
   const [courseReview, setCourseReview] = useState("");
@@ -44,6 +44,17 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
     return (
       <div className="flex flex-1 flex-col">
         <Header title="후기 작성" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-1 flex-col">
+        <Header title="후기 작성" />
+        <div className="flex flex-1 items-center justify-center px-6 text-sm text-muted">
+          {error instanceof ApiError ? error.message : "코스 정보를 불러오지 못했어요."}
+        </div>
       </div>
     );
   }

@@ -1,5 +1,23 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
+function isLoopbackHost(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
+// bearer token과 refresh 쿠키가 평문으로 전송되는 걸 막는다. 로컬 개발용 백엔드(localhost)는
+// http를 허용하고, 그 외 오리진은 반드시 https여야 한다.
+try {
+  const parsed = new URL(API_BASE_URL);
+  if (parsed.protocol === "http:" && !isLoopbackHost(parsed.hostname)) {
+    throw new Error(
+      `NEXT_PUBLIC_API_BASE_URL(${API_BASE_URL})은 로컬이 아닌 오리진에서 http를 사용할 수 없어요. https를 사용하세요.`,
+    );
+  }
+} catch (err) {
+  if (err instanceof Error && err.message.includes("http를 사용할 수 없어요")) throw err;
+  // API_BASE_URL이 비어 있거나 잘못된 형식이면 URL 파싱이 실패하는데, 이는 별도로 다룰 문제가 아니다.
+}
+
 /** 서버가 "/uploads/xxx.jpg"처럼 상대 경로로 내려주는 이미지를 백엔드 오리진에 붙여 절대 URL로 만든다. */
 export function resolveAssetUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path;

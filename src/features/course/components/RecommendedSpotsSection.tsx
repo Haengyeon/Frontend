@@ -9,7 +9,7 @@ import SpotReviewsSheet from "@/features/course/components/SpotReviewsSheet";
 import { extractDistrict } from "@/features/course/lib/address";
 
 export default function RecommendedSpotsSection() {
-  const { data, isLoading } = useRecommendedSpots();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useRecommendedSpots();
   const items = data?.pages.flatMap((page) => page.items) ?? [];
   const [openSpot, setOpenSpot] = useState<{ contentId: string; name: string; address: string } | null>(
     null,
@@ -61,6 +61,16 @@ export default function RecommendedSpotsSection() {
                   </button>
                 );
               })}
+          {!isLoading && hasNextPage ? (
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="flex w-16 shrink-0 items-center justify-center whitespace-nowrap text-xs text-muted underline disabled:opacity-50"
+            >
+              {isFetchingNextPage ? "..." : "더 보기"}
+            </button>
+          ) : null}
         </HorizontalScroller>
       </div>
 
