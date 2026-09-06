@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 import MatchingStageJumper from "@/components/dev/MatchingStageJumper";
+import DevLoginPanel from "@/components/dev/DevLoginPanel";
+import CourseRegenerateDevPanel from "@/components/dev/CourseRegenerateDevPanel";
 
 const pretendard = localFont({
   src: "../../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
@@ -21,7 +23,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-zinc-200">
         <Providers>
-          {process.env.NODE_ENV !== "production" ? <MatchingStageJumper /> : null}
+          {process.env.NODE_ENV !== "production" ? (
+            <>
+              <MatchingStageJumper />
+              <DevLoginPanel />
+              <CourseRegenerateDevPanel />
+            </>
+          ) : null}
           <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-cream shadow-xl">
             {children}
           </div>

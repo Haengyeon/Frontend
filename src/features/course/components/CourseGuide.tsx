@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { MapPinOff, MapPin, Clover, Clock, Shirt, Lock, type LucideIcon } from "lucide-react";
-import MissionStoryPath from "@/features/course/components/MissionStoryPath";
-import MissionCard from "@/features/course/components/MissionCard";
+import Button from "@/components/ui/Button";
+import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
 import InfoRow from "@/features/matching/components/InfoRow";
-import { MOCK_MISSIONS, MOCK_COURSE_DURATION, MOCK_COURSE_DRESS_CODE } from "@/features/course/mocks";
-import { MOCK_DECIDED_THEME_IDS, getThemeLabels } from "@/features/matching/mocks";
-import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
-import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { useCurrentCourse, useCourseDetail } from "@/features/course/api/useCourseApi";
 
 function GuideNotice({
   icon: Icon,
@@ -28,17 +25,17 @@ function GuideNotice({
   );
 }
 
-// D-2 이상: 지역/테마만 · D-1: 소요 시간·복장 추천까지 · D-Day: 전체 코스(다른 곳에서 렌더)
+// LOCKED(D-2 이전): 지역/테마만 · PREVIEW(D-1): 예상 소요시간·복장 추천까지 · FULL(D-Day): 전체 코스(다른 곳에서 렌더)
 function CoursePreview({
   notice,
   regionLabel,
   themeLabel,
-  showDetails,
+  details,
 }: {
   notice: string;
   regionLabel: string;
   themeLabel: string;
-  showDetails: boolean;
+  details?: { estimatedTime: string; dressTip: string };
 }) {
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-line bg-cream-card p-5">
@@ -48,10 +45,10 @@ function CoursePreview({
       </span>
       <InfoRow icon={MapPin} label="지역" value={regionLabel} />
       <InfoRow icon={Clover} label="테마" value={themeLabel} />
-      {showDetails ? (
+      {details ? (
         <>
-          <InfoRow icon={Clock} label="예상 소요 시간" value={MOCK_COURSE_DURATION} />
-          <InfoRow icon={Shirt} label="복장 추천" value={MOCK_COURSE_DRESS_CODE} />
+          <InfoRow icon={Clock} label="예상 소요 시간" value={details.estimatedTime} />
+          <InfoRow icon={Shirt} label="복장 추천" value={details.dressTip} />
         </>
       ) : null}
     </div>
@@ -59,68 +56,68 @@ function CoursePreview({
 }
 
 export default function CourseGuide() {
-  const daysUntilTrip = useDaysUntilTrip();
-  const regions = useMatchingDraftStore((state) => state.regions);
-  const [selectedMissionId, setSelectedMissionId] = useState(MOCK_MISSIONS[0].missionId);
-  const [capturedMissionIds, setCapturedMissionIds] = useState(() =>
-    MOCK_MISSIONS.filter((mission) => mission.done).map((mission) => mission.missionId),
-  );
-  const [comments, setComments] = useState<Record<string, string>>({});
+  const router = useRouter();
+  const {
+    data: current,
+    isLoading: isCurrentLoading,
+    isError: isCurrentError,
+  } = useCurrentCourse();
+  const courseId = current?.course?.id ?? null;
+  const {
+    data: detail,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+  } = useCourseDetail(courseId);
 
-  if (daysUntilTrip === null) {
+  if (isCurrentLoading) return null;
+
+  if (isCurrentError || isDetailError) {
+    return <GuideNotice icon={MapPinOff} title="코스 정보를 불러오지 못했어요" subtitle="잠시 후 다시 시도해주세요" />;
+  }
+
+  if (current?.generating) {
+    return <GuideNotice icon={MapPinOff} title="코스를 만드는 중이에요" subtitle="곧 준비될 거예요" />;
+  }
+
+  if (!current?.course) {
     return <GuideNotice icon={MapPinOff} title="진행중인 코스가 없어요" />;
   }
 
-  const regionLabel = regions.join(", ") || "미정";
-  const themeLabel = getThemeLabels(MOCK_DECIDED_THEME_IDS);
+  if (isDetailLoading || !detail) return null;
 
-  if (daysUntilTrip >= 2) {
+  const regionLabel = `${detail.regionLabel} ${detail.sigunguNames.join("·")}`.trim();
+
+  if (detail.viewType === "LOCKED") {
     return (
       <CoursePreview
-        notice={`코스 세부 일정은 만나기 하루 전(D-1)부터 확인할 수 있어요 · 현재 D-${daysUntilTrip}`}
+        notice={`코스 세부 일정은 만나기 하루 전(D-1)부터 확인할 수 있어요 · 현재 D-${detail.dday}`}
         regionLabel={regionLabel}
-        themeLabel={themeLabel}
-        showDetails={false}
+        themeLabel={detail.themeLabel}
       />
     );
   }
 
-  if (daysUntilTrip === 1) {
+  if (detail.viewType === "PREVIEW") {
     return (
       <CoursePreview
         notice="코스 세부 일정은 당일에 공개돼요"
         regionLabel={regionLabel}
-        themeLabel={themeLabel}
-        showDetails
+        themeLabel={detail.themeLabel}
+        details={{ estimatedTime: detail.preview.estimatedTime, dressTip: detail.preview.dressTip }}
       />
     );
   }
 
-  const selectedIndex = MOCK_MISSIONS.findIndex(
-    (mission) => mission.missionId === selectedMissionId,
-  );
-  const selectedMission = MOCK_MISSIONS[selectedIndex] ?? MOCK_MISSIONS[0];
+  const canWriteReview = detail.dday <= 0 && !detail.review.myPartnerReview;
 
   return (
     <div className="flex flex-col gap-5">
-      <MissionStoryPath
-        missions={MOCK_MISSIONS}
-        selectedMissionId={selectedMission.missionId}
-        onSelect={setSelectedMissionId}
-      />
-      <MissionCard
-        mission={selectedMission}
-        isCaptured={capturedMissionIds.includes(selectedMission.missionId)}
-        onCapture={() =>
-          setCapturedMissionIds((prev) =>
-            prev.includes(selectedMission.missionId) ? prev : [...prev, selectedMission.missionId],
-          )
-        }
-        comment={comments[selectedMission.missionId] ?? ""}
-        onCommentChange={(comment) =>
-          setComments((prev) => ({ ...prev, [selectedMission.missionId]: comment }))
-        }
-      />
+      <CourseSpotsPanel courseId={detail.id} spots={detail.spots} />
+      {canWriteReview ? (
+        <Button className="w-full" onClick={() => router.push(`/course/${detail.id}/review`)}>
+          후기 작성하기
+        </Button>
+      ) : null}
     </div>
   );
 }

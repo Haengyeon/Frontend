@@ -16,9 +16,15 @@ type ConditionConfirmSheetProps = {
   open: boolean;
   onEdit: () => void;
   onConfirm: () => void;
+  isSubmitting?: boolean;
 };
 
-export default function ConditionConfirmSheet({ open, onEdit, onConfirm }: ConditionConfirmSheetProps) {
+export default function ConditionConfirmSheet({
+  open,
+  onEdit,
+  onConfirm,
+  isSubmitting = false,
+}: ConditionConfirmSheetProps) {
   const { regions, ageRange, preferredGender, availableDates, themeIds } = useMatchingDraftStore();
 
   const rows = [
@@ -58,8 +64,8 @@ export default function ConditionConfirmSheet({ open, onEdit, onConfirm }: Condi
         <Button variant="secondary" className="flex-1" onClick={onEdit}>
           수정하기
         </Button>
-        <Button className="flex-[2]" onClick={onConfirm}>
-          매칭 시작하기
+        <Button className="flex-[2]" onClick={onConfirm} disabled={isSubmitting}>
+          {isSubmitting ? "매칭 시작 중..." : "매칭 시작하기"}
         </Button>
       </div>
     </BottomSheet>

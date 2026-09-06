@@ -34,6 +34,18 @@ export const JOB_CATEGORIES = [
   "서비스업",
 ];
 
+// [개발용] 카카오 계정 없이 dev-token으로 로그인할 수 있는 시드 계정 (isDummy=true만 발급됨)
+export const DEV_SEED_USERS = [
+  { userId: "1", name: "김민준" },
+  { userId: "2", name: "이도윤" },
+  { userId: "3", name: "박현우" },
+  { userId: "4", name: "최우진" },
+  { userId: "5", name: "장정운" },
+  { userId: "6", name: "곽소정" },
+  { userId: "7", name: "한서연" },
+  { userId: "8", name: "윤아름" },
+];
+
 export const MAX_INTEREST_TAGS = 5;
 
 export const INTEREST_TAGS = [

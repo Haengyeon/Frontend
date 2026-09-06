@@ -1,57 +1,53 @@
 import Image from "next/image";
-import type { Mission } from "@/features/course/types";
+import type { CourseSpot } from "@/features/course/api/types";
 
 type MissionStoryPathProps = {
-  missions: Mission[];
-  selectedMissionId: string;
-  onSelect: (missionId: string) => void;
+  spots: CourseSpot[];
+  selectedSpotId: string;
+  onSelect: (spotId: string) => void;
 };
 
-export default function MissionStoryPath({
-  missions,
-  selectedMissionId,
-  onSelect,
-}: MissionStoryPathProps) {
-  const total = missions.length;
+export default function MissionStoryPath({ spots, selectedSpotId, onSelect }: MissionStoryPathProps) {
+  const total = spots.length;
 
   return (
     <div className="flex items-center gap-1.5">
-      {missions.map((mission) => {
-        const isSelected = mission.missionId === selectedMissionId;
+      {spots.map((spot) => {
+        const isSelected = spot.id === selectedSpotId;
 
         return (
           <button
-            key={mission.missionId}
+            key={spot.id}
             type="button"
-            onClick={() => onSelect(mission.missionId)}
+            onClick={() => onSelect(spot.id)}
             aria-pressed={isSelected}
             className={`flex min-w-0 flex-col overflow-hidden rounded-2xl ${
               isSelected ? "flex-[2] border-2 border-forest" : "flex-1"
             }`}
           >
             <div className="relative aspect-[3/5] w-full bg-gradient-to-br from-forest-light to-forest/40">
-              {mission.imageUrl ? (
+              {spot.imageUrl ? (
                 <Image
-                  src={mission.imageUrl}
-                  alt={mission.placeName}
+                  src={spot.imageUrl}
+                  alt={spot.name}
                   fill
                   sizes="200px"
                   className="object-cover"
                 />
               ) : null}
               <span className="absolute right-1.5 top-1.5 rounded-full bg-white/80 px-2 py-0.5 text-xs font-semibold text-ink shadow-sm">
-                {mission.order}/{total}
+                {spot.order}/{total}
               </span>
             </div>
 
             <div className="bg-white px-2 py-3 text-center">
               {isSelected ? (
                 <>
-                  <p className="text-base font-semibold text-ink">{mission.placeName}</p>
-                  <p className="text-xs text-muted">{mission.location}</p>
+                  <p className="text-base font-semibold text-ink">{spot.name}</p>
+                  <p className="text-xs text-muted">{spot.sigunguName ?? spot.address}</p>
                 </>
               ) : (
-                <p className="truncate text-xs font-medium text-ink">{mission.placeName}</p>
+                <p className="truncate text-xs font-medium text-ink">{spot.name}</p>
               )}
             </div>
           </button>

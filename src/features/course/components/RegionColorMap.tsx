@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import provincesGeoJson from "@/features/course/data/skorea-provinces.json";
 import municipalitiesGeoJson from "@/features/course/data/skorea-municipalities.json";
-import { PROVINCE_CODE_TO_REGION, VISITED_DISTRICT_CODES } from "@/features/course/mocks";
+import { PROVINCE_CODE_TO_REGION } from "@/features/course/mocks";
 import { createProjection, featureCentroid, featureToPath } from "@/features/course/lib/geo";
 import type { ProvinceFeatureCollection } from "@/features/course/lib/geo";
 
@@ -23,7 +23,11 @@ const PROVINCE_LABEL_SIZE = 8;
 const CHAR_WIDTH_FACTOR = 0.95;
 const LINE_HEIGHT_FACTOR = 1.3;
 
-export default function RegionColorMap() {
+type RegionColorMapProps = {
+  visitedCodes: Set<string>;
+};
+
+export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
   const { project, width, height } = useMemo(
     () => createProjection(municipalities.features, MAP_WIDTH),
     [],
@@ -160,7 +164,7 @@ export default function RegionColorMap() {
       >
         <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
           {districtShapes.map(({ feature, d }) => {
-            const visited = VISITED_DISTRICT_CODES.has(feature.properties.code);
+            const visited = visitedCodes.has(feature.properties.code);
 
             return (
               <path
@@ -185,7 +189,7 @@ export default function RegionColorMap() {
 
           {districtLabelOpacity > 0
             ? visibleDistrictLabels.map(({ feature, centroid }) => {
-                const visited = VISITED_DISTRICT_CODES.has(feature.properties.code);
+                const visited = visitedCodes.has(feature.properties.code);
 
                 return (
                   <text

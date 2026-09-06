@@ -3,12 +3,14 @@
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import MatchConfirmedBadge from "@/features/matching/components/MatchConfirmedBadge";
-import { RECOMMENDED_COURSES } from "@/features/course/mocks";
+import { useCurrentCourse } from "@/features/course/api/useCourseApi";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 
 export default function TripCompleteSummary() {
   const router = useRouter();
   const reset = useMatchingDraftStore((state) => state.reset);
+  const { data: current } = useCurrentCourse();
+  const courseId = current?.course?.id;
 
   const handleRestart = () => {
     reset();
@@ -26,7 +28,8 @@ export default function TripCompleteSummary() {
         <Button
           variant="secondary"
           className="flex-1"
-          onClick={() => router.push(`/course/${RECOMMENDED_COURSES[0].courseId}/review`)}
+          disabled={!courseId}
+          onClick={() => router.push(`/course/${courseId}/review`)}
         >
           후기 작성하기
         </Button>
