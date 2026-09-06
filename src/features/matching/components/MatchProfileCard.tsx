@@ -6,14 +6,13 @@ import { X, Heart, CalendarHeart, Clover } from "lucide-react";
 import { formatDateLabel, getThemeLabels } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useMatchAttempt, useRespondToMatchAttempt } from "@/features/matching/api/useMatchingApi";
-import { jobCategoryToLocal, hobbyToLocal } from "@/features/matching/api/enumMap";
+import { jobCategoryToLocal, hobbyToLocal, themeToLocalId } from "@/features/matching/api/enumMap";
 import { ApiError } from "@/lib/api/client";
 
 export default function MatchProfileCard() {
   const router = useRouter();
   const params = useParams<{ matchingId: string; attemptId: string }>();
   const setStatus = useMatchingDraftStore((state) => state.setStatus);
-  const themeIds = useMatchingDraftStore((state) => state.themeIds);
   const { data, isLoading, isError, error, refetch } = useMatchAttempt(params.attemptId);
   const respond = useRespondToMatchAttempt(params.attemptId);
 
@@ -113,7 +112,7 @@ export default function MatchProfileCard() {
         <span className="h-3 w-px bg-line" />
         <span className="flex items-center gap-1">
           <Clover size={14} strokeWidth={1.5} className="text-forest" />
-          {getThemeLabels(themeIds)}
+          {getThemeLabels([themeToLocalId(data.theme)])}
         </span>
       </div>
 

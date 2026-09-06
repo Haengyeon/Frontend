@@ -4,7 +4,7 @@ import { useRef, useState, type KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 
 type ChatComposerProps = {
-  limited: boolean;
+  remainingCount: number;
   onSend: (content: string) => void;
   disabled?: boolean;
 };
@@ -12,9 +12,10 @@ type ChatComposerProps = {
 const MAX_LENGTH = 300;
 const MAX_TEXTAREA_HEIGHT = 120;
 
-export default function ChatComposer({ limited, onSend, disabled = false }: ChatComposerProps) {
+export default function ChatComposer({ remainingCount, onSend, disabled = false }: ChatComposerProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isDisabled = disabled || remainingCount <= 0;
 
   const resize = (el: HTMLTextAreaElement) => {
     el.style.height = "auto";
@@ -23,7 +24,7 @@ export default function ChatComposer({ limited, onSend, disabled = false }: Chat
 
   const handleSend = () => {
     const content = value.trim();
-    if (!content || disabled) return;
+    if (!content || isDisabled) return;
     onSend(content);
     setValue("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
@@ -48,26 +49,24 @@ export default function ChatComposer({ limited, onSend, disabled = false }: Chat
             resize(e.target);
           }}
           onKeyDown={handleKeyDown}
-          maxLength={limited ? MAX_LENGTH : undefined}
-          disabled={disabled}
-          placeholder="메시지 입력..."
+          maxLength={MAX_LENGTH}
+          disabled={isDisabled}
+          placeholder={remainingCount <= 0 ? "메시지를 모두 사용했어요" : "메시지 입력..."}
           className="max-h-[120px] flex-1 resize-none bg-transparent py-1 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-forest disabled:opacity-50"
         />
         <button
           type="button"
           onClick={handleSend}
-          disabled={disabled || !value.trim()}
+          disabled={isDisabled || !value.trim()}
           aria-label="전송"
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-forest text-white disabled:opacity-40"
         >
           <Send size={14} strokeWidth={1.5} />
         </button>
       </div>
-      {limited ? (
-        <span className="self-end pr-1 text-[11px] text-muted">
-          {value.length}/{MAX_LENGTH}
-        </span>
-      ) : null}
+      <span className="self-end pr-1 text-[11px] text-muted">
+        {value.length}/{MAX_LENGTH} · 남은 메시지 {remainingCount}회
+      </span>
     </div>
   );
 }
