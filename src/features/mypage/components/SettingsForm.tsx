@@ -7,6 +7,7 @@ import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { useLogout, useWithdraw } from "@/features/auth/api/useAuthApi";
 
 const LEGAL_DOCS = [
   {
@@ -26,18 +27,30 @@ const LEGAL_DOCS = [
 export default function SettingsForm() {
   const router = useRouter();
   const reset = useMatchingDraftStore((state) => state.reset);
+  const logout = useLogout();
+  const withdraw = useWithdraw();
   const [notifyEnabled, setNotifyEnabled] = useState(true);
   const [openLegalId, setOpenLegalId] = useState<string | null>(null);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   const handleWithdraw = () => {
-    reset();
-    router.push("/splash");
+    withdraw.mutate(undefined, {
+      onSuccess: () => {
+        reset();
+        router.push("/splash");
+      },
+    });
   };
 
   const handleLogout = () => {
-    reset();
-    router.push("/splash");
+    // 서버 호출 성공/실패와 무관하게 로컬 세션은 항상 지워지므로(useLogout의 onSettled),
+    // 여기서는 화면 전환만 신경 쓰면 된다.
+    logout.mutate(undefined, {
+      onSettled: () => {
+        reset();
+        router.push("/splash");
+      },
+    });
   };
 
   return (
@@ -65,9 +78,10 @@ export default function SettingsForm() {
         <button
           type="button"
           onClick={handleLogout}
-          className="text-center text-sm text-ink underline underline-offset-2"
+          disabled={logout.isPending}
+          className="text-center text-sm text-ink underline underline-offset-2 disabled:opacity-50"
         >
-          로그아웃
+          {logout.isPending ? "로그아웃 중..." : "로그아웃"}
         </button>
         <button
           type="button"
@@ -90,9 +104,12 @@ export default function SettingsForm() {
         <p className="mb-4 text-sm text-muted">
           탈퇴하면 프로필, 매칭·결제 내역이 모두 삭제되고 복구할 수 없어요.
         </p>
-        <Button className="w-full" onClick={handleWithdraw}>
-          탈퇴하기
+        <Button className="w-full" disabled={withdraw.isPending} onClick={handleWithdraw}>
+          {withdraw.isPending ? "탈퇴 처리 중..." : "탈퇴하기"}
         </Button>
+        {withdraw.isError ? (
+          <p className="mt-2 text-center text-xs text-red-500">탈퇴에 실패했어요. 다시 시도해주세요.</p>
+        ) : null}
       </Modal>
     </div>
   );

@@ -3,36 +3,56 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PersonStanding, Smile } from "lucide-react";
-import Input from "@/components/ui/Input";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
-import Chip from "@/components/ui/Chip";
 import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
-import { MOCK_MY_PROFILE, INTEREST_TAGS, MAX_INTEREST_TAGS } from "@/features/auth/mocks";
-import { MIN_BIRTH_YEAR, MAX_BIRTH_YEAR } from "@/features/matching/mocks";
-import type { Gender } from "@/features/auth/types";
+import InterestTags from "@/features/auth/components/InterestTags";
+import MbtiSelector from "@/features/auth/components/MbtiSelector";
+import { useMyProfile, useUpdateProfile } from "@/features/auth/api/useProfileApi";
+import { splitMbti, combineMbti, genderToLocal } from "@/features/auth/api/enumMap";
+import { jobCategoryToLocal, jobCategoryToApi, hobbyToLocal, hobbyToApi } from "@/features/matching/api/enumMap";
+import { MAX_INTEREST_TAGS } from "@/features/auth/mocks";
+import type { ProfileResponse } from "@/features/auth/api/types";
+import type { MbtiSelection } from "@/features/auth/types";
+import { ApiError } from "@/lib/api/client";
 
-const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
-  { value: "male", label: "남성", icon: "♂" },
-  { value: "female", label: "여성", icon: "♀" },
-  { value: "other", label: "기타", icon: "⚧" },
-];
+const GENDER_LABELS: Record<"male" | "female" | "other", string> = {
+  male: "남성",
+  female: "여성",
+  other: "기타",
+};
 
 export default function ProfileEditForm() {
-  const router = useRouter();
-  const { basicInfo, bio, interestTags } = MOCK_MY_PROFILE;
+  const { data: profile, isLoading, error } = useMyProfile();
 
-  const [name, setName] = useState(basicInfo.name);
-  const [birthYear, setBirthYear] = useState(String(basicInfo.birthYear));
-  const [gender, setGender] = useState<Gender>(basicInfo.gender);
-  const [jobCategory, setJobCategory] = useState(basicInfo.jobCategory);
-  const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(
-    basicInfo.isJobCategoryPrivate,
-  );
+  if (error) {
+    return (
+      <div className="flex flex-1 items-center justify-center text-sm text-muted">
+        {error instanceof ApiError ? error.message : "프로필을 불러오지 못했어요."}
+      </div>
+    );
+  }
+
+  if (isLoading || !profile) {
+    return <div className="flex flex-1 items-center justify-center text-sm text-muted">불러오는 중...</div>;
+  }
+
+  // key로 프로필 로드가 끝난 뒤 한 번만 로컬 편집 상태를 초기화한다 (useEffect로 동기화하지 않음).
+  return <ProfileEditFields key={profile.id} profile={profile} />;
+}
+
+function ProfileEditFields({ profile }: { profile: ProfileResponse }) {
+  const router = useRouter();
+  const updateProfile = useUpdateProfile();
+
+  const [jobCategory, setJobCategory] = useState(() => jobCategoryToLocal(profile.jobCategory));
+  const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(profile.jobPrivate);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
-  const [bioText, setBioText] = useState(bio);
-  const [selectedTags, setSelectedTags] = useState<string[]>(interestTags);
+  const [bio, setBio] = useState(profile.introduce);
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => profile.hobbies.map(hobbyToLocal));
+  const [mbti, setMbti] = useState<Partial<MbtiSelection>>(() => splitMbti(profile.mbti));
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => {
@@ -42,6 +62,27 @@ export default function ProfileEditForm() {
     });
   };
 
+  const canSubmit = bio.trim().length > 0 && selectedTags.length > 0 && !updateProfile.isPending;
+
+  const handleSubmit = () => {
+    setErrorMessage(null);
+    updateProfile.mutate(
+      {
+        introduce: bio.trim(),
+        jobCategory: jobCategoryToApi(jobCategory),
+        jobPrivate: isJobCategoryPrivate,
+        hobbies: selectedTags.map(hobbyToApi),
+        mbti: combineMbti(mbti),
+      },
+      {
+        onSuccess: () => router.push("/mypage"),
+        onError: (error) => {
+          setErrorMessage(error instanceof ApiError ? error.message : "프로필 저장에 실패했어요.");
+        },
+      },
+    );
+  };
+
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
       <div className="flex gap-3">
@@ -49,35 +90,12 @@ export default function ProfileEditForm() {
         <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} />
       </div>
 
-      <Input label="이름" value={name} onChange={(e) => setName(e.target.value)} />
-      <Input
-        label="출생연도"
-        type="number"
-        min={MIN_BIRTH_YEAR}
-        max={MAX_BIRTH_YEAR}
-        value={birthYear}
-        onChange={(e) => setBirthYear(e.target.value)}
-      />
-
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-ink">성별</span>
-        <div className="flex gap-2">
-          {GENDER_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setGender(option.value)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border py-3 text-sm ${
-                gender === option.value
-                  ? "border-forest bg-forest-light text-forest"
-                  : "border-line text-muted"
-              }`}
-            >
-              <span>{option.icon}</span>
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <span className="text-sm font-medium text-ink">기본 정보</span>
+        <p className="text-sm text-muted">
+          {profile.name} · 만 {profile.age}세 · {GENDER_LABELS[genderToLocal(profile.gender)]}
+        </p>
+        <p className="text-xs text-muted">이름·생년월일·성별은 수정할 수 없어요.</p>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -109,35 +127,21 @@ export default function ProfileEditForm() {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-ink">한 줄 소개</span>
         <textarea
-          value={bioText}
-          onChange={(e) => setBioText(e.target.value)}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
           rows={3}
+          maxLength={200}
           className="resize-none rounded-xl border border-line bg-cream-card p-4 text-sm text-ink placeholder:text-muted focus:border-forest focus:outline-none"
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-ink">취향 · 관심사</span>
-          <span className="text-xs text-muted">
-            {selectedTags.length}/{MAX_INTEREST_TAGS}개 선택됨
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {INTEREST_TAGS.map((tag) => (
-            <Chip
-              key={tag}
-              label={tag}
-              selected={selectedTags.includes(tag)}
-              disabled={!selectedTags.includes(tag) && selectedTags.length >= MAX_INTEREST_TAGS}
-              onClick={() => toggleTag(tag)}
-            />
-          ))}
-        </div>
-      </div>
+      <InterestTags selected={selectedTags} onToggle={toggleTag} />
+      <MbtiSelector selection={mbti} onSelect={(axis, value) => setMbti((prev) => ({ ...prev, [axis]: value }))} />
 
-      <Button className="mt-auto w-full" onClick={() => router.push("/mypage")}>
-        저장하기
+      {errorMessage ? <p className="text-center text-sm text-red-500">{errorMessage}</p> : null}
+
+      <Button className="mt-auto w-full" disabled={!canSubmit} onClick={handleSubmit}>
+        {updateProfile.isPending ? "저장 중..." : "저장하기"}
       </Button>
     </div>
   );

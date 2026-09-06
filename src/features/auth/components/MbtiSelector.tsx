@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import type { MbtiSelection } from "@/features/auth/types";
 
 type Axis = keyof MbtiSelection;
@@ -23,17 +20,17 @@ const LABELS: Record<string, string> = {
   P: "인식형",
 };
 
-export default function MbtiSelector() {
-  const [selection, setSelection] = useState<Partial<MbtiSelection>>({});
+type MbtiSelectorProps = {
+  selection: Partial<MbtiSelection>;
+  onSelect: (axis: Axis, value: string) => void;
+};
 
-  const select = (axis: Axis, value: string) =>
-    setSelection((prev) => ({ ...prev, [axis]: value }) as Partial<MbtiSelection>);
-
+export default function MbtiSelector({ selection, onSelect }: MbtiSelectorProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-ink">MBTI</span>
-        <p className="text-xs text-muted">MBTI를 입력해주세요</p>
+        <p className="text-xs text-muted">MBTI를 입력해주세요 (선택)</p>
       </div>
 
       <div className="grid grid-cols-4 gap-2">
@@ -45,7 +42,7 @@ export default function MbtiSelector() {
               <button
                 key={value}
                 type="button"
-                onClick={() => select(axis, value)}
+                onClick={() => onSelect(axis, value)}
                 className={`flex flex-col items-center gap-0.5 rounded-xl border py-3 ${
                   selected ? "border-forest bg-forest-light" : "border-line"
                 }`}

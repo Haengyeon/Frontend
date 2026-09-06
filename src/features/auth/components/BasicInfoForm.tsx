@@ -6,7 +6,8 @@ import Input from "@/components/ui/Input";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
-import { MIN_BIRTH_YEAR, MAX_BIRTH_YEAR } from "@/features/matching/mocks";
+import { calculateAge, MIN_SIGNUP_AGE } from "@/features/auth/lib/age";
+import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
 import type { Gender } from "@/features/auth/types";
 
 const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
@@ -15,21 +16,27 @@ const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
   { value: "other", label: "기타", icon: "⚧" },
 ];
 
+const TODAY = new Date().toISOString().slice(0, 10);
+
 export default function BasicInfoForm() {
   const router = useRouter();
+  const setBasicInfo = useProfileDraftStore((state) => state.setBasicInfo);
   const [name, setName] = useState("");
-  const [birthYear, setBirthYear] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [jobCategory, setJobCategory] = useState("");
   const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(false);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
 
-  const birthYearNum = Number(birthYear);
-  const isBirthYearValid =
-    birthYear.trim() !== "" &&
-    Number.isInteger(birthYearNum) &&
-    birthYearNum >= MIN_BIRTH_YEAR &&
-    birthYearNum <= MAX_BIRTH_YEAR;
+  const age = birthDate ? calculateAge(birthDate) : null;
+  const isBirthDateValid = age !== null && age >= MIN_SIGNUP_AGE;
+  const canSubmit = name.trim().length > 0 && isBirthDateValid && gender !== null && jobCategory !== "";
+
+  const handleNext = () => {
+    if (!canSubmit || !gender) return;
+    setBasicInfo({ name: name.trim(), birthDate, gender, jobCategory, isJobCategoryPrivate });
+    router.push("/profile-setup/photos");
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8">
@@ -37,14 +44,15 @@ export default function BasicInfoForm() {
 
       <Input label="이름" placeholder="이름을 입력해주세요" value={name} onChange={(e) => setName(e.target.value)} />
       <Input
-        label="출생연도"
-        type="number"
-        placeholder={`예: ${MAX_BIRTH_YEAR}`}
-        min={MIN_BIRTH_YEAR}
-        max={MAX_BIRTH_YEAR}
-        value={birthYear}
-        onChange={(e) => setBirthYear(e.target.value)}
+        label="생년월일"
+        type="date"
+        max={TODAY}
+        value={birthDate}
+        onChange={(e) => setBirthDate(e.target.value)}
       />
+      {birthDate && !isBirthDateValid ? (
+        <p className="-mt-4 text-xs text-red-500">만 {MIN_SIGNUP_AGE}세 이상만 가입할 수 있어요.</p>
+      ) : null}
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-ink">성별</span>
@@ -92,11 +100,7 @@ export default function BasicInfoForm() {
       />
 
       <div className="mt-auto">
-        <Button
-          className="w-full"
-          disabled={!isBirthYearValid}
-          onClick={() => router.push("/profile-setup/photos")}
-        >
+        <Button className="w-full" disabled={!canSubmit} onClick={handleNext}>
           다음
         </Button>
       </div>

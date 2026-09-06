@@ -5,10 +5,22 @@ import { useRouter } from "next/navigation";
 import { PersonStanding, Smile } from "lucide-react";
 import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import StepNavButtons from "@/components/ui/StepNavButtons";
+import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
+
+const MAX_BIO_LENGTH = 200;
 
 export default function ProfilePhotosForm() {
   const router = useRouter();
-  const [bio, setBio] = useState("");
+  const setBio = useProfileDraftStore((state) => state.setBio);
+  const [bio, setBioInput] = useState("");
+
+  const canSubmit = bio.trim().length > 0;
+
+  const handleNext = () => {
+    if (!canSubmit) return;
+    setBio(bio.trim());
+    router.push("/profile-setup/preferences");
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8">
@@ -26,15 +38,16 @@ export default function ProfilePhotosForm() {
         <p className="text-xs text-muted">한 줄로 나를 알려주세요</p>
         <textarea
           value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          onChange={(e) => setBioInput(e.target.value)}
           rows={4}
+          maxLength={MAX_BIO_LENGTH}
           className="resize-none rounded-xl border border-line bg-cream-card p-4 text-sm text-ink placeholder:text-muted focus:border-forest focus:outline-none"
           placeholder="나를 표현하는 한 줄을 적어주세요"
         />
       </div>
 
       <div className="mt-auto">
-        <StepNavButtons onNext={() => router.push("/profile-setup/preferences")} />
+        <StepNavButtons onNext={handleNext} nextDisabled={!canSubmit} />
       </div>
     </div>
   );

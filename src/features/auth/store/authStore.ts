@@ -7,6 +7,7 @@ type AuthState = {
   accessToken: string | null;
   hasProfile: boolean | null;
   setSession: (accessToken: string, hasProfile: boolean) => void;
+  setHasProfile: (hasProfile: boolean) => void;
   clearSession: () => void;
 };
 
@@ -21,6 +22,9 @@ export const useAuthStore = create<AuthState>()(
         queryClient.clear();
         set({ accessToken, hasProfile });
       },
+      // 프로필 작성(POST /profiles) 성공 직후, 토큰을 새로 받지 않고도 온보딩을 끝냈다는
+      // 사실만 반영해서 홈으로 넘어갈 수 있게 한다.
+      setHasProfile: (hasProfile) => set({ hasProfile }),
       clearSession: () => {
         queryClient.clear();
         set({ accessToken: null, hasProfile: null });
