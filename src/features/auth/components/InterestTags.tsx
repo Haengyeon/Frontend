@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Palette,
   Coffee,
@@ -39,17 +38,12 @@ const TAG_ICONS: Record<string, LucideIcon> = {
   역사: Landmark,
 };
 
-export default function InterestTags() {
-  const [selected, setSelected] = useState<string[]>([]);
+type InterestTagsProps = {
+  selected: string[];
+  onToggle: (tag: string) => void;
+};
 
-  const toggle = (tag: string) => {
-    setSelected((prev) => {
-      if (prev.includes(tag)) return prev.filter((item) => item !== tag);
-      if (prev.length >= MAX_INTEREST_TAGS) return prev;
-      return [...prev, tag];
-    });
-  };
-
+export default function InterestTags({ selected, onToggle }: InterestTagsProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -67,7 +61,7 @@ export default function InterestTags() {
             <button
               key={tag}
               type="button"
-              onClick={() => toggle(tag)}
+              onClick={() => onToggle(tag)}
               disabled={isDisabled}
               className={`flex items-center gap-1.5 rounded-xl border px-2 py-2.5 text-sm disabled:opacity-40 ${
                 isSelected ? "border-forest bg-forest-light text-forest" : "border-line text-muted"

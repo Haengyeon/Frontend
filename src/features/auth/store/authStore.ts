@@ -2,11 +2,13 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { configureApiClient } from "@/lib/api/client";
 import { queryClient } from "@/lib/queryClient";
+import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
 
 type AuthState = {
   accessToken: string | null;
   hasProfile: boolean | null;
   setSession: (accessToken: string, hasProfile: boolean) => void;
+  setHasProfile: (hasProfile: boolean) => void;
   clearSession: () => void;
 };
 
@@ -21,8 +23,14 @@ export const useAuthStore = create<AuthState>()(
         queryClient.clear();
         set({ accessToken, hasProfile });
       },
+      // 프로필 작성(POST /profiles) 성공 직후, 토큰을 새로 받지 않고도 온보딩을 끝냈다는
+      // 사실만 반영해서 홈으로 넘어갈 수 있게 한다.
+      setHasProfile: (hasProfile) => set({ hasProfile }),
       clearSession: () => {
         queryClient.clear();
+        // 같은 브라우저에서 다음 계정이 로그인할 때 이전 계정의 온보딩 초안(이름·생년월일·성별 등)이
+        // 남아있지 않도록 함께 초기화한다.
+        useProfileDraftStore.getState().reset();
         set({ accessToken: null, hasProfile: null });
       },
     }),

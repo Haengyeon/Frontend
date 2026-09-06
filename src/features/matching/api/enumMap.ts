@@ -124,8 +124,20 @@ export function jobCategoryToLocal(jobCategory: ApiJobCategory): string {
   return jobCategoryMap.toLocal.get(jobCategory) ?? jobCategory;
 }
 
+export function jobCategoryToApi(jobCategory: string): ApiJobCategory {
+  const value = jobCategoryMap.toApi.get(jobCategory);
+  if (!value) throw new Error(`알 수 없는 직업군: ${jobCategory}`);
+  return value;
+}
+
 export function hobbyToLocal(hobby: ApiHobby): string {
   return hobbyMap.toLocal.get(hobby) ?? hobby;
+}
+
+export function hobbyToApi(hobby: string): ApiHobby {
+  const value = hobbyMap.toApi.get(hobby);
+  if (!value) throw new Error(`알 수 없는 관심사: ${hobby}`);
+  return value;
 }
 
 const GENDER_TO_API: Record<"male" | "female" | "any", ApiPreferredGender> = {

@@ -2,7 +2,7 @@ export type Gender = "male" | "female" | "other";
 
 export type BasicInfo = {
   name: string;
-  birthYear: number;
+  birthDate: string;
   gender: Gender;
   jobCategory: string;
   isJobCategoryPrivate: boolean;
@@ -13,13 +13,4 @@ export type MbtiSelection = {
   SN: "S" | "N";
   TF: "T" | "F";
   JP: "J" | "P";
-};
-
-export type ProfileDraft = {
-  basicInfo: BasicInfo;
-  photos: string[];
-  bio: string;
-  mbti: MbtiSelection;
-  isMbtiPrivate: boolean;
-  interestTags: string[];
 };

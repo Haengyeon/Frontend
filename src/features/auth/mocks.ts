@@ -1,20 +1,7 @@
-import { CURRENT_YEAR } from "@/features/matching/mocks";
-import type { ProfileDraft } from "./types";
-
-export const MOCK_MY_PROFILE: ProfileDraft = {
-  basicInfo: {
-    name: "정우진",
-    birthYear: CURRENT_YEAR - 27,
-    gender: "male",
-    jobCategory: "IT・개발",
-    isJobCategoryPrivate: false,
-  },
-  photos: [],
-  bio: "함께 걸으며 이야기 나누는 걸 좋아해요",
-  mbti: { EI: "E", SN: "N", TF: "F", JP: "P" },
-  isMbtiPrivate: false,
-  interestTags: ["카페", "사진", "바다"],
-};
+// TODO: 프로필 사진을 업로드하는 API가 아직 없어서(POST /profiles가 URL 문자열만 받음),
+// 실제 파일 업로드 대신 고정 URL을 보낸다. 업로드 API가 생기면 실제 업로드 흐름으로 교체.
+export const PLACEHOLDER_PROFILE_IMAGE_URL = "https://placehold.co/400x400?text=Profile";
+export const PLACEHOLDER_FULL_BODY_IMAGE_URL = "https://placehold.co/400x800?text=FullBody";
 
 export const JOB_CATEGORIES = [
   "IT・개발",

@@ -32,3 +32,8 @@ export function refreshToken() {
 export function logout() {
   return apiRequest<{ success: boolean }>("/auth/logout", { method: "POST" });
 }
+
+/** 계정을 WITHDRAWN 상태로 바꾸는 soft delete. 지난 매칭·결제 기록은 남는다. */
+export function withdrawUser() {
+  return apiRequest<{ success: boolean }>("/users/me", { method: "DELETE" });
+}
