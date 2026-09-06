@@ -16,16 +16,25 @@ const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
   { value: "other", label: "기타", icon: "⚧" },
 ];
 
-const TODAY = new Date().toISOString().slice(0, 10);
+function getLocalToday(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+const TODAY = getLocalToday();
 
 export default function BasicInfoForm() {
   const router = useRouter();
   const setBasicInfo = useProfileDraftStore((state) => state.setBasicInfo);
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [gender, setGender] = useState<Gender | null>(null);
-  const [jobCategory, setJobCategory] = useState("");
-  const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(false);
+  const draft = useProfileDraftStore.getState();
+  const [name, setName] = useState(draft.name);
+  const [birthDate, setBirthDate] = useState(draft.birthDate);
+  const [gender, setGender] = useState<Gender | null>(draft.gender);
+  const [jobCategory, setJobCategory] = useState(draft.jobCategory);
+  const [isJobCategoryPrivate, setIsJobCategoryPrivate] = useState(draft.isJobCategoryPrivate);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
 
   const age = birthDate ? calculateAge(birthDate) : null;

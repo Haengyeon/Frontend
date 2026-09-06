@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { configureApiClient } from "@/lib/api/client";
 import { queryClient } from "@/lib/queryClient";
+import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
 
 type AuthState = {
   accessToken: string | null;
@@ -27,6 +28,9 @@ export const useAuthStore = create<AuthState>()(
       setHasProfile: (hasProfile) => set({ hasProfile }),
       clearSession: () => {
         queryClient.clear();
+        // 같은 브라우저에서 다음 계정이 로그인할 때 이전 계정의 온보딩 초안(이름·생년월일·성별 등)이
+        // 남아있지 않도록 함께 초기화한다.
+        useProfileDraftStore.getState().reset();
         set({ accessToken: null, hasProfile: null });
       },
     }),

@@ -12,7 +12,7 @@ const MAX_BIO_LENGTH = 200;
 export default function ProfilePhotosForm() {
   const router = useRouter();
   const setBio = useProfileDraftStore((state) => state.setBio);
-  const [bio, setBioInput] = useState("");
+  const [bio, setBioInput] = useState(() => useProfileDraftStore.getState().bio);
 
   const canSubmit = bio.trim().length > 0;
 

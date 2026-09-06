@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PersonStanding, Smile } from "lucide-react";
+import Image from "next/image";
+import { PersonStanding, Smile, type LucideIcon } from "lucide-react";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
-import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
 import InterestTags from "@/features/auth/components/InterestTags";
 import MbtiSelector from "@/features/auth/components/MbtiSelector";
@@ -86,8 +86,8 @@ function ProfileEditFields({ profile }: { profile: ProfileResponse }) {
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
       <div className="flex gap-3">
-        <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} />
-        <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} />
+        <ProfilePhotoPreview label="전신샷" src={profile.fullBodyImageUrl} icon={PersonStanding} />
+        <ProfilePhotoPreview label="얼굴사진" src={profile.profileImageUrl} icon={Smile} />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -143,6 +143,32 @@ function ProfileEditFields({ profile }: { profile: ProfileResponse }) {
       <Button className="mt-auto w-full" disabled={!canSubmit} onClick={handleSubmit}>
         {updateProfile.isPending ? "저장 중..." : "저장하기"}
       </Button>
+    </div>
+  );
+}
+
+// 이 화면에서는 사진 변경을 지원하지 않으므로(업로드 API 미연동), 서버에 저장된 사진을 읽기 전용으로 보여준다.
+function ProfilePhotoPreview({
+  label,
+  src,
+  icon: Icon,
+}: {
+  label: string;
+  src: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <div className="flex aspect-square flex-1 flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-line bg-cream-card">
+      {src ? (
+        <div className="relative h-full w-full">
+          <Image src={src} alt={label} fill sizes="200px" className="object-cover" />
+        </div>
+      ) : (
+        <>
+          <Icon size={28} strokeWidth={1.5} className="text-muted" />
+          <span className="text-xs text-muted">{label}</span>
+        </>
+      )}
     </div>
   );
 }
