@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import {
   getCurrentCourse,
@@ -112,25 +112,4 @@ export function useSpotReviews(contentId: string | null) {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: Boolean(accessToken) && Boolean(contentId),
   });
-}
-
-// /courses/history엔 지도 색칠용 5자리 코드가 없어서(스펙 명시), 완료 코스 각각의
-// 상세를 병렬로 불러와 FULL 응답의 mapSigunguCodes를 모아 지도 색칠에 쓴다.
-export function useVisitedDistrictCodes(courseIds: string[]) {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const results = useQueries({
-    queries: courseIds.map((courseId) => ({
-      queryKey: courseDetailKey(courseId),
-      queryFn: () => getCourseDetail(courseId),
-      enabled: Boolean(accessToken) && Boolean(courseId),
-    })),
-  });
-
-  const codes = new Set<string>();
-  for (const result of results) {
-    if (result.data?.viewType === "FULL") {
-      for (const code of result.data.mapSigunguCodes) codes.add(code);
-    }
-  }
-  return codes;
 }

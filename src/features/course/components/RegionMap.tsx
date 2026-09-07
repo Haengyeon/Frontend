@@ -4,17 +4,28 @@ import Link from "next/link";
 import CourseCard from "@/features/course/components/CourseCard";
 import RegionColorMap from "@/features/course/components/RegionColorMap";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
-import { useCourseHistory, useVisitedDistrictCodes } from "@/features/course/api/useCourseApi";
+import { useCourseHistory } from "@/features/course/api/useCourseApi";
+import { useStamps } from "@/features/reward/api/useRewardApi";
 
 export default function RegionMap() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useCourseHistory();
   const items = data?.pages.flatMap((page) => page.items) ?? [];
-  const visitedCodes = useVisitedDistrictCodes(items.map((item) => item.id));
+  const { data: stamps } = useStamps();
+  const visitedCodes = new Set(
+    stamps?.stamps.flatMap((stamp) => (stamp.mapSigunguCode ? [stamp.mapSigunguCode] : [])) ?? [],
+  );
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <span className="text-sm font-medium text-ink">다녀온 지역</span>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-ink">다녀온 지역</span>
+          {stamps ? (
+            <span className="text-xs text-muted">
+              {stamps.collectedCount}/{stamps.totalCount}칸 · {stamps.regionCount}/{stamps.totalRegionCount}개 시도
+            </span>
+          ) : null}
+        </div>
         <RegionColorMap visitedCodes={visitedCodes} />
       </div>
 

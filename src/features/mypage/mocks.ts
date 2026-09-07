@@ -1,12 +1,5 @@
 import { MATCHING_SERVICE_FEE } from "@/features/matching/mocks";
-import type { PaymentRecord, Notice, ReportCategory, PointRecord } from "./types";
-
-export const MOCK_POINTS = 1250;
-
-export const POINT_HISTORY: PointRecord[] = [
-  { pointId: "point-1", reason: "경주 역사 기행 코스 완료", amount: 500, date: "2026-08-12" },
-  { pointId: "point-2", reason: "부산 야경 산책 코스 완료", amount: 750, date: "2026-08-05" },
-];
+import type { PaymentRecord, Notice, ReportCategory } from "./types";
 
 export const PAYMENT_HISTORY: PaymentRecord[] = [
   {
