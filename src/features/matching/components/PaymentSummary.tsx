@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, Clover } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
@@ -23,9 +23,22 @@ export default function PaymentSummary() {
     : null;
   const { data } = useMatchAttempt(matchAttemptId);
   const partner = data?.partner;
-  const isPaymentExpired = paymentDeadlineAt !== null && Date.now() > paymentDeadlineAt;
+  const [isPaymentExpired, setIsPaymentExpired] = useState(false);
   const readyPayment = useReadyPayment();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // 마감 시각이 지나면 결제 버튼을 다시 렌더 없이도 자동으로 비활성화해야 하므로,
+  // 렌더 중 Date.now()를 읽는 대신 타이머로 만료 상태를 갱신한다.
+  useEffect(() => {
+    if (paymentDeadlineAt === null) {
+      setIsPaymentExpired(false);
+      return;
+    }
+    const check = () => setIsPaymentExpired(Date.now() > paymentDeadlineAt);
+    check();
+    const interval = setInterval(check, 1000);
+    return () => clearInterval(interval);
+  }, [paymentDeadlineAt]);
 
   const handlePay = () => {
     if (isPaymentExpired || !matchAttemptId) return;

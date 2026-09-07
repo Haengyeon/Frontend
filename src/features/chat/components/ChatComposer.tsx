@@ -5,7 +5,7 @@ import { Send } from "lucide-react";
 
 type ChatComposerProps = {
   remainingCount: number;
-  onSend: (content: string) => void;
+  onSend: (content: string) => Promise<unknown>;
   disabled?: boolean;
 };
 
@@ -25,9 +25,14 @@ export default function ChatComposer({ remainingCount, onSend, disabled = false 
   const handleSend = () => {
     const content = value.trim();
     if (!content || isDisabled) return;
-    onSend(content);
-    setValue("");
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    onSend(content)
+      .then(() => {
+        setValue("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
+      })
+      .catch(() => {
+        // 실패 메시지는 ChatRoom이 보여주므로, 여기서는 작성 중인 내용만 보존한다.
+      });
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {

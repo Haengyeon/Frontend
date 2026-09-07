@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { approvePayment } from "@/features/payment/api/paymentApi";
@@ -16,16 +16,24 @@ function PaymentSuccessContent() {
   const [error, setError] = useState<string | null>(null);
   const [matchConfirmed, setMatchConfirmed] = useState<boolean | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const approvedRef = useRef(false);
 
+  // pg_token은 1회용이라 두 번 승인 요청을 보내면 두 번째 호출이 실패한다. Strict Mode의
+  // 이펙트 재실행이나 리렌더로 같은 토큰이 다시 전송되지 않도록 ref로 막는다.
   useEffect(() => {
-    if (!paymentId || !pgToken) return;
+    if (!paymentId || !pgToken || approvedRef.current) return;
+    approvedRef.current = true;
+    let ignore = false;
     approvePayment({ paymentId, pgToken })
       .then((data) => {
-        setMatchConfirmed(data.matchConfirmed);
+        if (!ignore) setMatchConfirmed(data.matchConfirmed);
       })
       .catch((err) => {
-        setError(err instanceof ApiError ? err.message : "결제 승인에 실패했어요.");
+        if (!ignore) setError(err instanceof ApiError ? err.message : "결제 승인에 실패했어요.");
       });
+    return () => {
+      ignore = true;
+    };
   }, [paymentId, pgToken]);
 
   if (!paymentId || !pgToken) {

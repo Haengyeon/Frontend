@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Avatar from "@/components/ui/Avatar";
-import { formatDateLabel } from "@/features/matching/mocks";
+import { formatDateLabel, toDateValue } from "@/features/matching/mocks";
 import type { ChatRoom } from "@/features/chat/api/types";
 
 type ChatRoomListItemProps = {
@@ -12,7 +12,7 @@ type ChatRoomListItemProps = {
 function getStatusLabel(room: ChatRoom): string {
   switch (room.status) {
     case "LOCKED":
-      return `채팅은 ${formatDateLabel(room.openAt.slice(0, 10))}부터 열려요`;
+      return `채팅은 ${formatDateLabel(toDateValue(new Date(room.openAt)))}부터 열려요`;
     case "OPEN":
       return `대화를 나눠보세요 · 남은 메시지 ${room.myRemainingCount}회`;
     case "CLOSED":

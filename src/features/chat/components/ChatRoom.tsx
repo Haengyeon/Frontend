@@ -5,7 +5,7 @@ import CourseInfoAccordion from "@/features/chat/components/CourseInfoAccordion"
 import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
 import { useChatMessages, useSendChatMessage } from "@/features/chat/api/useChatApi";
-import { formatDateLabel } from "@/features/matching/mocks";
+import { formatDateLabel, toDateValue } from "@/features/matching/mocks";
 import type { ChatRoom as ChatRoomData } from "@/features/chat/api/types";
 import { ApiError } from "@/lib/api/client";
 
@@ -20,7 +20,10 @@ const CLOSED_NOTICE: Record<"CLOSED" | "DISABLED", string> = {
 
 export default function ChatRoom({ room }: ChatRoomProps) {
   const isOpen = room.status === "OPEN";
-  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useChatMessages(room.id, isOpen);
+  const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isError, refetch } = useChatMessages(
+    room.id,
+    isOpen,
+  );
   const sendMessage = useSendChatMessage(room.id);
 
   // 서버가 최신순으로 내려주는 각 페이지를 이어붙인 뒤 통째로 뒤집으면 오래된 순으로 정렬된다.
@@ -33,36 +36,47 @@ export default function ChatRoom({ room }: ChatRoomProps) {
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
           <Lock size={28} strokeWidth={1.5} className="text-muted" />
           <p className="text-sm font-medium text-ink">
-            채팅은 {formatDateLabel(room.openAt.slice(0, 10))}부터 열려요
+            채팅은 {formatDateLabel(toDateValue(new Date(room.openAt)))}부터 열려요
           </p>
         </div>
       </div>
     );
   }
 
-  const handleSend = (content: string) => {
-    sendMessage.mutate(content);
-  };
+  const handleSend = (content: string) => sendMessage.mutateAsync(content);
 
   return (
     <div className="flex flex-1 flex-col">
       <CourseInfoAccordion />
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-6">
-        {hasNextPage ? (
+      {isError && !data ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
+          <p className="text-sm text-muted">메시지를 불러오지 못했어요.</p>
           <button
             type="button"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="self-center text-xs text-muted underline underline-offset-2 disabled:opacity-50"
+            onClick={() => refetch()}
+            className="text-xs text-forest underline underline-offset-2"
           >
-            {isFetchingNextPage ? "불러오는 중..." : "이전 메시지 더 보기"}
+            다시 시도
           </button>
-        ) : null}
-        {messages.map((message) => (
-          <ChatBubble key={message.id} message={message} />
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-6">
+          {hasNextPage ? (
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="self-center text-xs text-muted underline underline-offset-2 disabled:opacity-50"
+            >
+              {isFetchingNextPage ? "불러오는 중..." : "이전 메시지 더 보기"}
+            </button>
+          ) : null}
+          {messages.map((message) => (
+            <ChatBubble key={message.id} message={message} />
+          ))}
+        </div>
+      )}
 
       {sendMessage.isError ? (
         <p className="px-6 pb-2 text-center text-xs text-red-500">
