@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { User, Receipt, MessageCircleWarning, Megaphone, Settings, ChevronRight } from "lucide-react";
+import { User, Receipt, MessageCircleWarning, ShieldAlert, Megaphone, Settings, ChevronRight } from "lucide-react";
 
 const MENU_ITEMS = [
   { href: "/mypage/profile", label: "프로필 수정", icon: User },
   { href: "/mypage/payments", label: "결제 내역", icon: Receipt },
   { href: "/mypage/reports", label: "신고 및 문의", icon: MessageCircleWarning },
+  { href: "/mypage/safety-history", label: "신고·차단 내역", icon: ShieldAlert },
   { href: "/mypage/notices", label: "공지사항", icon: Megaphone },
   { href: "/mypage/settings", label: "환경설정", icon: Settings },
 ] as const;

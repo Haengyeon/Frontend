@@ -27,7 +27,11 @@ export default function ChatRoomHeader({ room }: ChatRoomHeaderProps) {
         </div>
         <button
           type="button"
-          onClick={() => router.push("/mypage/reports")}
+          onClick={() =>
+            router.push(
+              `/mypage/reports?matchAttemptId=${room.matchAttemptId}&partnerName=${encodeURIComponent(room.partner.name)}`,
+            )
+          }
           aria-label="신고하기"
           className="text-muted"
         >
