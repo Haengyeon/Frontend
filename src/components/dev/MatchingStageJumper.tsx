@@ -19,11 +19,6 @@ const COURSE_STAGES: { label: string; dateValue: string | null }[] = [
   { label: "코스 없음 (매칭 안 됨)", dateValue: null },
 ];
 
-const CHAT_STAGES = [
-  { label: "채팅 잠김 (D-5)", dateValue: DATE_OPTIONS[4].value },
-  { label: "채팅 제한 (D-1)", dateValue: DATE_OPTIONS[0].value },
-];
-
 const STAGES: { label: string; status: MatchingStatus; href: string }[] = [
   { label: "노매칭", status: "none", href: "/home" },
   { label: "탐색중", status: "searching", href: "/home" },
@@ -73,21 +68,6 @@ export default function MatchingStageJumper() {
           onClick={() => {
             setAvailableDates(stage.dateValue ? [stage.dateValue] : []);
             router.push("/course");
-          }}
-          className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
-        >
-          {stage.label}
-        </button>
-      ))}
-
-      <span className="mt-2 px-1 text-[11px] font-semibold text-white/60">채팅 테스트</span>
-      {CHAT_STAGES.map((stage) => (
-        <button
-          key={stage.label}
-          type="button"
-          onClick={() => {
-            setAvailableDates([stage.dateValue]);
-            router.push("/chat/chat-1");
           }}
           className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
         >

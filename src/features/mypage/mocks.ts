@@ -1,4 +1,3 @@
-import { CHAT_ROOMS } from "@/features/chat/mocks";
 import { MATCHING_SERVICE_FEE } from "@/features/matching/mocks";
 import type { PaymentRecord, Notice, ReportCategory, PointRecord } from "./types";
 
@@ -12,8 +11,8 @@ export const POINT_HISTORY: PointRecord[] = [
 export const PAYMENT_HISTORY: PaymentRecord[] = [
   {
     paymentId: "pay-1",
-    courseTitle: CHAT_ROOMS[0].courseInfo.courseTitle,
-    partnerName: CHAT_ROOMS[0].partnerName,
+    courseTitle: "경주 역사 기행",
+    partnerName: "이서준",
     amount: MATCHING_SERVICE_FEE,
     paidAt: "2026-08-10",
     status: "결제완료",

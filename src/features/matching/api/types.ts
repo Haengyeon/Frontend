@@ -124,6 +124,10 @@ export type MatchAttemptDetail = {
   id: string;
   status: string;
   travelDate: string;
+  /** 두 사람의 조건으로 확정된 코스 테마 (내가 고른 후보 목록이 아니라 최종 하나) */
+  theme: ApiTheme;
+  /** 수락 시 1인당 결제해야 하는 금액(원) */
+  paymentAmount: number;
   paymentDeadlineAt: string | null;
   myResponded: boolean;
   myDecision: ApiDecision | null;

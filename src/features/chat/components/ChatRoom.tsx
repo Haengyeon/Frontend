@@ -1,66 +1,99 @@
 "use client";
 
-import { useState } from "react";
 import { Lock } from "lucide-react";
 import CourseInfoAccordion from "@/features/chat/components/CourseInfoAccordion";
 import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
-import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
-import type { ChatMessage, ChatRoomSummary } from "@/features/chat/types";
-
-const LIMITED_MESSAGE_CAP = 10;
+import { useChatMessages, useSendChatMessage } from "@/features/chat/api/useChatApi";
+import { formatDateLabel, toDateValue } from "@/features/matching/mocks";
+import type { ChatRoom as ChatRoomData } from "@/features/chat/api/types";
+import { ApiError } from "@/lib/api/client";
 
 type ChatRoomProps = {
-  room: ChatRoomSummary;
+  room: ChatRoomData;
+};
+
+const CLOSED_NOTICE: Record<"CLOSED" | "DISABLED", string> = {
+  CLOSED: "종료된 채팅방입니다.",
+  DISABLED: "사용할 수 없는 채팅방입니다.",
 };
 
 export default function ChatRoom({ room }: ChatRoomProps) {
-  const daysUntilTrip = useDaysUntilTrip();
-  const [messages, setMessages] = useState<ChatMessage[]>(room.messages);
+  const isOpen = room.status === "OPEN";
+  const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isError, refetch } = useChatMessages(
+    room.id,
+    isOpen,
+  );
+  const sendMessage = useSendChatMessage(room.id);
 
-  const isLocked = !room.isPast && (daysUntilTrip === null || daysUntilTrip > 1);
-  const isLimited = !room.isPast && daysUntilTrip !== null && daysUntilTrip <= 1;
-  const sentMessageCount = messages.filter((message) => message.senderId === "me").length;
-  const capReached = isLimited && sentMessageCount >= LIMITED_MESSAGE_CAP;
+  // 서버가 최신순으로 내려주는 각 페이지를 이어붙인 뒤 통째로 뒤집으면 오래된 순으로 정렬된다.
+  const messages = [...(data?.pages.flatMap((page) => page.messages) ?? [])].reverse();
 
-  if (isLocked) {
+  if (room.status === "LOCKED") {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
-        <Lock size={28} strokeWidth={1.5} className="text-muted" />
-        <p className="text-sm font-medium text-ink">채팅은 여행 D-1부터 열려요</p>
+      <div className="flex flex-1 flex-col">
+        <CourseInfoAccordion />
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
+          <Lock size={28} strokeWidth={1.5} className="text-muted" />
+          <p className="text-sm font-medium text-ink">
+            채팅은 {formatDateLabel(toDateValue(new Date(room.openAt)))}부터 열려요
+          </p>
+        </div>
       </div>
     );
   }
 
-  const handleSend = (content: string) => {
-    setMessages((prev) => [
-      ...prev,
-      { id: `local-${prev.length}`, senderId: "me", content, sentAt: "" },
-    ]);
-  };
+  const handleSend = (content: string) => sendMessage.mutateAsync(content);
 
   return (
     <div className="flex flex-1 flex-col">
-      <CourseInfoAccordion courseInfo={room.courseInfo} />
+      <CourseInfoAccordion />
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-6">
-        {messages.map((message) => (
-          <ChatBubble key={message.id} message={message} />
-        ))}
-      </div>
-
-      {capReached ? (
-        <div className="flex flex-col items-center gap-2 border-t border-line bg-cream-card p-4 text-center">
-          <p className="text-sm text-muted">무료 채팅 횟수를 다 사용했어요.</p>
+      {isError && !data ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
+          <p className="text-sm text-muted">메시지를 불러오지 못했어요.</p>
           <button
             type="button"
-            className="rounded-full bg-forest px-4 py-2 text-sm font-medium text-white"
+            onClick={() => refetch()}
+            className="text-xs text-forest underline underline-offset-2"
           >
-            연장하기
+            다시 시도
           </button>
         </div>
       ) : (
-        <ChatComposer limited={isLimited} onSend={handleSend} />
+        <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-6">
+          {hasNextPage ? (
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="self-center text-xs text-muted underline underline-offset-2 disabled:opacity-50"
+            >
+              {isFetchingNextPage ? "불러오는 중..." : "이전 메시지 더 보기"}
+            </button>
+          ) : null}
+          {messages.map((message) => (
+            <ChatBubble key={message.id} message={message} />
+          ))}
+        </div>
+      )}
+
+      {sendMessage.isError ? (
+        <p className="px-6 pb-2 text-center text-xs text-red-500">
+          {sendMessage.error instanceof ApiError ? sendMessage.error.message : "전송에 실패했어요."}
+        </p>
+      ) : null}
+
+      {room.status === "CLOSED" || room.status === "DISABLED" ? (
+        <div className="flex flex-col items-center gap-2 border-t border-line bg-cream-card p-4 text-center">
+          <p className="text-sm text-muted">{CLOSED_NOTICE[room.status]}</p>
+        </div>
+      ) : (
+        <ChatComposer
+          remainingCount={room.myRemainingCount}
+          onSend={handleSend}
+          disabled={sendMessage.isPending}
+        />
       )}
     </div>
   );

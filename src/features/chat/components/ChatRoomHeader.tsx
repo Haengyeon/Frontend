@@ -4,27 +4,25 @@ import { useRouter } from "next/navigation";
 import { Flag } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Avatar from "@/components/ui/Avatar";
-import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
-import type { ChatRoomSummary } from "@/features/chat/types";
+import { calculateDday } from "@/features/chat/lib/dday";
+import type { ChatRoom } from "@/features/chat/api/types";
 
 type ChatRoomHeaderProps = {
-  room: ChatRoomSummary;
+  room: ChatRoom;
 };
 
 export default function ChatRoomHeader({ room }: ChatRoomHeaderProps) {
   const router = useRouter();
-  const daysUntilTrip = useDaysUntilTrip();
+  const dday = calculateDday(room.travelDate);
 
   return (
     <Header>
       <div className="flex flex-1 items-center justify-between">
         <div className="flex items-center gap-3">
-          <Avatar src={room.partnerPhotoUrl} alt={room.partnerName} size={32} />
+          <Avatar src={room.partner.profileImageUrl} alt={room.partner.name} size={32} />
           <div>
-            <p className="text-sm font-medium text-ink">{room.partnerName}</p>
-            {!room.isPast && daysUntilTrip !== null ? (
-              <p className="text-xs text-muted">D-{daysUntilTrip}</p>
-            ) : null}
+            <p className="text-sm font-medium text-ink">{room.partner.name}</p>
+            <p className="text-xs text-muted">{dday === 0 ? "D-Day" : `D${dday > 0 ? "-" : "+"}${Math.abs(dday)}`}</p>
           </div>
         </div>
         <button
