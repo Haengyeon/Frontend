@@ -21,7 +21,7 @@ export default function RecommendedSpotsSection() {
     <div className="flex flex-col gap-3 px-6">
       <span className="text-sm font-medium text-ink">추천 관광지</span>
       <div className="-mx-6">
-        <HorizontalScroller className="gap-3 px-6 pb-2">
+        <HorizontalScroller className="items-start gap-3 px-6 pb-2">
           {isLoading
             ? null
             : items.map((spot) => {
@@ -50,7 +50,7 @@ export default function RecommendedSpotsSection() {
                         <div className="h-full w-full bg-gradient-to-br from-forest-light to-forest/40" />
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col gap-1 bg-white p-3">
+                    <div className="flex flex-col gap-1 bg-white p-3">
                       <p className="text-base font-semibold text-ink">{spot.name}</p>
                       <p className="text-xs text-ink/70">{subtitle}</p>
                       <span className="flex items-center gap-1 text-xs text-muted">

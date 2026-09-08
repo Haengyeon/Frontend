@@ -6,6 +6,7 @@ import Input from "@/components/ui/Input";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
+import BirthDateSelect from "@/features/auth/components/BirthDateSelect";
 import { calculateAge, MIN_SIGNUP_AGE } from "@/features/auth/lib/age";
 import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
 import type { Gender } from "@/features/auth/types";
@@ -15,16 +16,6 @@ const GENDER_OPTIONS: { value: Gender; label: string; icon: string }[] = [
   { value: "female", label: "여성", icon: "♀" },
   { value: "other", label: "기타", icon: "⚧" },
 ];
-
-function getLocalToday(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-const TODAY = getLocalToday();
 
 export default function BasicInfoForm() {
   const router = useRouter();
@@ -52,13 +43,7 @@ export default function BasicInfoForm() {
       <h1 className="text-lg font-semibold text-ink">기본 정보</h1>
 
       <Input label="이름" placeholder="이름을 입력해주세요" value={name} onChange={(e) => setName(e.target.value)} />
-      <Input
-        label="생년월일"
-        type="date"
-        max={TODAY}
-        value={birthDate}
-        onChange={(e) => setBirthDate(e.target.value)}
-      />
+      <BirthDateSelect value={birthDate} onChange={setBirthDate} />
       {birthDate && !isBirthDateValid ? (
         <p className="-mt-4 text-xs text-red-500">만 {MIN_SIGNUP_AGE}세 이상만 가입할 수 있어요.</p>
       ) : null}

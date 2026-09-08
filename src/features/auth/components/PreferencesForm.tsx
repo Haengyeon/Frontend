@@ -23,9 +23,12 @@ export default function PreferencesForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // 이전 단계를 건너뛰고 직접 들어온 경우 기본 정보가 비어있으니 처음부터 다시 시작한다.
+  // 단, 제출 성공 후 draft.reset()이 같은 조건(name/gender 없음)을 만들기 때문에
+  // isSuccess일 때는 이 가드가 /home 이동을 가로채 /signup으로 되돌리지 않도록 건너뛴다.
   useEffect(() => {
+    if (createProfile.isSuccess) return;
     if (!draft.name || !draft.gender) router.replace("/signup");
-  }, [draft.name, draft.gender, router]);
+  }, [draft.name, draft.gender, router, createProfile.isSuccess]);
 
   const toggleInterestTag = (tag: string) => {
     if (draft.interestTags.includes(tag)) {
