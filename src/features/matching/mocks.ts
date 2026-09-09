@@ -34,25 +34,50 @@ export const MATCHING_THEMES: MatchingTheme[] = [
     id: "nature",
     label: "자연 힐링",
     description: "숲, 바다, 호수, 공원, 수목원",
-    imageUrl: "/테마_자연.png",
+    imageUrl: "/테마_자연힐링.avif",
   },
   {
     id: "history",
     label: "역사 문화",
     description: "고궁, 유적지, 박물관, 전통문화",
-    imageUrl: "/테마_문화.png",
+    imageUrl: "/테마_역사문화.avif",
   },
-  { id: "night", label: "야경 데이트", description: "전망대, 야경 명소, 밤산책", imageUrl: "" },
-  { id: "photo", label: "사진 명소", description: "인생샷 스팟, 포토존", imageUrl: "" },
+  {
+    id: "night",
+    label: "야경 데이트",
+    description: "전망대, 야경 명소, 밤산책",
+    imageUrl: "/테마_야경.avif",
+  },
+  {
+    id: "photo",
+    label: "사진 명소",
+    description: "인생샷 스팟, 포토존",
+    imageUrl: "/테마_사진.avif",
+  },
   {
     id: "local",
     label: "로컬 맛집 · 전통시장",
     description: "시장 구경, 먹거리, 지역 상권 체험",
-    imageUrl: "/테마_카페.png",
+    imageUrl: "/테마_로컬맛집.avif",
   },
-  { id: "activity", label: "액티비티", description: "레저, 체험, 스포츠, 놀이시설", imageUrl: "" },
-  { id: "walk", label: "걷기 여행", description: "골목길, 둘레길, 산책로, 마을길", imageUrl: "" },
-  { id: "art", label: "예술 감성", description: "전시, 미술관, 공방, 사진 명소", imageUrl: "" },
+  {
+    id: "activity",
+    label: "액티비티",
+    description: "레저, 체험, 스포츠, 놀이시설",
+    imageUrl: "/테마_액티비티.avif",
+  },
+  {
+    id: "walk",
+    label: "걷기 여행",
+    description: "골목길, 둘레길, 산책로, 마을길",
+    imageUrl: "/테마_걷기.avif",
+  },
+  {
+    id: "art",
+    label: "예술 감성",
+    description: "전시, 미술관, 공방, 사진 명소",
+    imageUrl: "/테마_예술.avif",
+  },
 ];
 
 export function getThemeLabels(themeIds: string[]) {
