@@ -1,4 +1,4 @@
-import type { MatchingCondition, MatchingTheme, MatchProfile } from "./types";
+import type { MatchingCondition, MatchingTheme } from "./types";
 
 export const AGE_RANGE_MIN = 20;
 export const AGE_RANGE_MAX = 70;
@@ -132,42 +132,6 @@ export function getAvailableDateOptions(days = 14) {
     return { value, label: formatDateLabel(value) };
   });
 }
-
-export function getDaysUntilTrip(availableDates: string[]): number | null {
-  if (availableDates.length === 0) return null;
-  const earliest = [...availableDates].sort()[0];
-  const target = new Date(`${earliest}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  return diff > 0 ? diff : 0;
-}
-
-// 서로 가능한 날짜 중 가장 빠른 겹치는 날짜 — 매칭이 확정되는 실제 여행 날짜
-export function getEarliestCommonDate(datesA: string[], datesB: string[]): string | null {
-  const setB = new Set(datesB);
-  const common = datesA.filter((date) => setB.has(date));
-  return common.length > 0 ? [...common].sort()[0] : null;
-}
-
-export const MOCK_MATCHING_ID = "mock-matching-1";
-
-export const MOCK_MATCH_PROFILE: MatchProfile = {
-  attemptId: "mock-attempt-1",
-  name: "유지민",
-  age: 26,
-  job: "디자이너",
-  mbti: "ENFP",
-  interestTags: ["사진찍기", "독서", "카페투어"],
-  bio: "안녕하세요? 반가워요! 좋은 사람이에요",
-  photoUrl: "/유지민.png",
-  fullBodyPhotoUrl: "/유지민_전신.png",
-  // 상대방은 항상 다음 30일 모두 가능하다고 가정해, 내가 어떤 날짜를 골라도 겹치도록 함
-  availableDates: getAvailableDateOptions(AVAILABLE_DATE_RANGE_DAYS).map((option) => option.value),
-};
-
-// 매칭이 확정되면 백엔드가 내려주는 최종 테마 — 내가 매칭 조건에서 고른 themeIds와는 별개
-export const MOCK_DECIDED_THEME_IDS = ["history"];
 
 // 부가세 포함 총 결제 금액
 export const MATCHING_SERVICE_FEE = 25000;

@@ -6,6 +6,10 @@ import Modal from "@/components/ui/Modal";
 import { PAYMENT_HISTORY } from "@/features/mypage/mocks";
 import type { PaymentRecord } from "@/features/mypage/types";
 
+// 결제 내역 조회 API가 백엔드에 없어서 이 화면 전체가 mock 데이터로 동작한다(연동 아님).
+// "결제 취소"도 실제 취소 API(POST /payments/{id}/cancel — 이건 실존하지만 결제 직후
+// 화면에서만 쓰고 여기선 안 씀)를 호출하지 않고 로컬 상태만 바꾼다. 목록 API가 생기면
+// 이 컴포넌트를 실제 데이터 훅으로 통째로 교체해야 한다.
 export default function PaymentHistoryList() {
   const [payments, setPayments] = useState<PaymentRecord[]>(PAYMENT_HISTORY);
   const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);

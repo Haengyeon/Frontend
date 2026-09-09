@@ -93,7 +93,7 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
 
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium text-ink">
-            {detail.partner.nickname}님과의 여행은 어떠셨나요?
+            {detail.partner.name}님과의 여행은 어떠셨나요?
           </span>
           <textarea
             value={partnerReview}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { approvePayment } from "@/features/payment/api/paymentApi";
 import { useCancelPayment } from "@/features/payment/api/usePaymentApi";
+import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { ApiError } from "@/lib/api/client";
 
 function PaymentSuccessContent() {
@@ -13,8 +14,10 @@ function PaymentSuccessContent() {
   const paymentId = searchParams.get("paymentId");
   const pgToken = searchParams.get("pg_token");
   const cancelPayment = useCancelPayment();
+  const setPaidMatchAttemptId = useMatchingDraftStore((state) => state.setPaidMatchAttemptId);
   const [error, setError] = useState<string | null>(null);
   const [matchConfirmed, setMatchConfirmed] = useState<boolean | null>(null);
+  const [matchAttemptId, setMatchAttemptId] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const approvedRef = useRef(false);
 
@@ -30,11 +33,13 @@ function PaymentSuccessContent() {
     approvePayment({ paymentId, pgToken })
       .then((data) => {
         setMatchConfirmed(data.matchConfirmed);
+        setMatchAttemptId(data.matchAttemptId);
+        setPaidMatchAttemptId(data.matchAttemptId);
       })
       .catch((err) => {
         setError(err instanceof ApiError ? err.message : "결제 승인에 실패했어요.");
       });
-  }, [paymentId, pgToken]);
+  }, [paymentId, pgToken, setPaidMatchAttemptId]);
 
   if (!paymentId || !pgToken) {
     return (
@@ -70,7 +75,10 @@ function PaymentSuccessContent() {
     if (!paymentId) return;
     setCancelError(null);
     cancelPayment.mutate(paymentId, {
-      onSuccess: () => router.replace("/home"),
+      onSuccess: () => {
+        if (matchAttemptId) setPaidMatchAttemptId(null);
+        router.replace("/home");
+      },
       onError: (err) => {
         setCancelError(err instanceof ApiError ? err.message : "결제 취소에 실패했어요.");
       },

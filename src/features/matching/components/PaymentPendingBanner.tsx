@@ -12,6 +12,8 @@ export default function PaymentPendingBanner() {
   const matchingId = useMatchingDraftStore((state) => state.matchingId);
   const matchAttemptId = useMatchingDraftStore((state) => state.matchAttemptId);
   const paymentDeadlineAt = useMatchingDraftStore((state) => state.paymentDeadlineAt);
+  const paidMatchAttemptId = useMatchingDraftStore((state) => state.paidMatchAttemptId);
+  const hasPaid = matchAttemptId !== null && matchAttemptId === paidMatchAttemptId;
   const { data } = useMatchAttempt(matchAttemptId);
   const partner = data?.partner;
 
@@ -23,24 +25,38 @@ export default function PaymentPendingBanner() {
         <div className="h-16 w-16 animate-pulse rounded-full bg-forest/10" />
       )}
 
-      <p className="text-base font-semibold text-forest">결제를 완료해주세요</p>
-      <p className="text-sm text-forest/70">
-        {partner ? `${partner.name}님과의 매칭을` : "매칭을"} 확정하려면 결제가 필요해요.
-      </p>
+      {hasPaid ? (
+        <>
+          <p className="text-base font-semibold text-forest">결제 완료! 상대방을 기다리고 있어요</p>
+          <p className="text-sm text-forest/70">
+            {partner ? `${partner.name}님이` : "상대방이"} 결제를 완료하면 매칭이 확정돼요.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-base font-semibold text-forest">결제를 완료해주세요</p>
+          <p className="text-sm text-forest/70">
+            {partner ? `${partner.name}님과의 매칭을` : "매칭을"} 확정하려면 결제가 필요해요.
+          </p>
+        </>
+      )}
       {paymentDeadlineAt ? (
         <p className="text-xs text-forest/60">
+          {hasPaid ? "상대방이 " : null}
           <Countdown deadlineAt={paymentDeadlineAt} /> 이내에 결제하지 않으면 매칭이 자동으로
           취소돼요.
         </p>
       ) : null}
 
-      <Button
-        className="mt-2 px-6"
-        disabled={!matchingId}
-        onClick={() => router.push(`/matching/${matchingId}/payment`)}
-      >
-        결제하러 가기
-      </Button>
+      {!hasPaid ? (
+        <Button
+          className="mt-2 px-6"
+          disabled={!matchingId}
+          onClick={() => router.push(`/matching/${matchingId}/payment`)}
+        >
+          결제하러 가기
+        </Button>
+      ) : null}
     </div>
   );
 }

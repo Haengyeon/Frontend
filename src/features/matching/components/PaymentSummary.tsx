@@ -11,6 +11,7 @@ import { useMatchAttempt, useMyMatching } from "@/features/matching/api/useMatch
 import { jobCategoryToLocal, themeToLocalId } from "@/features/matching/api/enumMap";
 import { useReadyPayment } from "@/features/payment/api/usePaymentApi";
 import { pickKakaoPayRedirectUrl } from "@/features/payment/lib/redirect";
+import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { ApiError } from "@/lib/api/client";
 
 export default function PaymentSummary() {
@@ -25,6 +26,7 @@ export default function PaymentSummary() {
   const partner = data?.partner;
   const [isPaymentExpired, setIsPaymentExpired] = useState(false);
   const readyPayment = useReadyPayment();
+  const setPaidMatchAttemptId = useMatchingDraftStore((state) => state.setPaidMatchAttemptId);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // 마감 시각이 지나면 결제 버튼을 다시 렌더 없이도 자동으로 비활성화해야 하므로,
@@ -48,6 +50,12 @@ export default function PaymentSummary() {
         window.location.href = pickKakaoPayRedirectUrl(response);
       },
       onError: (error) => {
+        // "결제 준비"부터 다시 하는 건 결제 전이라는 뜻이라 로컬 결제완료 플래그가 없는데,
+        // 서버는 이미 이 사용자의 결제가 끝났다고 본다 — 서버 응답을 신뢰해서 로컬 상태를
+        // 맞춰준다. 그래야 홈으로 돌아갔을 때 "결제를 완료해주세요"가 다시 뜨지 않는다.
+        if (error instanceof ApiError && error.statusCode === 409 && error.message.includes("이미 결제")) {
+          setPaidMatchAttemptId(matchAttemptId);
+        }
         setErrorMessage(error instanceof ApiError ? error.message : "결제 준비에 실패했어요.");
       },
     });

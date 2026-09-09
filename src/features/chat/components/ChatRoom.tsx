@@ -6,11 +6,11 @@ import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
 import { useChatMessages, useSendChatMessage } from "@/features/chat/api/useChatApi";
 import { formatDateLabel, toDateValue } from "@/features/matching/mocks";
-import type { ChatRoom as ChatRoomData } from "@/features/chat/api/types";
+import type { ChatRoomSummary } from "@/features/chat/api/types";
 import { ApiError } from "@/lib/api/client";
 
 type ChatRoomProps = {
-  room: ChatRoomData;
+  room: ChatRoomSummary;
 };
 
 const CLOSED_NOTICE: Record<"CLOSED" | "DISABLED", string> = {

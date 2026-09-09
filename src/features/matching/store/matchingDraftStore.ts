@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { MAX_REGIONS } from "@/features/matching/mocks";
 import type { MatchingCondition, MatchingStatus } from "@/features/matching/types";
 
@@ -13,7 +14,17 @@ type MatchingDraftState = MatchingCondition & {
   matchingId: string | null;
   /** 서버가 발급한 현재 MatchAttempt id (상대 프로필 조회에 필요) */
   matchAttemptId: string | null;
+  /**
+   * 내가 결제를 완료한 MatchAttempt의 id — GET /match-attempts/{id}에는 "내가 이미
+   * 결제했는지"가 없어서(전체 상태만 PAYMENT_PENDING으로 내려오고 누가 냈는지는 안 알려줌)
+   * 결제 승인 성공 시점에 프론트가 직접 기록해둔다. matchAttemptId와 비교해서 "이번 시도에
+   * 대해" 냈는지를 판단하므로, 매칭이 취소되고 새 시도가 생겨도 엉뚱하게 남아있지 않는다.
+   * localStorage에 저장해서 새로고침에도 유지된다(카카오페이 결제창 왕복은 페이지 전체를
+   * 새로 로드하는 방식이라, 저장 안 하면 돌아왔을 때 이 값도 날아간다).
+   */
+  paidMatchAttemptId: string | null;
   setStatus: (status: MatchingStatus) => void;
+  setPaidMatchAttemptId: (matchAttemptId: string | null) => void;
   setRegions: (regions: string[]) => void;
   toggleRegion: (region: string) => void;
   setAgeRange: (ageRange: [number, number]) => void;
@@ -33,6 +44,7 @@ const INITIAL_STATE: MatchingCondition & {
   paymentDeadlineAt: number | null;
   matchingId: string | null;
   matchAttemptId: string | null;
+  paidMatchAttemptId: string | null;
 } = {
   status: "none",
   regions: [],
@@ -44,40 +56,52 @@ const INITIAL_STATE: MatchingCondition & {
   paymentDeadlineAt: null,
   matchingId: null,
   matchAttemptId: null,
+  paidMatchAttemptId: null,
 };
 
-export const useMatchingDraftStore = create<MatchingDraftState>((set, get) => ({
-  ...INITIAL_STATE,
-  setStatus: (status) => {
-    // 매칭/결제 대기 상태로 새로 진입할 때마다 데드라인을 다시 잡아준다 —
-    // 동일 상태를 반복 설정할 때만(예: 리렌더) 기존 카운트다운을 유지한다.
-    const { status: currentStatus } = get();
-    set({
-      status,
-      ...(status === "pending" && currentStatus !== "pending"
-        ? { matchDeadlineAt: Date.now() + MATCH_DEADLINE_MS }
-        : null),
-      ...(status === "payment_pending" && currentStatus !== "payment_pending"
-        ? { paymentDeadlineAt: Date.now() + PAYMENT_DEADLINE_MS }
-        : null),
-    });
-  },
-  setRegions: (regions) => set({ regions }),
-  toggleRegion: (region) => {
-    const { regions } = get();
-    if (regions.includes(region)) {
-      set({ regions: regions.filter((item) => item !== region) });
-      return;
-    }
-    if (regions.length >= MAX_REGIONS) return;
-    set({ regions: [...regions, region] });
-  },
-  setAgeRange: (ageRange) => set({ ageRange }),
-  setPreferredGender: (preferredGender) => set({ preferredGender }),
-  setAvailableDates: (availableDates) => set({ availableDates }),
-  setThemeIds: (themeIds) => set({ themeIds }),
-  setMatchingId: (matchingId) => set({ matchingId }),
-  setMatchAttemptId: (matchAttemptId) => set({ matchAttemptId }),
-  syncDeadlines: (updates) => set(updates),
-  reset: () => set({ ...INITIAL_STATE }),
-}));
+export const useMatchingDraftStore = create<MatchingDraftState>()(
+  persist(
+    (set, get) => ({
+      ...INITIAL_STATE,
+      setStatus: (status) => {
+        // 매칭/결제 대기 상태로 새로 진입할 때마다 데드라인을 다시 잡아준다 —
+        // 동일 상태를 반복 설정할 때만(예: 리렌더) 기존 카운트다운을 유지한다.
+        const { status: currentStatus } = get();
+        set({
+          status,
+          ...(status === "pending" && currentStatus !== "pending"
+            ? { matchDeadlineAt: Date.now() + MATCH_DEADLINE_MS }
+            : null),
+          ...(status === "payment_pending" && currentStatus !== "payment_pending"
+            ? { paymentDeadlineAt: Date.now() + PAYMENT_DEADLINE_MS }
+            : null),
+        });
+      },
+      setPaidMatchAttemptId: (matchAttemptId) => set({ paidMatchAttemptId: matchAttemptId }),
+      setRegions: (regions) => set({ regions }),
+      toggleRegion: (region) => {
+        const { regions } = get();
+        if (regions.includes(region)) {
+          set({ regions: regions.filter((item) => item !== region) });
+          return;
+        }
+        if (regions.length >= MAX_REGIONS) return;
+        set({ regions: [...regions, region] });
+      },
+      setAgeRange: (ageRange) => set({ ageRange }),
+      setPreferredGender: (preferredGender) => set({ preferredGender }),
+      setAvailableDates: (availableDates) => set({ availableDates }),
+      setThemeIds: (themeIds) => set({ themeIds }),
+      setMatchingId: (matchingId) => set({ matchingId }),
+      setMatchAttemptId: (matchAttemptId) => set({ matchAttemptId }),
+      syncDeadlines: (updates) => set(updates),
+      reset: () => set({ ...INITIAL_STATE }),
+    }),
+    {
+      name: "matching-draft",
+      // 이 스토어의 다른 필드(regions, themeIds 등)는 폴링으로 서버와 계속 동기화되는
+      // 값이라 굳이 영속시킬 필요가 없다 — 결제 왕복에서만 필요한 이 필드만 저장한다.
+      partialize: (state) => ({ paidMatchAttemptId: state.paidMatchAttemptId }),
+    },
+  ),
+);

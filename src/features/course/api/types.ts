@@ -1,8 +1,9 @@
 // public/img/API명세_코스.md 기준. region/theme enum은 매칭 API와 동일한 서버 enum을 쓴다.
 import type { ApiRegion, ApiTheme } from "@/features/matching/api/types";
 
+// 문서엔 nickname으로 돼있지만 실서버는 name으로 내려준다.
 export type CoursePartner = {
-  nickname: string;
+  name: string;
   profileImageUrl: string;
 };
 

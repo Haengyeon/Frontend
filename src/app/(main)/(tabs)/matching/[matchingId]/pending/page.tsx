@@ -6,20 +6,28 @@ import { Hourglass } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Countdown from "@/components/ui/Countdown";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
-
-const PARTNER_RESPONSE_DELAY_MS = 4000;
+import { useMyMatching } from "@/features/matching/api/useMatchingApi";
 
 export default function Page() {
   const router = useRouter();
   const { matchDeadlineAt, setStatus } = useMatchingDraftStore();
+  const { data } = useMyMatching();
 
+  // 실제 서버 상태를 폴링해서(useMyMatching이 WAITING_RESPONSE일 땐 4초마다 재조회) 상대방이
+  // 진짜로 응답했을 때만 다음 화면으로 넘어간다 — 예전엔 4초짜리 가짜 타이머로 무조건
+  // "응답 왔다"고 치고 넘어갔는데, 실제 응답 여부와 무관하게 진행되는 버그였다.
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (!data || data.status === "WAITING_RESPONSE") return;
+
+    if (data.status === "PAYMENT_PENDING") {
       setStatus("payment_pending");
-      router.push("/home");
-    }, PARTNER_RESPONSE_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [setStatus, router]);
+    } else if (data.status === "RETRY_READY") {
+      setStatus("retry_ready");
+    } else {
+      return;
+    }
+    router.push("/home");
+  }, [data, setStatus, router]);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 pb-8 text-center">
