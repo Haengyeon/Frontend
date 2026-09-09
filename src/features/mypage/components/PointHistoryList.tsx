@@ -2,6 +2,7 @@
 
 import { Sparkles } from "lucide-react";
 import { useMyPoints, usePointHistory } from "@/features/reward/api/useRewardApi";
+import { ApiError } from "@/lib/api/client";
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -9,9 +10,20 @@ function formatDate(iso: string) {
 }
 
 export default function PointHistoryList() {
-  const { data: points } = useMyPoints();
-  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = usePointHistory();
+  const { data: points, isError: isPointsError, error: pointsError, refetch: refetchPoints } = useMyPoints();
+  const {
+    data,
+    isLoading,
+    isError: isHistoryError,
+    error: historyError,
+    refetch: refetchHistory,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = usePointHistory();
   const items = data?.pages.flatMap((page) => page.items) ?? [];
+  const isError = isPointsError || isHistoryError;
+  const activeError = isPointsError ? pointsError : historyError;
 
   return (
     <div className="flex flex-col gap-6">
@@ -20,11 +32,27 @@ export default function PointHistoryList() {
           <Sparkles size={14} strokeWidth={1.5} className="text-forest" />
           누적 포인트
         </span>
-        <p className="text-2xl font-semibold text-ink">{(points?.points ?? 0).toLocaleString()}P</p>
+        <p className="text-2xl font-semibold text-ink">
+          {isPointsError ? "-" : `${(points?.points ?? 0).toLocaleString()}P`}
+        </p>
       </div>
 
       {isLoading ? (
         <p className="pt-4 text-center text-sm text-muted">불러오는 중...</p>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-2 pt-4 text-center text-sm text-muted">
+          <p>{activeError instanceof ApiError ? activeError.message : "포인트 정보를 불러오지 못했어요."}</p>
+          <button
+            type="button"
+            onClick={() => {
+              if (isPointsError) refetchPoints();
+              if (isHistoryError) refetchHistory();
+            }}
+            className="rounded-full border border-line px-4 py-2 text-xs text-ink"
+          >
+            다시 시도
+          </button>
+        </div>
       ) : items.length === 0 ? (
         <p className="pt-4 text-center text-sm text-muted">포인트 내역이 없어요.</p>
       ) : (

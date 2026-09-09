@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 const currentYear = new Date().getFullYear();
-const YEAR_OPTIONS = Array.from({ length: 100 }, (_, i) => currentYear - i);
+const MIN_BIRTH_YEAR = 1900;
+const YEAR_OPTIONS = Array.from({ length: currentYear - MIN_BIRTH_YEAR + 1 }, (_, i) => currentYear - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 function daysInMonth(year: number | null, month: number | null): number {

@@ -8,8 +8,8 @@ import { useMyPoints, useStamps } from "@/features/reward/api/useRewardApi";
 
 export default function ProfileSummaryCard() {
   const { data: profile, isLoading, isError } = useMyProfile();
-  const { data: points } = useMyPoints();
-  const { data: stamps } = useStamps();
+  const { data: points, isError: isPointsError } = useMyPoints();
+  const { data: stamps, isError: isStampsError } = useStamps();
 
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-cream-card p-4">
@@ -27,13 +27,18 @@ export default function ProfileSummaryCard() {
         <div className="flex items-center gap-3">
           <Link href="/mypage/points" className="flex items-center gap-1 text-xs text-muted">
             <Sparkles size={13} strokeWidth={1.5} className="text-forest" />
-            누적 포인트 {(points?.points ?? 0).toLocaleString()}P
+            누적 포인트 {isPointsError ? "-" : `${(points?.points ?? 0).toLocaleString()}P`}
             <ChevronRight size={13} strokeWidth={1.5} />
           </Link>
           {stamps ? (
             <span className="flex items-center gap-1 text-xs text-muted">
               <MapPin size={13} strokeWidth={1.5} className="text-forest" />
               스탬프 {stamps.collectedCount}/{stamps.totalCount}
+            </span>
+          ) : isStampsError ? (
+            <span className="flex items-center gap-1 text-xs text-muted">
+              <MapPin size={13} strokeWidth={1.5} className="text-forest" />
+              스탬프 정보 불러오기 실패
             </span>
           ) : null}
         </div>

@@ -94,12 +94,9 @@ function PartnerReportForm({ matchAttemptId, partnerName }: { matchAttemptId: st
 }
 
 function GeneralInquiryForm() {
-  const router = useRouter();
   const [category, setCategory] = useState<ReportCategory | null>(null);
-  const [content, setContent] = useState("");
 
   const isPartnerCategory = category === "매칭 상대";
-  const canSubmit = category !== null && !isPartnerCategory && content.trim().length > 0;
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
@@ -107,31 +104,23 @@ function GeneralInquiryForm() {
         <span className="text-sm font-medium text-ink">신고·문의 유형</span>
         <div className="flex flex-wrap gap-2">
           {REPORT_CATEGORIES.map((item) => (
-            <Chip key={item} label={item} selected={category === item} onClick={() => setCategory(item)} />
+            <Chip
+              key={item}
+              label={item}
+              selected={category === item}
+              disabled={item !== "매칭 상대"}
+              onClick={() => setCategory(item)}
+            />
           ))}
         </div>
+        <p className="text-xs text-muted">코스·결제·기타 문의는 아직 준비 중이에요.</p>
       </div>
 
       {isPartnerCategory ? (
         <p className="text-sm text-muted">
           매칭 상대 신고는 채팅방 상단의 신고 아이콘을 눌러 접수해주세요.
         </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-ink">내용</span>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            placeholder="신고하거나 문의하실 내용을 자세히 적어주세요."
-            className="resize-none rounded-2xl border border-line bg-cream-card p-4 text-sm text-ink placeholder:text-muted focus:border-forest focus:outline-none"
-          />
-        </div>
-      )}
-
-      <Button className="mt-auto w-full" disabled={!canSubmit} onClick={() => router.push("/mypage")}>
-        제출하기
-      </Button>
+      ) : null}
     </div>
   );
 }
