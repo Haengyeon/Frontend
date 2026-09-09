@@ -15,7 +15,14 @@ export default function Avatar({ src, alt, size = 48, className = "" }: AvatarPr
       style={{ width: size, height: size }}
     >
       {src ? (
-        <Image src={src} alt={alt} fill sizes={`${size}px`} className="object-cover" />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes={`${size}px`}
+          className="object-cover"
+          unoptimized={src.includes("placehold.co")}
+        />
       ) : (
         <div className="flex h-full w-full items-center justify-center">
           <User size={size * 0.45} strokeWidth={1.5} className="text-forest/50" />

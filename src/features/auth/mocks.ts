@@ -31,6 +31,7 @@ export const DEV_SEED_USERS = [
   { userId: "6", name: "곽소정" },
   { userId: "7", name: "한서연" },
   { userId: "8", name: "윤아름" },
+  { userId: "9", name: "테스트유저(신규가입용)" },
 ];
 
 export const MAX_INTEREST_TAGS = 5;

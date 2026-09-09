@@ -161,7 +161,14 @@ function ProfilePhotoPreview({
     <div className="flex aspect-square flex-1 flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-line bg-cream-card">
       {src ? (
         <div className="relative h-full w-full">
-          <Image src={src} alt={label} fill sizes="200px" className="object-cover" />
+          <Image
+            src={src}
+            alt={label}
+            fill
+            sizes="200px"
+            className="object-cover"
+            unoptimized={src.includes("placehold.co")}
+          />
         </div>
       ) : (
         <>

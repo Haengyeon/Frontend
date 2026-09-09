@@ -15,10 +15,3 @@ export type Notice = {
 };
 
 export type ReportCategory = "매칭 상대" | "코스" | "결제" | "기타";
-
-export type PointRecord = {
-  pointId: string;
-  reason: string;
-  amount: number;
-  date: string;
-};

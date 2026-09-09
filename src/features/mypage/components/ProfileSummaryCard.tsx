@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronRight, MapPin } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import { useMyProfile } from "@/features/auth/api/useProfileApi";
-import { MOCK_POINTS } from "@/features/mypage/mocks";
+import { useMyPoints, useStamps } from "@/features/reward/api/useRewardApi";
 
 export default function ProfileSummaryCard() {
   const { data: profile, isLoading, isError } = useMyProfile();
+  const { data: points, isError: isPointsError } = useMyPoints();
+  const { data: stamps, isError: isStampsError } = useStamps();
 
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-cream-card p-4">
@@ -22,11 +24,24 @@ export default function ProfileSummaryCard() {
                 ? "프로필을 불러오지 못했어요"
                 : "내 프로필"}
         </p>
-        <Link href="/mypage/points" className="flex items-center gap-1 text-xs text-muted">
-          <Sparkles size={13} strokeWidth={1.5} className="text-forest" />
-          누적 포인트 {MOCK_POINTS.toLocaleString()}P
-          <ChevronRight size={13} strokeWidth={1.5} />
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/mypage/points" className="flex items-center gap-1 text-xs text-muted">
+            <Sparkles size={13} strokeWidth={1.5} className="text-forest" />
+            누적 포인트 {isPointsError ? "-" : `${(points?.points ?? 0).toLocaleString()}P`}
+            <ChevronRight size={13} strokeWidth={1.5} />
+          </Link>
+          {stamps ? (
+            <span className="flex items-center gap-1 text-xs text-muted">
+              <MapPin size={13} strokeWidth={1.5} className="text-forest" />
+              스탬프 {stamps.collectedCount}/{stamps.totalCount}
+            </span>
+          ) : isStampsError ? (
+            <span className="flex items-center gap-1 text-xs text-muted">
+              <MapPin size={13} strokeWidth={1.5} className="text-forest" />
+              스탬프 정보 불러오기 실패
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
