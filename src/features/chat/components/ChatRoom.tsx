@@ -32,7 +32,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
   if (room.status === "LOCKED") {
     return (
       <div className="flex flex-1 flex-col">
-        <CourseInfoAccordion />
+        <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
           <Lock size={28} strokeWidth={1.5} className="text-muted" />
           <p className="text-sm font-medium text-ink">
@@ -47,7 +47,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <CourseInfoAccordion />
+      <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
 
       {isError && !data ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">

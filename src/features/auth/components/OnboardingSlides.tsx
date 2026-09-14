@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, type UIEvent } from "react";
-import { MapPinned, HeartHandshake, Camera, type LucideIcon } from "lucide-react";
+import { useRef, useState, type KeyboardEvent, type UIEvent } from "react";
+import { ChevronLeft, ChevronRight, MapPinned, HeartHandshake, Camera, type LucideIcon } from "lucide-react";
 
 const SLIDES: { icon: LucideIcon; title: string; description: string }[] = [
   {
@@ -37,12 +37,35 @@ export default function OnboardingSlides({ onIndexChange }: OnboardingSlidesProp
     onIndexChange?.(index, index === SLIDES.length - 1);
   };
 
+  const goToIndex = (index: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const clamped = Math.min(Math.max(index, 0), SLIDES.length - 1);
+    el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
+    setActiveIndex(clamped);
+    onIndexChange?.(clamped, clamped === SLIDES.length - 1);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goToIndex(activeIndex + 1);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goToIndex(activeIndex - 1);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-5">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex w-full snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="group"
+        aria-label={`온보딩 슬라이드 ${activeIndex + 1}/${SLIDES.length}`}
+        className="flex w-full snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest [&::-webkit-scrollbar]:hidden"
       >
         {SLIDES.map((slide) => (
           <div key={slide.title} className="flex w-full shrink-0 snap-center justify-center px-2">
@@ -61,15 +84,37 @@ export default function OnboardingSlides({ onIndexChange }: OnboardingSlidesProp
         ))}
       </div>
 
-      <div className="flex items-center justify-center gap-1.5">
-        {SLIDES.map((slide, index) => (
-          <span
-            key={slide.title}
-            className={`h-1.5 rounded-full transition-all ${
-              index === activeIndex ? "w-4 bg-forest" : "w-1.5 bg-line"
-            }`}
-          />
-        ))}
+      <div className="flex items-center justify-center gap-4">
+        <button
+          type="button"
+          onClick={() => goToIndex(activeIndex - 1)}
+          disabled={activeIndex === 0}
+          aria-label="이전 슬라이드"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-muted disabled:opacity-30"
+        >
+          <ChevronLeft size={20} strokeWidth={1.5} />
+        </button>
+
+        <div className="flex items-center justify-center gap-1.5">
+          {SLIDES.map((slide, index) => (
+            <span
+              key={slide.title}
+              className={`h-1.5 rounded-full transition-all ${
+                index === activeIndex ? "w-4 bg-forest" : "w-1.5 bg-line"
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => goToIndex(activeIndex + 1)}
+          disabled={activeIndex === SLIDES.length - 1}
+          aria-label="다음 슬라이드"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-muted disabled:opacity-30"
+        >
+          <ChevronRight size={20} strokeWidth={1.5} />
+        </button>
       </div>
     </div>
   );

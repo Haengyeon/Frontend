@@ -5,10 +5,17 @@ import Link from "next/link";
 import { ChevronDown, MapPin, Clover, ArrowRight } from "lucide-react";
 import { useCurrentCourse, useCourseDetail } from "@/features/course/api/useCourseApi";
 
-export default function CourseInfoAccordion() {
+type CourseInfoAccordionProps = {
+  matchAttemptId: string;
+};
+
+export default function CourseInfoAccordion({ matchAttemptId }: CourseInfoAccordionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { data } = useCurrentCourse();
-  const course = data?.course;
+  // useCurrentCourse는 "현재 진행중인 코스" 하나만 내려주고 채팅방별 코스 조회 API는
+  // 아직 없다 — 이 방이 그 코스의 방이 맞는지 matchAttemptId로 대조해서, 종료된
+  // 과거 채팅방에 무관한 최신 코스 정보가 뜨는 걸 막는다.
+  const course = data?.course?.matchAttemptId === matchAttemptId ? data.course : undefined;
   // 코스가 공개(FULL)됐을 때만 방문 장소 목록을 알 수 있다 — LOCKED/PREVIEW 응답엔 spots가 없다.
   const { data: detail } = useCourseDetail(course?.id ?? null);
   const spots = detail?.viewType === "FULL" ? detail.spots : null;
