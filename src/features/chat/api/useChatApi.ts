@@ -2,20 +2,21 @@
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import { getMyChatRoom, getChatMessages, sendChatMessage } from "./chatApi";
+import { getChatRoomHistory, getChatMessages, sendChatMessage } from "./chatApi";
 
-const CHAT_ROOM_KEY = ["chat-room", "me"] as const;
+const CHAT_ROOM_HISTORY_KEY = ["chat-rooms", "history"] as const;
 const messagesKey = (chatRoomId: string) => ["chat-room", chatRoomId, "messages"] as const;
 
-export function useMyChatRoom() {
+/** 종료·차단된 방까지 전부 포함한 내 채팅방 목록 — 현재 진행중인 방도 이 안에 들어있다. */
+export function useChatRoomHistory() {
   const accessToken = useAuthStore((state) => state.accessToken);
   return useQuery({
-    queryKey: CHAT_ROOM_KEY,
-    queryFn: getMyChatRoom,
+    queryKey: CHAT_ROOM_HISTORY_KEY,
+    queryFn: getChatRoomHistory,
     enabled: Boolean(accessToken),
-    retry: false,
-    // 아직 LOCKED면 openAt 시각에 자동으로 OPEN이 되므로, 그 전환을 놓치지 않게 짧게 폴링한다.
-    refetchInterval: (query) => (query.state.data?.status === "LOCKED" ? 5000 : false),
+    // 아직 LOCKED인 방이 있으면 openAt 시각에 자동으로 OPEN이 되므로, 그 전환을 놓치지 않게 짧게 폴링한다.
+    refetchInterval: (query) =>
+      query.state.data?.rooms.some((room) => room.status === "LOCKED") ? 5000 : false,
   });
 }
 
@@ -39,7 +40,7 @@ export function useSendChatMessage(chatRoomId: string) {
     mutationFn: (content: string) => sendChatMessage(chatRoomId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: messagesKey(chatRoomId) });
-      queryClient.invalidateQueries({ queryKey: CHAT_ROOM_KEY });
+      queryClient.invalidateQueries({ queryKey: CHAT_ROOM_HISTORY_KEY });
     },
   });
 }

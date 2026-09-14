@@ -1,79 +1,62 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { X } from "lucide-react";
 import {
-  MOCK_MATCHING_ID,
-  MOCK_MATCH_PROFILE,
-  getAvailableDateOptions,
-  toDateValue,
-} from "@/features/matching/mocks";
-import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
-import type { MatchingStatus } from "@/features/matching/types";
-
-const DATE_OPTIONS = getAvailableDateOptions(14);
-
-const COURSE_STAGES: { label: string; dateValue: string | null }[] = [
-  { label: "코스 전체공개 (D-Day)", dateValue: toDateValue(new Date()) },
-  { label: "코스 소요시간·복장 (D-1)", dateValue: DATE_OPTIONS[0].value },
-  { label: "코스 지역·테마만 (D-5)", dateValue: DATE_OPTIONS[4].value },
-  { label: "코스 없음 (매칭 안 됨)", dateValue: null },
-];
-
-const STAGES: { label: string; status: MatchingStatus; href: string }[] = [
-  { label: "노매칭", status: "none", href: "/home" },
-  { label: "탐색중", status: "searching", href: "/home" },
-  { label: "매칭 발견", status: "found", href: "/home" },
-  {
-    label: "상대 프로필",
-    status: "found",
-    href: `/matching/${MOCK_MATCHING_ID}/attempts/${MOCK_MATCH_PROFILE.attemptId}`,
-  },
-  {
-    label: "매칭 응답 대기 (12h)",
-    status: "pending",
-    href: `/matching/${MOCK_MATCHING_ID}/pending`,
-  },
-  { label: "결제 (6h)", status: "payment_pending", href: `/matching/${MOCK_MATCHING_ID}/payment` },
-  { label: "확정", status: "confirmed", href: "/home" },
-  { label: "완료", status: "completed", href: "/home" },
-];
+  MOCK_MATCHING_STAGES,
+  MOCK_COURSE_STAGES,
+  DevMockStageScreen,
+  type MockStageKey,
+} from "./mockStagePreviews";
 
 export default function MatchingStageJumper() {
-  const router = useRouter();
-  const setStatus = useMatchingDraftStore((state) => state.setStatus);
-  const setAvailableDates = useMatchingDraftStore((state) => state.setAvailableDates);
+  const [selected, setSelected] = useState<MockStageKey | null>(null);
 
   return (
-    <div className="fixed left-4 top-1/2 z-[100] flex -translate-y-1/2 flex-col gap-1.5 rounded-2xl bg-black/80 p-3 text-white shadow-lg backdrop-blur-sm">
-      <span className="px-1 text-[11px] font-semibold text-white/60">매칭 단계 테스트</span>
-      {STAGES.map((stage) => (
-        <button
-          key={stage.label}
-          type="button"
-          onClick={() => {
-            setStatus(stage.status);
-            router.push(stage.href);
-          }}
-          className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
-        >
-          {stage.label}
-        </button>
-      ))}
+    <>
+      <div className="fixed left-4 top-1/2 z-[100] flex w-56 -translate-y-1/2 flex-col gap-1.5 rounded-2xl bg-black/80 p-3 text-white shadow-lg backdrop-blur-sm">
+        <span className="px-1 text-[11px] font-semibold text-white/60">
+          매칭 단계 테스트 (mock)
+        </span>
+        {MOCK_MATCHING_STAGES.map((stage) => (
+          <button
+            key={stage.key}
+            type="button"
+            onClick={() => setSelected(stage.key)}
+            className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
+          >
+            {stage.label}
+          </button>
+        ))}
 
-      <span className="mt-2 px-1 text-[11px] font-semibold text-white/60">코스 테스트</span>
-      {COURSE_STAGES.map((stage) => (
-        <button
-          key={stage.label}
-          type="button"
-          onClick={() => {
-            setAvailableDates(stage.dateValue ? [stage.dateValue] : []);
-            router.push("/course");
-          }}
-          className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
-        >
-          {stage.label}
-        </button>
-      ))}
-    </div>
+        <span className="mt-2 px-1 text-[11px] font-semibold text-white/60">코스 테스트 (mock)</span>
+        {MOCK_COURSE_STAGES.map((stage) => (
+          <button
+            key={stage.key}
+            type="button"
+            onClick={() => setSelected(stage.key)}
+            className="rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/10"
+          >
+            {stage.label}
+          </button>
+        ))}
+      </div>
+
+      {selected ? (
+        <div className="fixed inset-0 z-[150] flex justify-center bg-black/40">
+          <div className="relative flex h-full w-full max-w-md flex-col bg-cream shadow-xl">
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              aria-label="미리보기 닫기"
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white"
+            >
+              <X size={16} strokeWidth={2} />
+            </button>
+            <DevMockStageScreen stageKey={selected} />
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

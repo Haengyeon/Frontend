@@ -1,8 +1,8 @@
 import { apiRequest } from "@/lib/api/client";
-import type { ChatRoom, ChatMessage, ChatMessageListResponse } from "./types";
+import type { ChatMessage, ChatMessageListResponse, ChatRoomHistoryResponse } from "./types";
 
-export function getMyChatRoom() {
-  return apiRequest<ChatRoom>("/chat-rooms/me");
+export function getChatRoomHistory() {
+  return apiRequest<ChatRoomHistoryResponse>("/chat-rooms");
 }
 
 export function getChatMessages(chatRoomId: string, params: { cursor?: string; limit?: number } = {}) {

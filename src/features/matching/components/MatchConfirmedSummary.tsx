@@ -3,14 +3,14 @@
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import MatchConfirmedBadge from "@/features/matching/components/MatchConfirmedBadge";
-import { useDaysUntilTrip } from "@/features/matching/hooks/useDaysUntilTrip";
-import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { useCurrentCourse } from "@/features/course/api/useCourseApi";
 
 export default function MatchConfirmedSummary() {
   const router = useRouter();
-  const regions = useMatchingDraftStore((state) => state.regions);
-  const dDay = useDaysUntilTrip();
-  const location = regions[0] ?? "여행지 미정";
+  const { data } = useCurrentCourse();
+  const course = data?.course;
+  const dDay = course?.dday ?? null;
+  const location = course?.regionLabel ?? "여행지 미정";
 
   return (
     <div className="flex flex-col items-center gap-4 px-6 text-center">

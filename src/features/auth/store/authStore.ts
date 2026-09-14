@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { configureApiClient } from "@/lib/api/client";
 import { queryClient } from "@/lib/queryClient";
 import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
+import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 
 type AuthState = {
   accessToken: string | null;
@@ -21,6 +22,10 @@ export const useAuthStore = create<AuthState>()(
       // 캐시를 지우지 않으면 새 세션의 화면에 잠깐 이전 계정 데이터가 보일 수 있다.
       setSession: (accessToken, hasProfile) => {
         queryClient.clear();
+        // matchingDraftStore의 paidMatchAttemptId는 matchAttemptId로만 구분하는데, 그 id는
+        // 매칭 양쪽 당사자가 공유한다 — 같은 브라우저에서 계정만 바꿔 로그인하면(dev 로그인
+        // 패널 등) 다른 사람 결제 여부가 그대로 이어져 보이므로 계정이 바뀔 때마다 초기화한다.
+        useMatchingDraftStore.getState().reset();
         set({ accessToken, hasProfile });
       },
       // 프로필 작성(POST /profiles) 성공 직후, 토큰을 새로 받지 않고도 온보딩을 끝냈다는
@@ -28,9 +33,10 @@ export const useAuthStore = create<AuthState>()(
       setHasProfile: (hasProfile) => set({ hasProfile }),
       clearSession: () => {
         queryClient.clear();
-        // 같은 브라우저에서 다음 계정이 로그인할 때 이전 계정의 온보딩 초안(이름·생년월일·성별 등)이
-        // 남아있지 않도록 함께 초기화한다.
+        // 같은 브라우저에서 다음 계정이 로그인할 때 이전 계정의 온보딩 초안(이름·생년월일·성별 등)이나
+        // 매칭/결제 상태가 남아있지 않도록 함께 초기화한다.
         useProfileDraftStore.getState().reset();
+        useMatchingDraftStore.getState().reset();
         set({ accessToken: null, hasProfile: null });
       },
     }),

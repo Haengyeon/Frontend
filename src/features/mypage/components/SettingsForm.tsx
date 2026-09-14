@@ -8,6 +8,10 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useLogout, useWithdraw } from "@/features/auth/api/useAuthApi";
+import {
+  useNotificationSetting,
+  useUpdateNotificationSetting,
+} from "@/features/notification/api/useNotificationApi";
 
 const LEGAL_DOCS = [
   {
@@ -29,7 +33,8 @@ export default function SettingsForm() {
   const reset = useMatchingDraftStore((state) => state.reset);
   const logout = useLogout();
   const withdraw = useWithdraw();
-  const [notifyEnabled, setNotifyEnabled] = useState(true);
+  const { data: notificationSetting } = useNotificationSetting();
+  const updateNotificationSetting = useUpdateNotificationSetting();
   const [openLegalId, setOpenLegalId] = useState<string | null>(null);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
@@ -56,8 +61,12 @@ export default function SettingsForm() {
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
       <div className="flex items-center justify-between rounded-2xl border border-line bg-cream-card p-4">
-        <span className="text-sm text-ink">카카오 알림 수신 동의</span>
-        <Toggle checked={notifyEnabled} onChange={setNotifyEnabled} />
+        <span className="text-sm text-ink">푸시 알림 수신 동의</span>
+        <Toggle
+          checked={notificationSetting?.pushEnabled ?? true}
+          onChange={(checked) => updateNotificationSetting.mutate({ pushEnabled: checked })}
+          disabled={!notificationSetting || updateNotificationSetting.isPending}
+        />
       </div>
 
       <div className="flex flex-col divide-y divide-line rounded-2xl border border-line bg-cream-card">

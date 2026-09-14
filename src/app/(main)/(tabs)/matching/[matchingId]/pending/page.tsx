@@ -6,20 +6,35 @@ import { Hourglass } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Countdown from "@/components/ui/Countdown";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
-
-const PARTNER_RESPONSE_DELAY_MS = 4000;
+import { useMyMatching } from "@/features/matching/api/useMatchingApi";
 
 export default function Page() {
   const router = useRouter();
-  const { matchDeadlineAt, setStatus } = useMatchingDraftStore();
+  const { matchDeadlineAt, setStatus, syncDeadlines } = useMatchingDraftStore();
+  const { data } = useMyMatching();
 
+  // 실제 서버 상태를 폴링해서(useMyMatching이 WAITING_RESPONSE일 땐 4초마다 재조회) 상대방이
+  // 진짜로 응답했을 때만 다음 화면으로 넘어간다 — 예전엔 4초짜리 가짜 타이머로 무조건
+  // "응답 왔다"고 치고 넘어갔는데, 실제 응답 여부와 무관하게 진행되는 버그였다.
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (!data || data.status === "WAITING_RESPONSE") return;
+
+    if (data.status === "PAYMENT_PENDING") {
       setStatus("payment_pending");
-      router.push("/home");
-    }, PARTNER_RESPONSE_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [setStatus, router]);
+      // setStatus는 로컬 추정치(현재+6시간)로 마감 시각을 잡는데, 새로고침 등으로 이미
+      // 경과한 서버 마감 시각을 다시 6시간으로 표시하면 PaymentSummary가 쓰는 실제 결제
+      // 가능 시간과 어긋난다 — 서버 값이 있으면 그걸로 덮어쓴다.
+      const paymentDeadlineAt = data.currentAttempt?.paymentDeadlineAt;
+      if (paymentDeadlineAt) {
+        syncDeadlines({ paymentDeadlineAt: new Date(paymentDeadlineAt).getTime() });
+      }
+    } else if (data.status === "RETRY_READY") {
+      setStatus("retry_ready");
+    } else {
+      return;
+    }
+    router.push("/home");
+  }, [data, setStatus, syncDeadlines, router]);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 pb-8 text-center">

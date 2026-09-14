@@ -6,11 +6,11 @@ import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
 import { useChatMessages, useSendChatMessage } from "@/features/chat/api/useChatApi";
 import { formatDateLabel, toDateValue } from "@/features/matching/mocks";
-import type { ChatRoom as ChatRoomData } from "@/features/chat/api/types";
+import type { ChatRoomSummary } from "@/features/chat/api/types";
 import { ApiError } from "@/lib/api/client";
 
 type ChatRoomProps = {
-  room: ChatRoomData;
+  room: ChatRoomSummary;
 };
 
 const CLOSED_NOTICE: Record<"CLOSED" | "DISABLED", string> = {
@@ -32,7 +32,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
   if (room.status === "LOCKED") {
     return (
       <div className="flex flex-1 flex-col">
-        <CourseInfoAccordion />
+        <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
           <Lock size={28} strokeWidth={1.5} className="text-muted" />
           <p className="text-sm font-medium text-ink">
@@ -47,7 +47,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <CourseInfoAccordion />
+      <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
 
       {isError && !data ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">

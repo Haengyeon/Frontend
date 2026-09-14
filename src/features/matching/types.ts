@@ -23,15 +23,3 @@ export type MatchingTheme = {
   imageUrl: string;
 };
 
-export type MatchProfile = {
-  attemptId: string;
-  name: string;
-  age: number;
-  job: string;
-  mbti: string;
-  interestTags: string[];
-  bio: string;
-  photoUrl: string;
-  fullBodyPhotoUrl: string;
-  availableDates: string[];
-};

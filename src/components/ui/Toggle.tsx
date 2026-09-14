@@ -2,16 +2,18 @@ type ToggleProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label?: string;
+  disabled?: boolean;
 };
 
-export default function Toggle({ checked, onChange, label }: ToggleProps) {
+export default function Toggle({ checked, onChange, label, disabled = false }: ToggleProps) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 disabled:opacity-50"
     >
       {label ? <span className="text-sm text-muted">{label}</span> : null}
       <span

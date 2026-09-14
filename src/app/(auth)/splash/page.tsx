@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import OnboardingSlides from "@/features/auth/components/OnboardingSlides";
 import { getKakaoLoginUrl } from "@/features/auth/api/authApi";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
@@ -10,6 +11,7 @@ export default function Page() {
   const router = useRouter();
   const accessToken = useAuthStore((state) => state.accessToken);
   const hasProfile = useAuthStore((state) => state.hasProfile);
+  const [isLastSlide, setIsLastSlide] = useState(false);
 
   // 이미 로그인돼 있으면(새로고침 등으로 영속화된 세션이 남아있으면) 로그인 화면을
   // 다시 보여줄 필요가 없다. 첫 렌더는 서버와 동일하게 스플래시로 그리고, 마운트 후에만
@@ -19,17 +21,26 @@ export default function Page() {
   }, [accessToken, hasProfile, router]);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-16 px-8">
-      <h1 className="text-4xl font-bold tracking-wide text-ink">LOGO</h1>
-      <Button
-        variant="kakao"
-        className="w-full"
-        onClick={() => {
-          window.location.href = getKakaoLoginUrl();
-        }}
-      >
-        💬 카카오로 시작하기
-      </Button>
+    <div className="flex flex-1 flex-col gap-8 px-6 pb-10 pt-12">
+      <h1 className="text-center text-2xl font-bold tracking-wide text-ink">LOGO</h1>
+
+      <div className="flex flex-1 flex-col justify-center">
+        <OnboardingSlides onIndexChange={(_, last) => setIsLastSlide(last)} />
+      </div>
+
+      {isLastSlide ? (
+        <Button
+          variant="kakao"
+          className="w-full"
+          onClick={() => {
+            window.location.href = getKakaoLoginUrl();
+          }}
+        >
+          💬 카카오로 시작하기
+        </Button>
+      ) : (
+        <p className="text-center text-xs text-muted">옆으로 넘겨서 계속 보기</p>
+      )}
     </div>
   );
 }
