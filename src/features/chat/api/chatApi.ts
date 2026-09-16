@@ -1,5 +1,10 @@
 import { apiRequest } from "@/lib/api/client";
-import type { ChatMessage, ChatMessageListResponse, ChatRoomHistoryResponse } from "./types";
+import type {
+  ChatMessage,
+  ChatMessageListResponse,
+  ChatReadResponse,
+  ChatRoomHistoryResponse,
+} from "./types";
 
 export function getChatRoomHistory() {
   return apiRequest<ChatRoomHistoryResponse>("/chat-rooms");
@@ -19,5 +24,11 @@ export function sendChatMessage(chatRoomId: string, content: string) {
   return apiRequest<ChatMessage>(`/chat-rooms/${chatRoomId}/messages`, {
     method: "POST",
     body: { content },
+  });
+}
+
+export function markChatRoomAsRead(chatRoomId: string) {
+  return apiRequest<ChatReadResponse>(`/chat-rooms/${chatRoomId}/messages/read`, {
+    method: "POST",
   });
 }

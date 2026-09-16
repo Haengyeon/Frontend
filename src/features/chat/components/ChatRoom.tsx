@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { Lock } from "lucide-react";
 import CourseInfoAccordion from "@/features/chat/components/CourseInfoAccordion";
 import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
-import { useChatMessages, useSendChatMessage } from "@/features/chat/api/useChatApi";
+import { useChatMessages, useMarkChatRoomAsRead, useSendChatMessage } from "@/features/chat/api/useChatApi";
 import { formatDateLabel, toDateValue } from "@/features/matching/mocks";
 import type { ChatRoomSummary } from "@/features/chat/api/types";
 import { ApiError } from "@/lib/api/client";
@@ -25,6 +26,14 @@ export default function ChatRoom({ room }: ChatRoomProps) {
     isOpen,
   );
   const sendMessage = useSendChatMessage(room.id);
+  const markAsRead = useMarkChatRoomAsRead(room.id);
+
+  // 방을 열람하는 시점(LOCKED가 아니어서 메시지가 존재할 수 있을 때)에 읽음 처리한다.
+  useEffect(() => {
+    if (room.status === "LOCKED") return;
+    markAsRead.mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.id, room.status]);
 
   // 서버가 최신순으로 내려주는 각 페이지를 이어붙인 뒤 통째로 뒤집으면 오래된 순으로 정렬된다.
   const messages = [...(data?.pages.flatMap((page) => page.messages) ?? [])].reverse();

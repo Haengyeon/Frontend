@@ -32,17 +32,19 @@ function CoursePreview({
   themeLabel,
   details,
 }: {
-  notice: string;
+  notice?: string;
   regionLabel: string;
   themeLabel: string;
   details?: { estimatedTime: string; dressTip: string };
 }) {
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-line bg-cream-card p-5">
-      <span className="flex items-center gap-1.5 text-xs text-muted">
-        <Lock size={13} strokeWidth={1.5} />
-        {notice}
-      </span>
+      {notice ? (
+        <span className="flex items-center gap-1.5 text-xs text-muted">
+          <Lock size={13} strokeWidth={1.5} />
+          {notice}
+        </span>
+      ) : null}
       <InfoRow icon={MapPin} label="지역" value={regionLabel} />
       <InfoRow icon={Clover} label="테마" value={themeLabel} />
       {details ? (
@@ -89,11 +91,12 @@ export default function CourseGuide() {
 
   if (detail.viewType === "LOCKED") {
     return (
-      <CoursePreview
-        notice={`코스 세부 일정은 만나기 하루 전(D-1)부터 확인할 수 있어요 · 현재 D-${detail.dday}`}
-        regionLabel={regionLabel}
-        themeLabel={detail.themeLabel}
-      />
+      <div className="flex flex-col gap-4">
+        <p className="text-center text-base font-semibold text-ink">
+          코스 세부 일정은 만나기 하루 전(D-1)부터 확인할 수 있어요
+        </p>
+        <CoursePreview regionLabel={regionLabel} themeLabel={detail.themeLabel} />
+      </div>
     );
   }
 

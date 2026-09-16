@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/store/authStore";
-import { getChatRoomHistory, getChatMessages, sendChatMessage } from "./chatApi";
+import { getChatRoomHistory, getChatMessages, markChatRoomAsRead, sendChatMessage } from "./chatApi";
 
 const CHAT_ROOM_HISTORY_KEY = ["chat-rooms", "history"] as const;
 const messagesKey = (chatRoomId: string) => ["chat-room", chatRoomId, "messages"] as const;
@@ -38,6 +38,18 @@ export function useSendChatMessage(chatRoomId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (content: string) => sendChatMessage(chatRoomId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: messagesKey(chatRoomId) });
+      queryClient.invalidateQueries({ queryKey: CHAT_ROOM_HISTORY_KEY });
+    },
+  });
+}
+
+/** 채팅방을 열었을 때 호출 — 그 시각 이후 상대 메시지만 안읽음으로 집계되게 만든다. */
+export function useMarkChatRoomAsRead(chatRoomId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => markChatRoomAsRead(chatRoomId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: messagesKey(chatRoomId) });
       queryClient.invalidateQueries({ queryKey: CHAT_ROOM_HISTORY_KEY });

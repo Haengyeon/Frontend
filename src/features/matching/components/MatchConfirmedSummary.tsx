@@ -10,7 +10,10 @@ export default function MatchConfirmedSummary() {
   const { data } = useCurrentCourse();
   const course = data?.course;
   const dDay = course?.dday ?? null;
-  const location = course?.regionLabel ?? "여행지 미정";
+  // 스탬프·코스 화면과 같은 시군구 단위로 보여준다 — "전북"이 아니라 "전북 남원시".
+  const location = course
+    ? [course.regionLabel, ...course.sigunguNames].join(" ")
+    : "여행지 미정";
 
   return (
     <div className="flex flex-col items-center gap-4 px-6 text-center">
@@ -19,7 +22,7 @@ export default function MatchConfirmedSummary() {
         <p className="text-lg font-semibold text-ink">매칭이 확정되었어요!</p>
         <div className="flex items-center gap-1.5">
           <span className="rounded-full bg-forest-light px-3 py-1 text-xs font-medium text-forest">
-            {dDay === null ? "일정 미정" : `D-${dDay}`}
+            {dDay === null ? "일정 미정" : dDay === 0 ? "D-DAY" : `D-${dDay}`}
           </span>
           <span className="rounded-full bg-forest-light px-3 py-1 text-xs font-medium text-forest">
             {location}

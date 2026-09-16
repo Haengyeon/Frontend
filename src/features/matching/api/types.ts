@@ -78,8 +78,19 @@ export type ApiMatchingStatus =
 
 export type ApiDecision = "ACCEPTED" | "REJECTED";
 
+/** 희망 지역 하나. 배열에서의 위치가 곧 순위다(앞일수록 높은 순위, 1~5순위). */
+export type ApiRegionPreference = {
+  region: ApiRegion;
+  sigunguCode: string;
+};
+
+export type ApiRegionPreferenceResponse = ApiRegionPreference & {
+  sigunguName: string;
+  priority: number;
+};
+
 export type CreateMatchingRequest = {
-  regions: ApiRegion[];
+  regionPreferences: ApiRegionPreference[];
   ageMin: number;
   ageMax: number;
   preferredGender: ApiPreferredGender;
@@ -98,7 +109,7 @@ export type CurrentMatchAttempt = {
 
 export type MatchingResponse = {
   id: string;
-  regions: ApiRegion[];
+  regionPreferences: ApiRegionPreferenceResponse[];
   ageMin: number;
   ageMax: number;
   preferredGender: ApiPreferredGender;

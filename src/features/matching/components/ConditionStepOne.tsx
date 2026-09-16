@@ -21,8 +21,10 @@ import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftSt
 export default function ConditionStepOne() {
   const router = useRouter();
   const {
-    regions,
-    toggleRegion,
+    regionPreferences,
+    addRegionPreference,
+    removeRegionPreference,
+    moveRegionPreference,
     ageRange,
     setAgeRange,
     preferredGender,
@@ -64,24 +66,30 @@ export default function ConditionStepOne() {
           onClick={() => setIsRegionModalOpen(true)}
           className="flex h-12 items-center justify-between rounded-xl border border-line bg-cream-card px-4 text-left text-sm text-ink"
         >
-          <span className={regions.length ? "text-ink" : "text-muted"}>
-            {regions.length ? `${regions.length}개 지역 선택됨` : "지역을 선택하세요"}
+          <span className={regionPreferences.length ? "text-ink" : "text-muted"}>
+            {regionPreferences.length ? `${regionPreferences.length}개 지역 선택됨` : "지역을 선택하세요"}
           </span>
           <span className="text-muted">›</span>
         </button>
 
-        {regions.length > 0 ? (
+        {regionPreferences.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {regions.map((region) => (
-              <RemovableTag key={region} label={region} onRemove={() => toggleRegion(region)} />
+            {regionPreferences.map((pref, index) => (
+              <RemovableTag
+                key={`${pref.region}-${pref.sigunguCode}`}
+                label={`${index + 1}순위 · ${pref.region} ${pref.sigunguName}`}
+                onRemove={() => removeRegionPreference(index)}
+              />
             ))}
           </div>
         ) : null}
 
         <RegionSelectModal
           open={isRegionModalOpen}
-          selected={regions}
-          onToggle={toggleRegion}
+          selected={regionPreferences}
+          onAdd={addRegionPreference}
+          onRemove={removeRegionPreference}
+          onMove={moveRegionPreference}
           onClose={() => setIsRegionModalOpen(false)}
         />
       </div>
@@ -125,7 +133,7 @@ export default function ConditionStepOne() {
       <div className="mt-auto">
         <Button
           className="w-full"
-          disabled={regions.length === 0 || availableDates.length === 0}
+          disabled={regionPreferences.length === 0 || availableDates.length === 0}
           onClick={() => router.push("/matching/theme")}
         >
           다음

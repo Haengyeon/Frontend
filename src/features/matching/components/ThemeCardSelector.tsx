@@ -21,7 +21,7 @@ import { ApiError } from "@/lib/api/client";
 export default function ThemeCardSelector() {
   const router = useRouter();
   const {
-    regions,
+    regionPreferences,
     ageRange,
     preferredGender,
     availableDates,
@@ -52,7 +52,11 @@ export default function ThemeCardSelector() {
   const handleConfirm = () => {
     setErrorMessage(null);
     const payload = {
-      regions: regions.map(regionToApi),
+      // 배열 순서가 곧 우선순위라 map으로 만든 순서를 그대로 보낸다.
+      regionPreferences: regionPreferences.map((pref) => ({
+        region: regionToApi(pref.region),
+        sigunguCode: pref.sigunguCode,
+      })),
       ageMin: ageRange[0],
       ageMax: ageRange[1],
       preferredGender: preferredGenderToApi(preferredGender),

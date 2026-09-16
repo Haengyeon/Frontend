@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { MAX_REGIONS } from "@/features/matching/mocks";
-import type { MatchingCondition, MatchingStatus } from "@/features/matching/types";
+import { MAX_REGION_PREFERENCES } from "@/features/matching/mocks";
+import type { MatchingCondition, MatchingStatus, RegionPreference } from "@/features/matching/types";
 
 const MATCH_DEADLINE_MS = 12 * 60 * 60 * 1000;
 const PAYMENT_DEADLINE_MS = 6 * 60 * 60 * 1000;
@@ -25,8 +25,12 @@ type MatchingDraftState = MatchingCondition & {
   paidMatchAttemptId: string | null;
   setStatus: (status: MatchingStatus) => void;
   setPaidMatchAttemptId: (matchAttemptId: string | null) => void;
-  setRegions: (regions: string[]) => void;
-  toggleRegion: (region: string) => void;
+  setRegionPreferences: (regionPreferences: RegionPreference[]) => void;
+  /** 새 지역을 우선순위 맨 뒤(가장 낮은 순위)에 추가한다. 이미 있거나 5개 꽉 찼으면 무시. */
+  addRegionPreference: (pref: RegionPreference) => void;
+  removeRegionPreference: (index: number) => void;
+  /** 순위 목록에서 위/아래로 한 칸 옮긴다(완료 전 순위를 직접 조정할 수 있게). */
+  moveRegionPreference: (index: number, direction: "up" | "down") => void;
   setAgeRange: (ageRange: [number, number]) => void;
   setPreferredGender: (gender: MatchingCondition["preferredGender"]) => void;
   setAvailableDates: (dates: string[]) => void;
@@ -47,7 +51,7 @@ const INITIAL_STATE: MatchingCondition & {
   paidMatchAttemptId: string | null;
 } = {
   status: "none",
-  regions: [],
+  regionPreferences: [],
   ageRange: [20, 35],
   preferredGender: "any",
   availableDates: [],
@@ -78,15 +82,30 @@ export const useMatchingDraftStore = create<MatchingDraftState>()(
         });
       },
       setPaidMatchAttemptId: (matchAttemptId) => set({ paidMatchAttemptId: matchAttemptId }),
-      setRegions: (regions) => set({ regions }),
-      toggleRegion: (region) => {
-        const { regions } = get();
-        if (regions.includes(region)) {
-          set({ regions: regions.filter((item) => item !== region) });
+      setRegionPreferences: (regionPreferences) => set({ regionPreferences }),
+      addRegionPreference: (pref) => {
+        const { regionPreferences } = get();
+        if (regionPreferences.length >= MAX_REGION_PREFERENCES) return;
+        if (
+          regionPreferences.some(
+            (item) => item.region === pref.region && item.sigunguCode === pref.sigunguCode,
+          )
+        ) {
           return;
         }
-        if (regions.length >= MAX_REGIONS) return;
-        set({ regions: [...regions, region] });
+        set({ regionPreferences: [...regionPreferences, pref] });
+      },
+      removeRegionPreference: (index) => {
+        const { regionPreferences } = get();
+        set({ regionPreferences: regionPreferences.filter((_, i) => i !== index) });
+      },
+      moveRegionPreference: (index, direction) => {
+        const { regionPreferences } = get();
+        const targetIndex = direction === "up" ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= regionPreferences.length) return;
+        const next = [...regionPreferences];
+        [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+        set({ regionPreferences: next });
       },
       setAgeRange: (ageRange) => set({ ageRange }),
       setPreferredGender: (preferredGender) => set({ preferredGender }),

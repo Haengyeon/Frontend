@@ -27,7 +27,7 @@ export function getGenderLabel(value: MatchingCondition["preferredGender"]) {
 }
 
 export const MAX_THEMES = 3;
-export const MAX_REGIONS = 3;
+export const MAX_REGION_PREFERENCES = 5;
 
 export const MATCHING_THEMES: MatchingTheme[] = [
   {

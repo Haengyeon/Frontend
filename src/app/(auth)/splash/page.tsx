@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import Logo from "@/components/ui/Logo";
 import OnboardingSlides from "@/features/auth/components/OnboardingSlides";
 import { getKakaoLoginUrl } from "@/features/auth/api/authApi";
 import { useAuthStore } from "@/features/auth/store/authStore";
@@ -22,7 +23,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-1 flex-col gap-8 px-6 pb-10 pt-12">
-      <h1 className="text-center text-2xl font-bold tracking-wide text-ink">LOGO</h1>
+      <Logo size={64} />
 
       <div className="flex flex-1 flex-col justify-center">
         <OnboardingSlides onIndexChange={(_, last) => setIsLastSlide(last)} />

@@ -27,6 +27,7 @@ function getStatusLabel(room: ChatRoomSummary): string {
 
 export default function ChatRoomListItem({ room }: ChatRoomListItemProps) {
   const router = useRouter();
+  const unreadCount = room.unreadCount ?? 0;
 
   return (
     <button
@@ -36,7 +37,14 @@ export default function ChatRoomListItem({ room }: ChatRoomListItemProps) {
     >
       <Avatar src={room.partnerProfileImageUrl} alt={room.partnerName} size={48} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-ink">{room.partnerName}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm font-semibold text-ink">{room.partnerName}</p>
+          {unreadCount > 0 ? (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-forest px-1 text-[10px] font-semibold leading-none text-white">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          ) : null}
+        </div>
         <p className="truncate text-xs text-muted">{getStatusLabel(room)}</p>
       </div>
     </button>

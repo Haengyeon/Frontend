@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api/client";
 export default function RetryReadyBanner() {
   const router = useRouter();
   const matchingId = useMatchingDraftStore((state) => state.matchingId);
-  const setRegions = useMatchingDraftStore((state) => state.setRegions);
+  const setRegionPreferences = useMatchingDraftStore((state) => state.setRegionPreferences);
   const setAgeRange = useMatchingDraftStore((state) => state.setAgeRange);
   const setPreferredGender = useMatchingDraftStore((state) => state.setPreferredGender);
   const setAvailableDates = useMatchingDraftStore((state) => state.setAvailableDates);
@@ -25,7 +25,13 @@ export default function RetryReadyBanner() {
 
   const handleEditCondition = () => {
     if (!data) return;
-    setRegions(data.regions.map(regionToLocal));
+    setRegionPreferences(
+      data.regionPreferences.map((pref) => ({
+        region: regionToLocal(pref.region),
+        sigunguCode: pref.sigunguCode,
+        sigunguName: pref.sigunguName,
+      })),
+    );
     setAgeRange([data.ageMin, data.ageMax]);
     setPreferredGender(preferredGenderToLocal(data.preferredGender));
     setAvailableDates(data.availableDates);

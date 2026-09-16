@@ -10,6 +10,9 @@ export type ChatRoomSummary = {
   openAt: string;
   travelDate: string;
   myRemainingCount: number;
+  // 목록 응답(GET /chat-rooms)에는 백엔드가 아직 이 값을 안 채워서 항상 undefined로 온다.
+  // 방 상세/메시지 목록 조회에는 정상적으로 내려온다.
+  unreadCount?: number;
   partnerName: string;
   partnerProfileImageUrl: string;
   lastMessageContent: string | null;
@@ -31,4 +34,9 @@ export type ChatMessageListResponse = {
   messages: ChatMessage[];
   nextCursor: string | null;
   myRemainingCount: number;
+  unreadCount: number;
+};
+
+export type ChatReadResponse = {
+  unreadCount: number;
 };

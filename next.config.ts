@@ -28,11 +28,10 @@ const nextConfig: NextConfig = {
         hostname: "tong.visitkorea.or.kr",
       },
       {
-        // 로컬 백엔드가 저장하는 인증샷 등 업로드 파일 (개발 환경 전용)
-        protocol: "http",
-        hostname: "localhost",
-        port: "4000",
-        pathname: "/uploads/**",
+        // 인증샷을 GCS에 저장하고 서명 URL로 내려준다(백엔드 d19b652, 2026-09).
+        // /uploads 정적 서빙은 완전히 없어졌다 — 로컬·배포 환경 모두 이 호스트로 온다.
+        protocol: "https",
+        hostname: "storage.googleapis.com",
       },
     ],
   },

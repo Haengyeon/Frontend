@@ -25,10 +25,17 @@ export default function ConditionConfirmSheet({
   onConfirm,
   isSubmitting = false,
 }: ConditionConfirmSheetProps) {
-  const { regions, ageRange, preferredGender, availableDates, themeIds } = useMatchingDraftStore();
+  const { regionPreferences, ageRange, preferredGender, availableDates, themeIds } =
+    useMatchingDraftStore();
+
+  const regionsLabel = regionPreferences.length
+    ? regionPreferences
+        .map((pref, index) => `${index + 1}순위 ${pref.region} ${pref.sigunguName}`)
+        .join(", ")
+    : "미선택";
 
   const rows = [
-    { icon: MapPin, label: "여행 지역", value: regions.join(", ") || "미선택" },
+    { icon: MapPin, label: "여행 지역", value: regionsLabel },
     { icon: Users, label: "나이 범위", value: formatAgeRange(ageRange) },
     { icon: Heart, label: "선호 성별", value: getGenderLabel(preferredGender) },
     {

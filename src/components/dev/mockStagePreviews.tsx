@@ -283,15 +283,14 @@ function Completed() {
   );
 }
 
-function CourseLocked({ daysLeft }: { daysLeft: number }) {
+function CourseLocked() {
   return (
     <MockScreen title="코스">
       <div className="flex flex-col gap-4 p-6">
+        <p className="text-center text-base font-semibold text-ink">
+          코스 세부 일정은 만나기 하루 전(D-1)부터 확인할 수 있어요
+        </p>
         <div className="flex flex-col gap-4 rounded-2xl border border-line bg-cream-card p-5">
-          <span className="flex items-center gap-1.5 text-xs text-muted">
-            <Lock size={13} strokeWidth={1.5} />
-            코스 세부 일정은 만나기 하루 전(D-1)부터 확인할 수 있어요 · 현재 D-{daysLeft}
-          </span>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted">지역</span>
             <span className="ml-auto font-medium text-ink">서울</span>
@@ -456,7 +455,7 @@ export function DevMockStageScreen({ stageKey }: { stageKey: MockStageKey }) {
     case "course-preview":
       return <CoursePreviewD1 />;
     case "course-locked":
-      return <CourseLocked daysLeft={5} />;
+      return <CourseLocked />;
     case "course-none":
       return <CourseNone />;
   }
