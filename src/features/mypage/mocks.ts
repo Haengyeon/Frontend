@@ -1,18 +1,7 @@
-import { MATCHING_SERVICE_FEE } from "@/features/matching/mocks";
-import type { PaymentRecord, Notice, ReportCategory } from "./types";
+import type { Notice, ReportCategory } from "./types";
 
-// 결제 내역을 조회하는 GET 엔드포인트가 백엔드에 없어서(POST ready/approve/cancel만 존재)
-// PaymentHistoryList가 이 mock 배열을 그대로 화면에 뿌린다 — API가 생기면 통째로 교체.
-export const PAYMENT_HISTORY: PaymentRecord[] = [
-  {
-    paymentId: "pay-1",
-    courseTitle: "경주 역사 기행",
-    partnerName: "이서준",
-    amount: MATCHING_SERVICE_FEE,
-    paidAt: "2026-08-10",
-    status: "결제완료",
-  },
-];
+// 결제 내역 전용 GET 엔드포인트가 백엔드에 없어서, PaymentHistoryList는 실제 코스 이력
+// (GET /courses/history)에서 결제 내역을 파생시킨다 — 여기엔 mock이 필요 없다.
 
 // 공지사항 API 자체가 없어서(전체 엔드포인트 목록에 Notice 도메인이 없음) NoticeList가
 // 이 mock 배열을 고정으로 보여준다 — API가 생기면 통째로 교체.

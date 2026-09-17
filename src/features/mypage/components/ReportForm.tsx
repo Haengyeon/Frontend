@@ -93,10 +93,15 @@ function PartnerReportForm({ matchAttemptId, partnerName }: { matchAttemptId: st
   );
 }
 
+const CATEGORY_NOTICE: Record<ReportCategory, string> = {
+  "매칭 상대": "매칭 상대 신고는 채팅방 상단의 신고 아이콘을 눌러 접수해주세요.",
+  "코스": "코스 관련 문의 접수 기능은 아직 준비 중이에요. 빠르게 추가할게요.",
+  "결제": "결제 관련 문의 접수 기능은 아직 준비 중이에요. 빠르게 추가할게요.",
+  "기타": "기타 문의 접수 기능은 아직 준비 중이에요. 빠르게 추가할게요.",
+};
+
 function GeneralInquiryForm() {
   const [category, setCategory] = useState<ReportCategory | null>(null);
-
-  const isPartnerCategory = category === "매칭 상대";
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
@@ -108,19 +113,13 @@ function GeneralInquiryForm() {
               key={item}
               label={item}
               selected={category === item}
-              disabled={item !== "매칭 상대"}
               onClick={() => setCategory(item)}
             />
           ))}
         </div>
-        <p className="text-xs text-muted">코스·결제·기타 문의는 아직 준비 중이에요.</p>
       </div>
 
-      {isPartnerCategory ? (
-        <p className="text-sm text-muted">
-          매칭 상대 신고는 채팅방 상단의 신고 아이콘을 눌러 접수해주세요.
-        </p>
-      ) : null}
+      {category ? <p className="text-sm text-muted">{CATEGORY_NOTICE[category]}</p> : null}
     </div>
   );
 }

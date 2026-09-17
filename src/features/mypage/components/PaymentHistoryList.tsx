@@ -1,73 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import Button from "@/components/ui/Button";
-import Modal from "@/components/ui/Modal";
-import { PAYMENT_HISTORY } from "@/features/mypage/mocks";
-import type { PaymentRecord } from "@/features/mypage/types";
+import { useCourseHistory } from "@/features/course/api/useCourseApi";
+import { MATCHING_SERVICE_FEE } from "@/features/matching/mocks";
+import { ApiError } from "@/lib/api/client";
 
-// 결제 내역 조회 API가 백엔드에 없어서 이 화면 전체가 mock 데이터로 동작한다(연동 아님).
-// "결제 취소"도 실제 취소 API(POST /payments/{id}/cancel — 이건 실존하지만 결제 직후
-// 화면에서만 쓰고 여기선 안 씀)를 호출하지 않고 로컬 상태만 바꾼다. 목록 API가 생기면
-// 이 컴포넌트를 실제 데이터 훅으로 통째로 교체해야 한다.
+// 결제 내역 전용 조회 API가 백엔드에 없어서, "완료된 코스는 양쪽 결제가 끝난 매칭에서만
+// 생긴다"는 사실을 이용해 실제 코스 이력(GET /courses/history)에서 결제 내역을 그대로
+// 파생시킨다 — 더 이상 mock이 아니라 실제로 다녀온 코스만 나온다.
+// 결제 금액은 매칭 1건당 고정값(MATCHING_SERVICE_FEE)이라 안전하게 그대로 쓸 수 있다.
+// 이 화면엔 개별 결제 취소 API로 이어지는 진입점이 없어서(paymentId를 모름) "결제 취소"
+// 버튼은 넣지 않는다 — 결제 직후 화면(PaymentSummary)에서만 취소를 지원한다.
 export default function PaymentHistoryList() {
-  const [payments, setPayments] = useState<PaymentRecord[]>(PAYMENT_HISTORY);
-  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
+  const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useCourseHistory();
+  const items = data?.pages.flatMap((page) => page.items) ?? [];
 
-  const handleCancel = () => {
-    setPayments((prev) =>
-      prev.map((payment) =>
-        payment.paymentId === cancelTargetId ? { ...payment, status: "환불완료" } : payment,
-      ),
+  if (isLoading) {
+    return <p className="pt-8 text-center text-sm text-muted">불러오는 중...</p>;
+  }
+
+  if (isError) {
+    return (
+      <p className="pt-8 text-center text-sm text-muted">
+        {error instanceof ApiError ? error.message : "결제 내역을 불러오지 못했어요."}
+      </p>
     );
-    setCancelTargetId(null);
-  };
+  }
 
-  if (payments.length === 0) {
+  if (items.length === 0) {
     return <p className="pt-8 text-center text-sm text-muted">결제 내역이 없어요.</p>;
   }
 
   return (
     <div className="flex flex-col gap-3">
-      {payments.map((payment) => (
+      {items.map((course) => (
         <div
-          key={payment.paymentId}
+          key={course.id}
           className="flex flex-col gap-1 rounded-2xl border border-line bg-cream-card p-4"
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-ink">{payment.courseTitle}</span>
+            <span className="text-sm font-semibold text-ink">{course.title}</span>
             <span className="rounded-full bg-forest-light px-2.5 py-1 text-xs font-medium text-forest">
-              {payment.status}
+              결제완료
             </span>
           </div>
           <span className="text-xs text-muted">
-            {payment.partnerName}님과의 매칭 · {payment.paidAt}
+            {course.partner.name}님과의 매칭 · {course.travelDate}
           </span>
           <span className="mt-1 text-base font-semibold text-ink">
-            {payment.amount.toLocaleString()}원
+            {MATCHING_SERVICE_FEE.toLocaleString()}원
           </span>
-
-          {payment.status === "결제완료" ? (
-            <button
-              type="button"
-              onClick={() => setCancelTargetId(payment.paymentId)}
-              className="mt-2 self-start text-xs text-muted underline underline-offset-2"
-            >
-              결제 취소
-            </button>
-          ) : null}
         </div>
       ))}
 
-      <Modal open={cancelTargetId !== null} onClose={() => setCancelTargetId(null)}>
-        <p className="mb-2 text-sm font-semibold text-ink">결제를 취소할까요?</p>
-        <p className="mb-4 text-sm text-muted">
-          결제 취소 후에는 매칭 조건을 다시 수정해서 새로 매칭을 시작할 수 있어요.
-        </p>
-        <Button className="w-full" onClick={handleCancel}>
-          결제 취소하기
-        </Button>
-      </Modal>
+      {hasNextPage ? (
+        <button
+          type="button"
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+          className="self-center text-xs text-muted underline disabled:opacity-50"
+        >
+          {isFetchingNextPage ? "불러오는 중..." : "더 보기"}
+        </button>
+      ) : null}
     </div>
   );
 }
