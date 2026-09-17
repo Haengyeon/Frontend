@@ -17,11 +17,22 @@ const DISTRICT_LABEL_MIN_SCALE = 2;
 
 // Labels are sized/measured in "on-screen" units (roughly CSS px, since the
 // viewBox width tracks the rendered container width) so their legibility
-// doesn't grow or shrink with zoom — only the map underneath them does.
-const DISTRICT_LABEL_SIZE = 8;
-const PROVINCE_LABEL_SIZE = 9;
+// doesn't grow or shrink with zoom by default — only the map underneath them does.
+// District labels are the one exception: they grow a bit as you approach max
+// zoom, from DISTRICT_LABEL_SIZE_BASE up to DISTRICT_LABEL_SIZE_MAX.
+const DISTRICT_LABEL_SIZE_BASE = 6;
+const DISTRICT_LABEL_SIZE_MAX = 11;
+const PROVINCE_LABEL_SIZE = 8;
 const CHAR_WIDTH_FACTOR = 0.95;
 const LINE_HEIGHT_FACTOR = 1.3;
+
+function districtLabelSizeAt(scale: number): number {
+  const progress = Math.min(
+    1,
+    Math.max(0, (scale - DISTRICT_LABEL_MIN_SCALE) / (MAX_SCALE - DISTRICT_LABEL_MIN_SCALE)),
+  );
+  return DISTRICT_LABEL_SIZE_BASE + (DISTRICT_LABEL_SIZE_MAX - DISTRICT_LABEL_SIZE_BASE) * progress;
+}
 
 type RegionColorMapProps = {
   visitedCodes: Set<string>;
@@ -77,6 +88,8 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
   // Greedily keep the largest districts' labels and drop any candidate whose
   // on-screen footprint would overlap one already accepted — otherwise dense
   // clusters (e.g. Seoul's gu's) render as an unreadable pile of text.
+  const districtLabelSize = districtLabelSizeAt(transform.scale);
+
   const visibleDistrictLabels = useMemo(() => {
     if (transform.scale <= DISTRICT_LABEL_MIN_SCALE) return [];
 
@@ -87,8 +100,8 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
     for (const candidate of ranked) {
       const sx = candidate.centroid.x * transform.scale;
       const sy = candidate.centroid.y * transform.scale;
-      const halfW = (candidate.feature.properties.name.length * DISTRICT_LABEL_SIZE * CHAR_WIDTH_FACTOR) / 2;
-      const halfH = (DISTRICT_LABEL_SIZE * LINE_HEIGHT_FACTOR) / 2;
+      const halfW = (candidate.feature.properties.name.length * districtLabelSize * CHAR_WIDTH_FACTOR) / 2;
+      const halfH = (districtLabelSize * LINE_HEIGHT_FACTOR) / 2;
 
       const overlaps = accepted.some(
         (a) => Math.abs(sx - a.sx) < halfW + a.halfW && Math.abs(sy - a.sy) < halfH + a.halfH,
@@ -101,7 +114,7 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
     }
 
     return result;
-  }, [districtShapes, transform.scale]);
+  }, [districtShapes, transform.scale, districtLabelSize]);
 
   const clampScale = (scale: number) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
 
@@ -262,7 +275,7 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
                     x={centroid.x}
                     y={centroid.y}
                     textAnchor="middle"
-                    fontSize={DISTRICT_LABEL_SIZE / transform.scale}
+                    fontSize={districtLabelSize / transform.scale}
                     opacity={districtLabelOpacity}
                     className={visited ? "fill-white" : "fill-ink/70"}
                   >
