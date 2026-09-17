@@ -62,6 +62,17 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
   const dragState = useRef<{ pointerId: number; startX: number; startY: number; origin: { x: number; y: number } } | null>(
     null,
   );
+  // 두 손가락으로 동시에 짚고 있는 포인터들. 핀치 확대/축소 판단에 쓴다.
+  const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  // 핀치 시작 시점에 두 손가락 사이 거리·배율과, 두 손가락 중점이 지도 위 어느
+  // 지점(스케일/이동과 무관한 원본 좌표)을 짚고 있었는지 저장한다 — 손가락을
+  // 움직이는 동안 그 지점이 계속 손가락 중점 밑에 붙어있도록 유지한다.
+  const pinchAnchor = useRef<{
+    localX: number;
+    localY: number;
+    initialDistance: number;
+    initialScale: number;
+  } | null>(null);
 
   // Greedily keep the largest districts' labels and drop any candidate whose
   // on-screen footprint would overlap one already accepted — otherwise dense
@@ -107,18 +118,60 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
     return { dx: pixelDx * unitsPerPixel, dy: pixelDy * unitsPerPixel };
   };
 
-  const handlePointerDown = (e: PointerEvent<SVGSVGElement>) => {
-    if (transform.scale <= 1) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragState.current = {
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startY: e.clientY,
-      origin: { x: transform.x, y: transform.y },
+  // 화면 좌표(clientX/Y)를 <g> 변환 이전의 viewBox 좌표로 바꾼다.
+  const toSvgPoint = (clientX: number, clientY: number) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return { x: 0, y: 0 };
+    const unitsPerPixel = width / rect.width;
+    return { x: (clientX - rect.left) * unitsPerPixel, y: (clientY - rect.top) * unitsPerPixel };
+  };
+
+  const beginPinch = () => {
+    const [p1, p2] = [...pointers.current.values()];
+    const distance = Math.max(Math.hypot(p2.x - p1.x, p2.y - p1.y), 1);
+    const midSvg = toSvgPoint((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+    pinchAnchor.current = {
+      localX: (midSvg.x - transform.x) / transform.scale,
+      localY: (midSvg.y - transform.y) / transform.scale,
+      initialDistance: distance,
+      initialScale: transform.scale,
     };
   };
 
+  const handlePointerDown = (e: PointerEvent<SVGSVGElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.current.size === 2) {
+      dragState.current = null;
+      beginPinch();
+      return;
+    }
+
+    if (pointers.current.size === 1 && transform.scale > 1) {
+      dragState.current = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        origin: { x: transform.x, y: transform.y },
+      };
+    }
+  };
+
   const handlePointerMove = (e: PointerEvent<SVGSVGElement>) => {
+    if (!pointers.current.has(e.pointerId)) return;
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.current.size >= 2 && pinchAnchor.current) {
+      const [p1, p2] = [...pointers.current.values()];
+      const distance = Math.max(Math.hypot(p2.x - p1.x, p2.y - p1.y), 1);
+      const midSvg = toSvgPoint((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+      const { localX, localY, initialDistance, initialScale } = pinchAnchor.current;
+      const newScale = clampScale(initialScale * (distance / initialDistance));
+      setTransform({ scale: newScale, x: midSvg.x - localX * newScale, y: midSvg.y - localY * newScale });
+      return;
+    }
+
     const drag = dragState.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
     const { dx, dy } = toSvgDelta(e.clientX - drag.startX, e.clientY - drag.startY);
@@ -126,7 +179,19 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
   };
 
   const handlePointerUp = (e: PointerEvent<SVGSVGElement>) => {
-    if (dragState.current?.pointerId === e.pointerId) dragState.current = null;
+    pointers.current.delete(e.pointerId);
+
+    if (pointers.current.size < 2) pinchAnchor.current = null;
+
+    if (pointers.current.size === 1) {
+      const [[pointerId, pos]] = pointers.current;
+      dragState.current =
+        transform.scale > 1
+          ? { pointerId, startX: pos.x, startY: pos.y, origin: { x: transform.x, y: transform.y } }
+          : null;
+    } else if (dragState.current?.pointerId === e.pointerId) {
+      dragState.current = null;
+    }
   };
 
   // React attaches onWheel as a passive listener, so preventDefault() there can't
