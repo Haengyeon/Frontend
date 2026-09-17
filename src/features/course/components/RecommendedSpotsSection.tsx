@@ -16,6 +16,7 @@ export default function RecommendedSpotsSection() {
     name: string;
     address: string;
     category: string | null;
+    description: string | null;
   } | null>(null);
 
   if (!isLoading && items.length === 0) return null;
@@ -41,6 +42,7 @@ export default function RecommendedSpotsSection() {
                         name: spot.name,
                         address: spot.address,
                         category: spot.category,
+                        description: spot.description,
                       })
                     }
                     className="flex w-36 shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-forest-light text-left"
@@ -87,6 +89,7 @@ export default function RecommendedSpotsSection() {
         spotName={openSpot?.name ?? ""}
         address={openSpot?.address ?? ""}
         category={openSpot?.category ?? ""}
+        description={openSpot?.description ?? null}
         onClose={() => setOpenSpot(null)}
       />
     </div>

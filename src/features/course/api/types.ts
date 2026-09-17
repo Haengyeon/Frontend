@@ -210,6 +210,7 @@ export type RecommendedSpot = {
   name: string;
   region: ApiRegion | null;
   category: string | null;
+  description: string | null;
   address: string;
   latitude: number;
   longitude: number;

@@ -19,6 +19,14 @@ const DISTRICT_FOCUS_SCALE = 4.5;
 // 탭으로 이동할 때만 잠깐 트랜지션을 켠다 — 드래그/핀치 중에는 손가락과 어긋나 보이므로 끔.
 const FOCUS_TRANSITION_MS = 300;
 
+// 독도는 행정구역상 울릉군 소속이라 별도 시군구 코드가 없고, 지도 파일에도 폴리곤이
+// 없다(울릉도에서 실제로는 약 87km 떨어져 있어 실제 축척대로 그리면 지도 밖으로
+// 나간다). 그래서 울릉군 도형 중심에서 가까운 근사 위치에 작은 마커로만 표시하고,
+// 방문 여부·클릭 시 확대 동작은 울릉군과 동일하게 공유한다.
+const ULLEUNGDO_CODE = "37430";
+const DOKDO_MARKER_OFFSET = { x: 6, y: 10 };
+const DOKDO_MARKER_RADIUS = 2.2;
+
 // Labels are sized/measured in "on-screen" units (roughly CSS px, since the
 // viewBox width tracks the rendered container width) so their legibility
 // doesn't grow or shrink with zoom by default — only the map underneath them does.
@@ -70,6 +78,17 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
       })),
     [project],
   );
+
+  const ulleungdo = useMemo(
+    () => districtShapes.find((shape) => shape.feature.properties.code === ULLEUNGDO_CODE) ?? null,
+    [districtShapes],
+  );
+  const dokdoPosition = ulleungdo
+    ? {
+        x: Math.min(ulleungdo.centroid.x + DOKDO_MARKER_OFFSET.x, width - DOKDO_MARKER_RADIUS * 2),
+        y: ulleungdo.centroid.y + DOKDO_MARKER_OFFSET.y,
+      }
+    : null;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -295,6 +314,37 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
               strokeWidth={1.5 / transform.scale}
             />
           ))}
+
+          {dokdoPosition && ulleungdo ? (
+            <g
+              className="cursor-pointer"
+              onClick={() => {
+                if (movedRef.current) return;
+                focusOnDistrict(ulleungdo.centroid);
+              }}
+            >
+              <circle
+                cx={dokdoPosition.x}
+                cy={dokdoPosition.y}
+                r={DOKDO_MARKER_RADIUS / transform.scale}
+                strokeWidth={0.5 / transform.scale}
+                stroke="var(--color-cream)"
+                className={visitedCodes.has(ULLEUNGDO_CODE) ? "fill-forest" : "fill-forest-light"}
+              />
+              {transform.scale > DISTRICT_LABEL_MIN_SCALE ? (
+                <text
+                  x={dokdoPosition.x}
+                  y={dokdoPosition.y + (DOKDO_MARKER_RADIUS + districtLabelSize * 0.9) / transform.scale}
+                  textAnchor="middle"
+                  fontSize={districtLabelSize / transform.scale}
+                  opacity={districtLabelOpacity}
+                  className="fill-ink/70"
+                >
+                  독도
+                </text>
+              ) : null}
+            </g>
+          ) : null}
 
           {districtLabelOpacity > 0
             ? visibleDistrictLabels.map(({ feature, centroid }) => {

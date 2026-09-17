@@ -11,6 +11,7 @@ type SpotReviewsSheetProps = {
   spotName: string;
   address: string;
   category?: string | null;
+  description?: string | null;
   onClose: () => void;
 };
 
@@ -19,6 +20,7 @@ export default function SpotReviewsSheet({
   spotName,
   address,
   category,
+  description,
   onClose,
 }: SpotReviewsSheetProps) {
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -41,6 +43,9 @@ export default function SpotReviewsSheet({
           </span>
         ) : null}
         {address ? <p className="text-xs text-muted">{address}</p> : null}
+        {description ? (
+          <p className="mt-2 text-sm leading-relaxed text-ink/80">{description}</p>
+        ) : null}
         <p className="mt-2 text-sm font-medium text-ink">
           후기{totalCount > 0 ? ` (${totalCount})` : ""}
         </p>
