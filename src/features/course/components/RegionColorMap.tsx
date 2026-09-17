@@ -18,8 +18,8 @@ const DISTRICT_LABEL_MIN_SCALE = 2;
 // Labels are sized/measured in "on-screen" units (roughly CSS px, since the
 // viewBox width tracks the rendered container width) so their legibility
 // doesn't grow or shrink with zoom — only the map underneath them does.
-const DISTRICT_LABEL_SIZE = 6;
-const PROVINCE_LABEL_SIZE = 8;
+const DISTRICT_LABEL_SIZE = 8;
+const PROVINCE_LABEL_SIZE = 9;
 const CHAR_WIDTH_FACTOR = 0.95;
 const LINE_HEIGHT_FACTOR = 1.3;
 
