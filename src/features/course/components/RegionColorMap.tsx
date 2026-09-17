@@ -12,7 +12,7 @@ const provinces = provincesGeoJson as ProvinceFeatureCollection;
 const municipalities = municipalitiesGeoJson as ProvinceFeatureCollection;
 const MAP_WIDTH = 400;
 const MIN_SCALE = 1;
-const MAX_SCALE = 8;
+const MAX_SCALE = 12;
 const DISTRICT_LABEL_MIN_SCALE = 2;
 // 시군구를 탭했을 때 최소한 이 배율까지는 확대한다(이미 더 확대돼 있으면 그대로 유지).
 const DISTRICT_FOCUS_SCALE = 4.5;
