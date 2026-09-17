@@ -86,8 +86,8 @@ function ProfileEditFields({ profile }: { profile: ProfileResponse }) {
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
       <div className="flex gap-3">
-        <ProfilePhotoPreview label="전신샷" src={profile.fullBodyImageUrl} icon={PersonStanding} />
         <ProfilePhotoPreview label="얼굴사진" src={profile.profileImageUrl} icon={Smile} />
+        <ProfilePhotoPreview label="전신샷" src={profile.fullBodyImageUrl} icon={PersonStanding} />
       </div>
 
       <div className="flex flex-col gap-2">

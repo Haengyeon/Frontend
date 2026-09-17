@@ -10,6 +10,7 @@ type SpotReviewsSheetProps = {
   contentId: string | null;
   spotName: string;
   address: string;
+  category?: string | null;
   onClose: () => void;
 };
 
@@ -17,6 +18,7 @@ export default function SpotReviewsSheet({
   contentId,
   spotName,
   address,
+  category,
   onClose,
 }: SpotReviewsSheetProps) {
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -24,19 +26,24 @@ export default function SpotReviewsSheet({
   const items = data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = data?.pages[0]?.totalCount ?? 0;
   const district = extractDistrict(address);
+  const locationLabel = [category, district].filter(Boolean).join(" · ");
 
   return (
     <BottomSheet open={Boolean(contentId)} onClose={onClose} labelledBy="spot-reviews-heading">
       <div className="mb-4 flex flex-col gap-1">
         <h2 id="spot-reviews-heading" className="text-base font-semibold text-ink">
-          {spotName} 후기{totalCount > 0 ? ` (${totalCount})` : ""}
+          {spotName}
         </h2>
-        {district ? (
+        {locationLabel ? (
           <span className="flex items-center gap-1 text-xs text-muted">
             <MapPin size={12} strokeWidth={1.5} />
-            {district}
+            {locationLabel}
           </span>
         ) : null}
+        {address ? <p className="text-xs text-muted">{address}</p> : null}
+        <p className="mt-2 text-sm font-medium text-ink">
+          후기{totalCount > 0 ? ` (${totalCount})` : ""}
+        </p>
       </div>
       <div className="flex max-h-80 flex-col gap-3 overflow-y-auto">
         {isLoading ? (

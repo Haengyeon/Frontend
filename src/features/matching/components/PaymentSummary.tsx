@@ -5,6 +5,7 @@ import { CalendarDays, Clover } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
 import Countdown from "@/components/ui/Countdown";
+import DemoDataNotice from "@/components/ui/DemoDataNotice";
 import InfoRow from "@/features/matching/components/InfoRow";
 import { formatDateLabel, getThemeLabels } from "@/features/matching/mocks";
 import { useMatchAttempt, useMyMatching } from "@/features/matching/api/useMatchingApi";
@@ -123,6 +124,7 @@ export default function PaymentSummary() {
               : "카카오페이로 결제하기"}
         </Button>
       </div>
+      {partner ? <DemoDataNotice /> : null}
     </div>
   );
 }

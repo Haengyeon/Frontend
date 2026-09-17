@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
+import DemoDataNotice from "@/components/ui/DemoDataNotice";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useMatchAttempt } from "@/features/matching/api/useMatchingApi";
 import { hobbyToLocal, jobCategoryToLocal } from "@/features/matching/api/enumMap";
@@ -50,6 +51,7 @@ export default function MatchFoundBanner() {
       >
         프로필 보러가기
       </Button>
+      {partner ? <DemoDataNotice /> : null}
     </div>
   );
 }

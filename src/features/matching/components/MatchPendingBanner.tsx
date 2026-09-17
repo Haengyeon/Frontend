@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
 import Countdown from "@/components/ui/Countdown";
+import DemoDataNotice from "@/components/ui/DemoDataNotice";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useMatchAttempt } from "@/features/matching/api/useMatchingApi";
 
@@ -43,6 +44,7 @@ export default function MatchPendingBanner() {
       >
         자세히 보기
       </Button>
+      {partner ? <DemoDataNotice /> : null}
     </div>
   );
 }

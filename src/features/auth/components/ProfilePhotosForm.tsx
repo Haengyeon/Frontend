@@ -28,8 +28,8 @@ export default function ProfilePhotosForm() {
         <span className="text-sm font-medium text-ink">프로필 사진</span>
         <p className="text-xs text-muted">전신샷과 얼굴샷을 등록해주세요</p>
         <div className="flex gap-3">
-          <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} />
           <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} />
+          <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} />
         </div>
       </div>
 

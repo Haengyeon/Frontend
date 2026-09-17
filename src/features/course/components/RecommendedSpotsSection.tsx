@@ -11,9 +11,12 @@ import { extractDistrict } from "@/features/course/lib/address";
 export default function RecommendedSpotsSection() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useRecommendedSpots();
   const items = data?.pages.flatMap((page) => page.items) ?? [];
-  const [openSpot, setOpenSpot] = useState<{ contentId: string; name: string; address: string } | null>(
-    null,
-  );
+  const [openSpot, setOpenSpot] = useState<{
+    contentId: string;
+    name: string;
+    address: string;
+    category: string | null;
+  } | null>(null);
 
   if (!isLoading && items.length === 0) return null;
 
@@ -33,7 +36,12 @@ export default function RecommendedSpotsSection() {
                     key={spot.contentId}
                     type="button"
                     onClick={() =>
-                      setOpenSpot({ contentId: spot.contentId, name: spot.name, address: spot.address })
+                      setOpenSpot({
+                        contentId: spot.contentId,
+                        name: spot.name,
+                        address: spot.address,
+                        category: spot.category,
+                      })
                     }
                     className="flex w-36 shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-forest-light text-left"
                   >
@@ -78,6 +86,7 @@ export default function RecommendedSpotsSection() {
         contentId={openSpot?.contentId ?? null}
         spotName={openSpot?.name ?? ""}
         address={openSpot?.address ?? ""}
+        category={openSpot?.category ?? ""}
         onClose={() => setOpenSpot(null)}
       />
     </div>
