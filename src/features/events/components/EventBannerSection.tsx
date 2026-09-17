@@ -4,13 +4,15 @@ import { useState, type UIEvent } from "react";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
-import { MOCK_FESTIVAL_EVENTS } from "@/features/events/mocks";
+import { useFestivals } from "@/features/events/api/useEventsApi";
+import { formatPeriod } from "@/features/events/lib/formatPeriod";
 
 export default function EventBannerSection() {
-  const events = MOCK_FESTIVAL_EVENTS;
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useFestivals();
+  const events = data?.pages.flatMap((page) => page.items) ?? [];
   const [activeIndex, setActiveIndex] = useState(0);
 
-  if (events.length === 0) return null;
+  if (!isLoading && events.length === 0) return null;
 
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
@@ -20,7 +22,7 @@ export default function EventBannerSection() {
     const step = card.clientWidth + gap;
     if (step === 0) return;
     const index = Math.round(el.scrollLeft / step);
-    setActiveIndex(Math.min(Math.max(index, 0), events.length - 1));
+    setActiveIndex(Math.min(Math.max(index, 0), Math.max(events.length - 1, 0)));
   };
 
   return (
@@ -34,22 +36,36 @@ export default function EventBannerSection() {
       </div>
 
       <div className="-mx-6">
-        <HorizontalScroller onScroll={handleScroll} className="snap-x snap-mandatory gap-3 px-6 pb-1">
-          {events.map((event) => (
-            <div key={event.id} className="flex w-44 shrink-0 snap-start flex-col gap-2">
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-forest-light">
-                <Image
-                  src={event.imageUrl}
-                  alt={event.title}
-                  fill
-                  sizes="176px"
-                  className="object-cover"
-                />
-              </div>
-              <p className="line-clamp-1 text-sm font-semibold text-ink">{event.title}</p>
-              <p className="text-xs text-muted">{event.period}</p>
-            </div>
-          ))}
+        <HorizontalScroller onScroll={handleScroll} className="snap-x snap-mandatory gap-3 px-6 pb-2">
+          {isLoading
+            ? null
+            : events.map((event) => (
+                <div key={event.contentId} className="flex w-44 shrink-0 snap-start flex-col gap-2">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-forest-light">
+                    <Image
+                      src={event.imageUrl}
+                      alt={event.name}
+                      fill
+                      sizes="176px"
+                      // 공공누리 제3유형 포스터라 잘라내지 않고 원본 비율 그대로 보여준다
+                      className="object-contain"
+                    />
+                  </div>
+                  <p className="line-clamp-1 text-sm font-semibold text-ink">{event.name}</p>
+                  <p className="text-xs text-muted">{formatPeriod(event.startDate, event.endDate)}</p>
+                  <p className="text-[10px] text-muted/70">출처: 한국관광공사</p>
+                </div>
+              ))}
+          {!isLoading && hasNextPage ? (
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="flex w-16 shrink-0 items-center justify-center whitespace-nowrap text-xs text-muted underline disabled:opacity-50"
+            >
+              {isFetchingNextPage ? "..." : "더 보기"}
+            </button>
+          ) : null}
         </HorizontalScroller>
       </div>
 
@@ -57,7 +73,7 @@ export default function EventBannerSection() {
         <div className="flex items-center justify-center gap-1.5">
           {events.map((event, index) => (
             <span
-              key={event.id}
+              key={event.contentId}
               className={`h-1.5 rounded-full transition-all ${
                 index === activeIndex ? "w-4 bg-forest" : "w-1.5 bg-line"
               }`}

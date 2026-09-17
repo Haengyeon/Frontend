@@ -13,7 +13,7 @@ export default function RegionMap() {
   const items = data?.pages.flatMap((page) => page.items) ?? [];
   const { data: stamps, isError: isStampsError, error: stampsError, refetch: refetchStamps } = useStamps();
   const visitedCodes = new Set(
-    stamps?.stamps.flatMap((stamp) => (stamp.mapSigunguCode ? [stamp.mapSigunguCode] : [])) ?? [],
+    stamps?.stamps.flatMap((stamp) => stamp.mapSigunguCodes) ?? [],
   );
 
   return (

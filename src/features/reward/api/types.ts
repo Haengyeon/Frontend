@@ -30,8 +30,12 @@ export type Stamp = {
   region: ApiRegion;
   regionLabel: string;
   sigunguName: string | null;
-  /** 지도 색칠용. southkorea-maps kostat/2018의 SIG_CD */
-  mapSigunguCode: string | null;
+  /**
+   * 지도 색칠용. southkorea-maps kostat/2018의 SIG_CD 배열.
+   * 스탬프는 시군구 단위인데 지도는 그보다 더 잘게 나눠 그린 곳(예: 수원시 4개 구)이 있어서,
+   * 스탬프 하나가 지도 칸 여러 개에 대응할 수 있다 — 그 칸들을 전부 담아온다.
+   */
+  mapSigunguCodes: string[];
   courseId: string;
   earnedAt: string;
 };

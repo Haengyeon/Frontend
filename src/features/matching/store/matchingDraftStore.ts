@@ -118,7 +118,7 @@ export const useMatchingDraftStore = create<MatchingDraftState>()(
     }),
     {
       name: "matching-draft",
-      // 이 스토어의 다른 필드(regions, themeIds 등)는 폴링으로 서버와 계속 동기화되는
+      // 이 스토어의 다른 필드(regionPreferences, themeIds 등)는 폴링으로 서버와 계속 동기화되는
       // 값이라 굳이 영속시킬 필요가 없다 — 결제 왕복에서만 필요한 이 필드만 저장한다.
       partialize: (state) => ({ paidMatchAttemptId: state.paidMatchAttemptId }),
     },

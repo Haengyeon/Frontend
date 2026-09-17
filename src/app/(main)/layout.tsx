@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import DemoDataNotice from "@/components/ui/DemoDataNotice";
 
 const emptySubscribe = () => () => {};
 /** 서버(및 클라이언트 첫 렌더)에서는 false, 마운트된 클라이언트에서는 true. */
@@ -36,5 +37,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!mounted || !accessToken) return null;
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <DemoDataNotice />
+    </>
+  );
 }
