@@ -14,6 +14,10 @@ const MAP_WIDTH = 400;
 const MIN_SCALE = 1;
 const MAX_SCALE = 8;
 const DISTRICT_LABEL_MIN_SCALE = 2;
+// 시군구를 탭했을 때 최소한 이 배율까지는 확대한다(이미 더 확대돼 있으면 그대로 유지).
+const DISTRICT_FOCUS_SCALE = 4.5;
+// 탭으로 이동할 때만 잠깐 트랜지션을 켠다 — 드래그/핀치 중에는 손가락과 어긋나 보이므로 끔.
+const FOCUS_TRANSITION_MS = 300;
 
 // Labels are sized/measured in "on-screen" units (roughly CSS px, since the
 // viewBox width tracks the rendered container width) so their legibility
@@ -84,6 +88,10 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
     initialDistance: number;
     initialScale: number;
   } | null>(null);
+  // 드래그/핀치로 실제 움직였는지 기록해서, 팬 동작이 끝나는 탭에서 지역 확대가
+  // 잘못 걸리지 않게 한다(포인터가 몇 px만 움직여도 브라우저는 click을 계속 낸다).
+  const movedRef = useRef(false);
+  const [isFocusing, setIsFocusing] = useState(false);
 
   // Greedily keep the largest districts' labels and drop any candidate whose
   // on-screen footprint would overlap one already accepted — otherwise dense
@@ -124,6 +132,17 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
 
   const reset = () => setTransform({ scale: 1, x: 0, y: 0 });
 
+  const focusOnDistrict = (centroid: { x: number; y: number }) => {
+    const targetScale = clampScale(Math.max(transform.scale, DISTRICT_FOCUS_SCALE));
+    setIsFocusing(true);
+    setTransform({
+      scale: targetScale,
+      x: width / 2 - centroid.x * targetScale,
+      y: height / 2 - centroid.y * targetScale,
+    });
+    window.setTimeout(() => setIsFocusing(false), FOCUS_TRANSITION_MS);
+  };
+
   const toSvgDelta = (pixelDx: number, pixelDy: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect || rect.width === 0) return { dx: 0, dy: 0 };
@@ -155,8 +174,11 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
+    if (pointers.current.size === 1) movedRef.current = false;
+
     if (pointers.current.size === 2) {
       dragState.current = null;
+      movedRef.current = true;
       beginPinch();
       return;
     }
@@ -187,6 +209,7 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
 
     const drag = dragState.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
+    if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) > 4) movedRef.current = true;
     const { dx, dy } = toSvgDelta(e.clientX - drag.startX, e.clientY - drag.startY);
     setTransform((prev) => ({ ...prev, x: drag.origin.x + dx, y: drag.origin.y + dy }));
   };
@@ -240,17 +263,25 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        <g transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`}>
-          {districtShapes.map(({ feature, d }) => {
+        <g
+          className={isFocusing ? "transition-transform ease-out" : undefined}
+          style={isFocusing ? { transitionDuration: `${FOCUS_TRANSITION_MS}ms` } : undefined}
+          transform={`translate(${transform.x} ${transform.y}) scale(${transform.scale})`}
+        >
+          {districtShapes.map(({ feature, d, centroid }) => {
             const visited = visitedCodes.has(feature.properties.code);
 
             return (
               <path
                 key={feature.properties.code}
                 d={d}
-                className={visited ? "fill-forest" : "fill-forest-light"}
+                className={`cursor-pointer ${visited ? "fill-forest" : "fill-forest-light"}`}
                 stroke="var(--color-cream)"
                 strokeWidth={0.4 / transform.scale}
+                onClick={() => {
+                  if (movedRef.current) return;
+                  focusOnDistrict(centroid);
+                }}
               />
             );
           })}
