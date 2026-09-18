@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import Header from "@/components/layout/Header";
-import Button from "@/components/ui/Button";
 import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
 import CourseMemoryVideo from "@/features/course/components/CourseMemoryVideo";
+import PartnerReviewStatus from "@/features/course/components/PartnerReviewStatus";
 import { useCourseDetail } from "@/features/course/api/useCourseApi";
 import { ApiError } from "@/lib/api/client";
 
@@ -14,7 +13,6 @@ type CourseDetailProps = {
 };
 
 export default function CourseDetail({ courseId }: CourseDetailProps) {
-  const router = useRouter();
   const { data: detail, isLoading, error } = useCourseDetail(courseId);
 
   if (isLoading) {
@@ -52,7 +50,6 @@ export default function CourseDetail({ courseId }: CourseDetailProps) {
     );
   }
 
-  const canWriteReview = detail.dday <= 0 && !detail.review.myPartnerReview;
   const regionLabel = `${detail.regionLabel} ${detail.sigunguNames.join("·")}`.trim();
 
   return (
@@ -71,11 +68,14 @@ export default function CourseDetail({ courseId }: CourseDetailProps) {
         <CourseSpotsPanel courseId={detail.id} spots={detail.spots} />
         <CourseMemoryVideo courseId={detail.id} hasVideoRecord={detail.video !== null} />
 
-        {canWriteReview ? (
-          <Button className="mt-auto w-full" onClick={() => router.push(`/course/${detail.id}/review`)}>
-            후기 작성하기
-          </Button>
-        ) : null}
+        <div className="mt-auto">
+          <PartnerReviewStatus
+            courseId={detail.id}
+            dday={detail.dday}
+            partnerName={detail.partner.name}
+            review={detail.review}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { MapPinOff, MapPin, Clover, Clock, Shirt, Lock, type LucideIcon } from "lucide-react";
-import Button from "@/components/ui/Button";
 import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
 import CourseMemoryVideo from "@/features/course/components/CourseMemoryVideo";
+import PartnerReviewStatus from "@/features/course/components/PartnerReviewStatus";
 import InfoRow from "@/features/matching/components/InfoRow";
 import { useCurrentCourse, useCourseDetail } from "@/features/course/api/useCourseApi";
 
@@ -59,7 +58,6 @@ function CoursePreview({
 }
 
 export default function CourseGuide() {
-  const router = useRouter();
   const {
     data: current,
     isLoading: isCurrentLoading,
@@ -112,17 +110,16 @@ export default function CourseGuide() {
     );
   }
 
-  const canWriteReview = detail.dday <= 0 && !detail.review.myPartnerReview;
-
   return (
     <div className="flex flex-col gap-5">
       <CourseSpotsPanel courseId={detail.id} spots={detail.spots} />
       <CourseMemoryVideo courseId={detail.id} hasVideoRecord={detail.video !== null} />
-      {canWriteReview ? (
-        <Button className="w-full" onClick={() => router.push(`/course/${detail.id}/review`)}>
-          후기 작성하기
-        </Button>
-      ) : null}
+      <PartnerReviewStatus
+        courseId={detail.id}
+        dday={detail.dday}
+        partnerName={detail.partner.name}
+        review={detail.review}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Header from "@/components/layout/Header";
+import PartnerReviewStatus from "@/features/course/components/PartnerReviewStatus";
 import { useCourseDetail, useSubmitCourseReview } from "@/features/course/api/useCourseApi";
 import { ApiError } from "@/lib/api/client";
 
@@ -65,6 +66,25 @@ export default function ReviewForm({ courseId }: ReviewFormProps) {
         <Header title="후기 작성" />
         <div className="flex flex-1 items-center justify-center px-6 text-sm text-muted">
           여행 당일부터 후기를 남길 수 있어요.
+        </div>
+      </div>
+    );
+  }
+
+  // 이미 후기를 썼으면 백엔드가 재제출을 막는다(ConflictException) — 폼 대신
+  // 상대 후기 공개 상태(도착 여부/내용)만 보여준다.
+  if (detail.review.myPartnerReview) {
+    return (
+      <div className="flex flex-1 flex-col">
+        <Header title="후기 작성" />
+        <div className="flex flex-1 flex-col gap-4 px-6 pb-8 pt-4">
+          <p className="text-sm text-muted">이미 후기를 남겼어요.</p>
+          <PartnerReviewStatus
+            courseId={detail.id}
+            dday={detail.dday}
+            partnerName={detail.partner.name}
+            review={detail.review}
+          />
         </div>
       </div>
     );
