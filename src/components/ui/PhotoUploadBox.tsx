@@ -6,14 +6,17 @@ import type { LucideIcon } from "lucide-react";
 type PhotoUploadBoxProps = {
   label: string;
   icon: LucideIcon;
+  onFileSelect: (file: File) => void;
+  /** 마이페이지 수정처럼 서버에 이미 저장된 사진이 있을 때 초기 미리보기로 쓴다 */
+  initialPreviewUrl?: string | null;
 };
 
-export default function PhotoUploadBox({ label, icon: Icon }: PhotoUploadBoxProps) {
-  const [preview, setPreview] = useState<string | null>(null);
+export default function PhotoUploadBox({ label, icon: Icon, onFileSelect, initialPreviewUrl }: PhotoUploadBoxProps) {
+  const [preview, setPreview] = useState<string | null>(initialPreviewUrl ?? null);
 
   useEffect(() => {
     return () => {
-      if (preview) URL.revokeObjectURL(preview);
+      if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
@@ -34,7 +37,12 @@ export default function PhotoUploadBox({ label, icon: Icon }: PhotoUploadBoxProp
         className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) setPreview(URL.createObjectURL(file));
+          if (!file) return;
+          setPreview((prev) => {
+            if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+            return URL.createObjectURL(file);
+          });
+          onFileSelect(file);
         }}
       />
     </label>

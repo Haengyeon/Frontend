@@ -9,11 +9,7 @@ import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
 import { useCreateProfile } from "@/features/auth/api/useProfileApi";
 import { genderToApi, combineMbti } from "@/features/auth/api/enumMap";
 import { jobCategoryToApi, hobbyToApi } from "@/features/matching/api/enumMap";
-import {
-  PLACEHOLDER_PROFILE_IMAGE_URL,
-  PLACEHOLDER_FULL_BODY_IMAGE_URL,
-  MAX_INTEREST_TAGS,
-} from "@/features/auth/mocks";
+import { MAX_INTEREST_TAGS } from "@/features/auth/mocks";
 import { ApiError } from "@/lib/api/client";
 
 export default function PreferencesForm() {
@@ -27,8 +23,10 @@ export default function PreferencesForm() {
   // isSuccess일 때는 이 가드가 /home 이동을 가로채 /signup으로 되돌리지 않도록 건너뛴다.
   useEffect(() => {
     if (createProfile.isSuccess) return;
-    if (!draft.name || !draft.gender) router.replace("/signup");
-  }, [draft.name, draft.gender, router, createProfile.isSuccess]);
+    if (!draft.name || !draft.gender || !draft.profileImage || !draft.fullBodyImage) {
+      router.replace("/signup");
+    }
+  }, [draft.name, draft.gender, draft.profileImage, draft.fullBodyImage, router, createProfile.isSuccess]);
 
   const toggleInterestTag = (tag: string) => {
     if (draft.interestTags.includes(tag)) {
@@ -42,7 +40,7 @@ export default function PreferencesForm() {
   const canSubmit = draft.interestTags.length > 0 && !createProfile.isPending;
 
   const handleSubmit = () => {
-    if (!draft.gender) return;
+    if (!draft.gender || !draft.profileImage || !draft.fullBodyImage) return;
     setErrorMessage(null);
     createProfile.mutate(
       {
@@ -54,8 +52,8 @@ export default function PreferencesForm() {
         jobCategory: jobCategoryToApi(draft.jobCategory),
         jobPrivate: draft.isJobCategoryPrivate,
         hobbies: draft.interestTags.map(hobbyToApi),
-        profileImageUrl: PLACEHOLDER_PROFILE_IMAGE_URL,
-        fullBodyImageUrl: PLACEHOLDER_FULL_BODY_IMAGE_URL,
+        profileImage: draft.profileImage,
+        fullBodyImage: draft.fullBodyImage,
       },
       {
         onSuccess: () => {

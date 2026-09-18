@@ -21,6 +21,8 @@ export type ApiMbti =
   | "ENFJ"
   | "ENTJ";
 
+// 사진은 URL 문자열이 아니라 파일로 보낸다 — POST/PATCH /profiles가
+// multipart/form-data(profile JSON + profileImage/fullBodyImage 파일)만 받는다.
 export type CreateProfileRequest = {
   name: string;
   birthDate: string; // YYYY-MM-DD
@@ -30,16 +32,17 @@ export type CreateProfileRequest = {
   jobCategory: ApiJobCategory;
   jobPrivate?: boolean;
   hobbies: ApiHobby[];
-  profileImageUrl: string;
-  fullBodyImageUrl: string;
+  profileImage: File;
+  fullBodyImage: File;
 };
 
 export type UpdateProfileRequest = Partial<
-  Pick<
-    CreateProfileRequest,
-    "mbti" | "introduce" | "jobCategory" | "jobPrivate" | "hobbies" | "profileImageUrl" | "fullBodyImageUrl"
-  >
->;
+  Pick<CreateProfileRequest, "mbti" | "introduce" | "jobCategory" | "jobPrivate" | "hobbies">
+> & {
+  // 사진을 바꿀 때만 보낸다. 안 보내면 기존 사진이 유지된다.
+  profileImage?: File;
+  fullBodyImage?: File;
+};
 
 export type ProfileResponse = {
   id: string;

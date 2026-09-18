@@ -12,9 +12,13 @@ const MAX_BIO_LENGTH = 200;
 export default function ProfilePhotosForm() {
   const router = useRouter();
   const setBio = useProfileDraftStore((state) => state.setBio);
+  const setProfileImage = useProfileDraftStore((state) => state.setProfileImage);
+  const setFullBodyImage = useProfileDraftStore((state) => state.setFullBodyImage);
+  const profileImage = useProfileDraftStore((state) => state.profileImage);
+  const fullBodyImage = useProfileDraftStore((state) => state.fullBodyImage);
   const [bio, setBioInput] = useState(() => useProfileDraftStore.getState().bio);
 
-  const canSubmit = bio.trim().length > 0;
+  const canSubmit = bio.trim().length > 0 && Boolean(profileImage) && Boolean(fullBodyImage);
 
   const handleNext = () => {
     if (!canSubmit) return;
@@ -28,8 +32,8 @@ export default function ProfilePhotosForm() {
         <span className="text-sm font-medium text-ink">프로필 사진</span>
         <p className="text-xs text-muted">전신샷과 얼굴샷을 등록해주세요</p>
         <div className="flex gap-3">
-          <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} />
-          <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} />
+          <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} onFileSelect={setProfileImage} />
+          <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} onFileSelect={setFullBodyImage} />
         </div>
       </div>
 

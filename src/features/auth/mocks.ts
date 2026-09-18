@@ -1,8 +1,3 @@
-// TODO: 프로필 사진을 업로드하는 API가 아직 없어서(POST /profiles가 URL 문자열만 받음),
-// 실제 파일 업로드 대신 고정 URL을 보낸다. 업로드 API가 생기면 실제 업로드 흐름으로 교체.
-export const PLACEHOLDER_PROFILE_IMAGE_URL = "https://placehold.co/400x400?text=Profile";
-export const PLACEHOLDER_FULL_BODY_IMAGE_URL = "https://placehold.co/400x800?text=FullBody";
-
 export const JOB_CATEGORIES = [
   "IT・개발",
   "디자인",

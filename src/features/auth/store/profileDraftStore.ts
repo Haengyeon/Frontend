@@ -10,6 +10,8 @@ type ProfileDraftState = {
   bio: string;
   mbti: Partial<MbtiSelection>;
   interestTags: string[];
+  profileImage: File | null;
+  fullBodyImage: File | null;
   setBasicInfo: (info: {
     name: string;
     birthDate: string;
@@ -20,6 +22,8 @@ type ProfileDraftState = {
   setBio: (bio: string) => void;
   setMbtiAxis: (axis: keyof MbtiSelection, value: string) => void;
   setInterestTags: (tags: string[]) => void;
+  setProfileImage: (file: File) => void;
+  setFullBodyImage: (file: File) => void;
   reset: () => void;
 };
 
@@ -32,6 +36,8 @@ const INITIAL_STATE = {
   bio: "",
   mbti: {} as Partial<MbtiSelection>,
   interestTags: [] as string[],
+  profileImage: null as File | null,
+  fullBodyImage: null as File | null,
 };
 
 export const useProfileDraftStore = create<ProfileDraftState>((set) => ({
@@ -41,5 +47,7 @@ export const useProfileDraftStore = create<ProfileDraftState>((set) => ({
   setMbtiAxis: (axis, value) =>
     set((state) => ({ mbti: { ...state.mbti, [axis]: value } as Partial<MbtiSelection> })),
   setInterestTags: (interestTags) => set({ interestTags }),
+  setProfileImage: (profileImage) => set({ profileImage }),
+  setFullBodyImage: (fullBodyImage) => set({ fullBodyImage }),
   reset: () => set({ ...INITIAL_STATE }),
 }));
