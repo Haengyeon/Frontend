@@ -84,6 +84,17 @@ export type CourseVideo = {
   thumbnailUrl: string | null;
 } | null;
 
+// GET /courses/{courseId}/video 전용 응답. course.video와 달리 완료 시
+// GCS 서명 URL로 재발급된 videoUrl/thumbnailUrl을 준다 — 실제 재생은 이 값을 써야 한다.
+export type VideoDetail = {
+  id: string;
+  status: VideoStatus;
+  videoUrl: string | null;
+  thumbnailUrl: string | null;
+  errorMessage: string | null;
+  completedAt: string | null;
+};
+
 export type PartnerReviewSummary = {
   id: string;
   content: string;

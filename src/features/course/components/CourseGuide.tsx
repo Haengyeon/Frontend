@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { MapPinOff, MapPin, Clover, Clock, Shirt, Lock, type LucideIcon } from "lucide-react";
 import Button from "@/components/ui/Button";
 import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
+import CourseMemoryVideo from "@/features/course/components/CourseMemoryVideo";
 import InfoRow from "@/features/matching/components/InfoRow";
 import { useCurrentCourse, useCourseDetail } from "@/features/course/api/useCourseApi";
 
@@ -116,6 +117,7 @@ export default function CourseGuide() {
   return (
     <div className="flex flex-col gap-5">
       <CourseSpotsPanel courseId={detail.id} spots={detail.spots} />
+      <CourseMemoryVideo courseId={detail.id} hasVideoRecord={detail.video !== null} />
       {canWriteReview ? (
         <Button className="w-full" onClick={() => router.push(`/course/${detail.id}/review`)}>
           후기 작성하기

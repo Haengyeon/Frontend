@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Button from "@/components/ui/Button";
 import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
+import CourseMemoryVideo from "@/features/course/components/CourseMemoryVideo";
 import { useCourseDetail } from "@/features/course/api/useCourseApi";
 import { ApiError } from "@/lib/api/client";
 
@@ -68,6 +69,7 @@ export default function CourseDetail({ courseId }: CourseDetailProps) {
         </div>
 
         <CourseSpotsPanel courseId={detail.id} spots={detail.spots} />
+        <CourseMemoryVideo courseId={detail.id} hasVideoRecord={detail.video !== null} />
 
         {canWriteReview ? (
           <Button className="mt-auto w-full" onClick={() => router.push(`/course/${detail.id}/review`)}>

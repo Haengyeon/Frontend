@@ -11,6 +11,7 @@ import {
   getCourseHistory,
   getRecommendedSpots,
   getSpotReviews,
+  getCourseVideo,
 } from "./courseApi";
 import type { SubmitCourseReviewRequest } from "./types";
 
@@ -100,6 +101,25 @@ export function useRecommendedSpots() {
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: Boolean(accessToken),
+  });
+}
+
+/**
+ * 추억 영상 제작 상태. 코스 상세의 video 필드가 이미 null이 아닐 때만(=
+ * 백엔드가 이미 CourseVideo 행을 만들어둔 상태) 호출해서, 아직 만들어지지도
+ * 않은 영상을 조회해 매번 404를 받는 걸 피한다. 완료 전까지는 짧게 폴링한다.
+ */
+export function useCourseVideo(courseId: string | null, options: { enabled?: boolean } = {}) {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  return useQuery({
+    queryKey: [...courseDetailKey(courseId ?? ""), "video"],
+    queryFn: () => getCourseVideo(courseId as string),
+    enabled: Boolean(accessToken) && Boolean(courseId) && (options.enabled ?? true),
+    retry: false,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === "PENDING" || status === "PROCESSING" ? 5000 : false;
+    },
   });
 }
 

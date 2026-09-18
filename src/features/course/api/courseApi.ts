@@ -9,6 +9,7 @@ import type {
   CourseHistoryResponse,
   RecommendedSpotsResponse,
   SpotReviewsResponse,
+  VideoDetail,
 } from "./types";
 
 type PageParams = { limit?: number; cursor?: string | null };
@@ -69,4 +70,10 @@ export function getRecommendedSpots(params: PageParams = {}) {
 
 export function getSpotReviews(contentId: string, params: PageParams = {}) {
   return apiRequest<SpotReviewsResponse>(withQuery(`/courses/spots/${contentId}/reviews`, params));
+}
+
+// 추억 영상은 요청 API가 없다 — 여행을 마치고 인증샷이 한 장이라도 있으면
+// 백엔드 스케줄러가 매분 자동으로 만들기 시작한다. 여기선 진행 상태만 조회한다.
+export function getCourseVideo(courseId: string) {
+  return apiRequest<VideoDetail>(`/courses/${courseId}/video`);
 }
