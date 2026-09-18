@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Camera, CheckCircle2 } from "lucide-react";
+import { Camera, CheckCircle2, Clock, MessageSquare, Navigation } from "lucide-react";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
+import SpotReviewsSheet from "@/features/course/components/SpotReviewsSheet";
 import type { CourseSpot } from "@/features/course/api/types";
 import { useUploadMissionPhoto } from "@/features/course/api/useCourseApi";
 import { ApiError, resolveAssetUrl } from "@/lib/api/client";
@@ -15,6 +16,7 @@ type MissionCardProps = {
 
 export default function MissionCard({ courseId, spot }: MissionCardProps) {
   const [comment, setComment] = useState("");
+  const [isReviewsOpen, setIsReviewsOpen] = useState(false);
   const upload = useUploadMissionPhoto(courseId);
   const { mission } = spot;
 
@@ -44,6 +46,27 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
       {spot.description ? (
         <p className="text-sm leading-relaxed text-ink/80">{spot.description}</p>
       ) : null}
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted">
+        {spot.moveMinutesFromPrevious !== null ? (
+          <span className="flex items-center gap-1">
+            <Navigation size={12} strokeWidth={1.5} />
+            이전 장소에서 {spot.moveMinutesFromPrevious}분 이동
+          </span>
+        ) : null}
+        <span className="flex items-center gap-1">
+          <Clock size={12} strokeWidth={1.5} />
+          여기서 {spot.stayMinutes}분 머물러요
+        </span>
+        <button
+          type="button"
+          onClick={() => setIsReviewsOpen(true)}
+          className="flex items-center gap-1 underline underline-offset-2"
+        >
+          <MessageSquare size={12} strokeWidth={1.5} />
+          후기 {spot.reviewCount}개{spot.reviewWritten ? " · 내가 남김" : ""}
+        </button>
+      </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
         <div className="flex flex-col gap-1">
@@ -118,6 +141,17 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
             </div>
           ))}
         </HorizontalScroller>
+      ) : null}
+
+      {isReviewsOpen ? (
+        <SpotReviewsSheet
+          contentId={spot.contentId}
+          spotName={spot.name}
+          address={spot.address}
+          category={spot.category}
+          description={spot.description}
+          onClose={() => setIsReviewsOpen(false)}
+        />
       ) : null}
     </div>
   );
