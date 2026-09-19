@@ -1,7 +1,6 @@
 "use client";
 
 import ChatRoomListItem from "@/features/chat/components/ChatRoomListItem";
-import DemoDataNotice from "@/components/ui/DemoDataNotice";
 import { useChatRoomHistory } from "@/features/chat/api/useChatApi";
 
 const ACTIVE_STATUSES = new Set(["LOCKED", "OPEN"]);
@@ -53,7 +52,6 @@ export default function Page() {
           </div>
         </div>
       ) : null}
-      <DemoDataNotice />
     </div>
   );
 }

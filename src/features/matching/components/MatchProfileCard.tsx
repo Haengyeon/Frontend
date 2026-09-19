@@ -3,7 +3,6 @@
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { X, Heart, CalendarHeart, Clover } from "lucide-react";
-import DemoDataNotice from "@/components/ui/DemoDataNotice";
 import { formatDateLabel, getThemeLabels } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useMatchAttempt, useRespondToMatchAttempt } from "@/features/matching/api/useMatchingApi";
@@ -147,7 +146,6 @@ export default function MatchProfileCard() {
           <span className="text-xs">수락</span>
         </button>
       </div>
-      <DemoDataNotice />
     </div>
   );
 }

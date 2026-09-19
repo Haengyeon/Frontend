@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { Flag } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Avatar from "@/components/ui/Avatar";
-import DemoDataNotice from "@/components/ui/DemoDataNotice";
 import { calculateDday } from "@/features/chat/lib/dday";
 import type { ChatRoomSummary } from "@/features/chat/api/types";
 
@@ -39,7 +38,6 @@ export default function ChatRoomHeader({ room }: ChatRoomHeaderProps) {
           <Flag size={18} strokeWidth={1.5} />
         </button>
       </div>
-      <DemoDataNotice />
     </Header>
   );
 }
