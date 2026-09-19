@@ -29,6 +29,27 @@
   --font-sans: var(--font-pretendard);
 }
 
+/* 코스 카드/지도 전환과 지도 시트 등장. to를 비워 끝나면 transform이 남지 않게 한다 —
+   남으면 안쪽 후기 시트(fixed)가 화면이 아니라 이 요소를 기준으로 붙는다. */
+@theme {
+  --animate-view-in: view-in 0.28s ease-out;
+  --animate-sheet-up: sheet-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  @keyframes view-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @keyframes sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
