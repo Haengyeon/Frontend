@@ -6,7 +6,9 @@ import Button from "@/components/ui/Button";
 import { approvePayment } from "@/features/payment/api/paymentApi";
 import { useCancelPayment } from "@/features/payment/api/usePaymentApi";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
+import { getKakaoLoginUrl } from "@/features/auth/api/authApi";
 import { ApiError } from "@/lib/api/client";
+import { setPostLoginRedirect } from "@/lib/postLoginRedirect";
 
 function PaymentSuccessContent() {
   const router = useRouter();
@@ -16,6 +18,7 @@ function PaymentSuccessContent() {
   const cancelPayment = useCancelPayment();
   const setPaidMatchAttemptId = useMatchingDraftStore((state) => state.setPaidMatchAttemptId);
   const [error, setError] = useState<string | null>(null);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [matchConfirmed, setMatchConfirmed] = useState<boolean | null>(null);
   const [matchAttemptId, setMatchAttemptId] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
@@ -37,9 +40,23 @@ function PaymentSuccessContent() {
         setPaidMatchAttemptId(data.matchAttemptId);
       })
       .catch((err) => {
+        // 카카오페이 결제창에 머무는 동안 로그인 세션이 끊긴 경우(예: 다른 곳에서 로그아웃됨).
+        // 이 시점엔 아직 우리 서버가 pg_token을 카카오페이에 제출하지 않은 상태라(인증에서
+        // 막혀서), 다시 로그인해서 같은 paymentId/pg_token으로 재시도하면 정상 승인된다.
+        if (err instanceof ApiError && err.statusCode === 401) {
+          setIsSessionExpired(true);
+          return;
+        }
         setError(err instanceof ApiError ? err.message : "결제 승인에 실패했어요.");
       });
   }, [paymentId, pgToken, setPaidMatchAttemptId]);
+
+  const handleReLogin = () => {
+    if (!paymentId || !pgToken) return;
+    const query = new URLSearchParams({ paymentId, pg_token: pgToken });
+    setPostLoginRedirect(`/payments/success?${query.toString()}`);
+    window.location.href = getKakaoLoginUrl();
+  };
 
   if (!paymentId || !pgToken) {
     return (
@@ -47,6 +64,21 @@ function PaymentSuccessContent() {
         <p className="text-sm text-red-500">결제 정보가 올바르지 않아요.</p>
         <Button className="w-full" onClick={() => router.replace("/home")}>
           홈으로
+        </Button>
+      </div>
+    );
+  }
+
+  if (isSessionExpired) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-sm text-ink">
+          로그인이 만료됐어요.
+          <br />
+          다시 로그인하면 결제가 자동으로 이어져요.
+        </p>
+        <Button variant="kakao" className="w-full" onClick={handleReLogin}>
+          다시 로그인하기
         </Button>
       </div>
     );
