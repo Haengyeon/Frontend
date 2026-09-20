@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Camera, CheckCircle2, Clock, MessageSquare, Navigation } from "lucide-react";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
+import ExpandableText from "@/components/ui/ExpandableText";
 import SpotReviewsSheet from "@/features/course/components/SpotReviewsSheet";
 import type { CourseSpot } from "@/features/course/api/types";
 import { useUploadMissionPhoto } from "@/features/course/api/useCourseApi";
@@ -44,7 +45,7 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
       </div>
 
       {spot.description ? (
-        <p className="text-sm leading-relaxed text-ink/80">{spot.description}</p>
+        <ExpandableText text={spot.description} className="text-sm leading-relaxed text-ink/80" />
       ) : null}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted">
@@ -77,6 +78,9 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
           <p className="text-xs leading-relaxed text-muted">{mission.description}</p>
           <p className="text-xs text-muted">
             상대방 인증샷 {mission.partnerPhotoUploaded ? "완료" : "대기중"}
+          </p>
+          <p className="text-[10px] text-muted/70">
+            여행일 다음날 00시부터, 그때까지 올린 사진과 한 줄로 추억 영상이 만들어져요
           </p>
         </div>
 
@@ -131,7 +135,11 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
         <HorizontalScroller className="gap-2">
           {mission.photos.map((photo) => (
             <div key={photo.id} className="flex w-24 shrink-0 flex-col gap-1">
-              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-forest-light">
+              <div
+                className={`relative aspect-square w-full overflow-hidden rounded-xl bg-forest-light ${
+                  photo.isMine ? "ring-2 ring-forest" : ""
+                }`}
+              >
                 <Image src={resolveAssetUrl(photo.imageUrl)} alt={photo.comment ?? spot.name} fill sizes="96px" className="object-cover" />
               </div>
               <span className="text-[11px] font-medium text-muted">{photo.isMine ? "나" : "상대방"}</span>

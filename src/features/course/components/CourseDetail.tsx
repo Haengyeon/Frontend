@@ -2,6 +2,7 @@
 
 import { MapPin } from "lucide-react";
 import Header from "@/components/layout/Header";
+import ExpandableText from "@/components/ui/ExpandableText";
 import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
 import CourseMemoryVideo from "@/features/course/components/CourseMemoryVideo";
 import PartnerReviewStatus from "@/features/course/components/PartnerReviewStatus";
@@ -62,7 +63,7 @@ export default function CourseDetail({ courseId }: CourseDetailProps) {
             <MapPin size={14} strokeWidth={1.5} />
             {regionLabel}
           </span>
-          <p className="text-sm leading-relaxed text-ink/80">{detail.description}</p>
+          <ExpandableText text={detail.description} className="text-sm leading-relaxed text-ink/80" />
         </div>
 
         <CourseSpotsPanel courseId={detail.id} spots={detail.spots} />

@@ -40,7 +40,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
 
   if (room.status === "LOCKED") {
     return (
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
           <Lock size={28} strokeWidth={1.5} className="text-muted" />
@@ -55,7 +55,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
   const handleSend = (content: string) => sendMessage.mutateAsync(content);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
 
       {isError && !data ? (
@@ -70,7 +70,7 @@ export default function ChatRoom({ room }: ChatRoomProps) {
           </button>
         </div>
       ) : (
-        <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-6">
           {hasNextPage ? (
             <button
               type="button"

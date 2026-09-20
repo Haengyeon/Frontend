@@ -11,6 +11,7 @@ import MatchConfirmedSummary from "@/features/matching/components/MatchConfirmed
 import TripCompleteSummary from "@/features/matching/components/TripCompleteSummary";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useMyMatching, useMatchAttempt } from "@/features/matching/api/useMatchingApi";
+import { useCurrentCourse } from "@/features/course/api/useCourseApi";
 import { matchingStatusToLocal } from "@/features/matching/api/enumMap";
 import type { MatchingStatus } from "@/features/matching/types";
 
@@ -39,13 +40,22 @@ export default function StatusBanner() {
   // WAITING_RESPONSE 하나로는 "내가 아직 응답 안 함(found)"과 "내가 이미 수락하고 상대를
   // 기다리는 중(pending)"을 구분할 수 없어서, 상세 조회의 myResponded로 둘을 나눈다.
   const { data: attempt } = useMatchAttempt(attemptId);
+  // 매칭 자체엔 "여행이 끝났다"는 상태가 없다 — CONFIRMED에 계속 머문다. 여행이 끝났는지는
+  // 코스 쪽 상태(Course.status)로만 알 수 있어서, confirmed일 때만 코스를 같이 확인한다.
+  const { data: currentCourse } = useCurrentCourse();
 
   useEffect(() => {
     if (!data) return;
     setMatchingId(data.id);
     setMatchAttemptId(attemptId);
     const baseStatus = matchingStatusToLocal(data.status);
-    const resolvedStatus = baseStatus === "found" && attempt?.myResponded ? "pending" : baseStatus;
+    const isTripCompleted =
+      baseStatus === "confirmed" && currentCourse?.course?.status === "COMPLETED";
+    const resolvedStatus = isTripCompleted
+      ? "completed"
+      : baseStatus === "found" && attempt?.myResponded
+        ? "pending"
+        : baseStatus;
     setStatus(resolvedStatus);
 
     // setStatus는 상태가 막 바뀐 시점에만 로컬 추정 만료 시각(12h/6h)을 잡아준다 — 새로고침
@@ -58,7 +68,7 @@ export default function StatusBanner() {
     } else if (resolvedStatus === "payment_pending" && paymentDeadlineAt) {
       syncDeadlines({ paymentDeadlineAt: new Date(paymentDeadlineAt).getTime() });
     }
-  }, [data, attempt, attemptId, setMatchingId, setMatchAttemptId, setStatus, syncDeadlines]);
+  }, [data, attempt, attemptId, currentCourse, setMatchingId, setMatchAttemptId, setStatus, syncDeadlines]);
 
   const Banner = STATUS_BANNERS[status];
   if (Banner) return <Banner />;

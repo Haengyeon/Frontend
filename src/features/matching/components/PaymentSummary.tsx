@@ -106,8 +106,8 @@ export default function PaymentSummary() {
       <div className="mt-auto flex flex-col items-center gap-2">
         {paymentDeadlineAt ? (
           <p className="text-xs text-muted">
-            <Countdown deadlineAt={paymentDeadlineAt} /> 이내에 결제하지 않으면 매칭이 자동으로
-            취소돼요.
+            <Countdown deadlineAt={paymentDeadlineAt} className="text-sm font-bold" /> 이내에 결제하지
+            않으면 매칭이 자동으로 취소돼요.
           </p>
         ) : null}
         <Button

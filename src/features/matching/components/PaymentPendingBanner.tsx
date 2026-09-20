@@ -43,8 +43,8 @@ export default function PaymentPendingBanner() {
       {paymentDeadlineAt ? (
         <p className="text-xs text-forest/60">
           {hasPaid ? "상대방이 " : null}
-          <Countdown deadlineAt={paymentDeadlineAt} /> 이내에 결제하지 않으면 매칭이 자동으로
-          취소돼요.
+          <Countdown deadlineAt={paymentDeadlineAt} className="text-sm font-bold" /> 이내에 결제하지
+          않으면 매칭이 자동으로 취소돼요.
         </p>
       ) : null}
 

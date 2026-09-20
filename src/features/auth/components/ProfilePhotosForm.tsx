@@ -32,8 +32,13 @@ export default function ProfilePhotosForm() {
         <span className="text-sm font-medium text-ink">프로필 사진</span>
         <p className="text-xs text-muted">전신샷과 얼굴샷을 등록해주세요</p>
         <div className="flex gap-3">
-          <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} onFileSelect={setProfileImage} />
-          <PhotoUploadBox label="전신샷 업로드" icon={PersonStanding} onFileSelect={setFullBodyImage} />
+          <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} aspectRatio={1} onFileSelect={setProfileImage} />
+          <PhotoUploadBox
+            label="전신샷 업로드"
+            icon={PersonStanding}
+            aspectRatio={3 / 4}
+            onFileSelect={setFullBodyImage}
+          />
         </div>
       </div>
 
