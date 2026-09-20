@@ -93,14 +93,12 @@ function ProfileEditFields({ profile }: { profile: ProfileResponse }) {
         <PhotoUploadBox
           label="얼굴사진"
           icon={Smile}
-          aspectRatio={1}
           initialPreviewUrl={profile.profileImageUrl}
           onFileSelect={setProfileImage}
         />
         <PhotoUploadBox
           label="전신샷"
           icon={PersonStanding}
-          aspectRatio={3 / 4}
           initialPreviewUrl={profile.fullBodyImageUrl}
           onFileSelect={setFullBodyImage}
         />
