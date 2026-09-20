@@ -38,6 +38,8 @@ export const DEV_SEED_USERS = [
   { userId: "16", name: "강예린" },
   { userId: "17", name: "조민서" },
   { userId: "18", name: "백가온" },
+  { userId: "19", name: "오하은" },
+  { userId: "20", name: "민서준" },
 ];
 
 export const MAX_INTEREST_TAGS = 5;
