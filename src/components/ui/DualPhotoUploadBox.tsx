@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type PointerEvent, type WheelEvent } from "react";
-import type { LucideIcon } from "lucide-react";
+import { Camera } from "lucide-react";
 
-type PhotoUploadBoxProps = {
-  label: string;
-  icon: LucideIcon;
-  onFileSelect: (file: File) => void;
+type DualPhotoUploadBoxProps = {
+  onProfileImageSelect: (file: File) => void;
+  onFullBodyImageSelect: (file: File) => void;
   /** 마이페이지 수정처럼 서버에 이미 저장된 사진이 있을 때 초기 미리보기로 쓴다 */
-  initialPreviewUrl?: string | null;
-  /** 가로/세로 비율. 1이면 정사각형(얼굴사진), 1보다 작으면 세로로 긴 사진(전신샷) */
-  aspectRatio?: number;
+  initialProfilePreviewUrl?: string | null;
+  initialFullBodyPreviewUrl?: string | null;
 };
 
 type Offset = { x: number; y: number };
 type Size = { w: number; h: number };
+type Rect = { x: number; y: number; w: number; h: number };
 
+// 얼굴사진(정사각형)과 전신샷(세로로 긴 사진)을 사진 한 장에서 동시에 뽑아낸다.
+// 세로 틀 안에 정사각형 틀을 겹쳐 보여주고, 사진 한 장을 손가락/휠로 조정하면
+// 두 틀 영역을 각각 잘라 두 장의 결과물로 만든다.
+const VERTICAL_ASPECT = 3 / 4;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 const OUTPUT_LONG_SIDE = 900;
@@ -26,26 +29,20 @@ function distance(a: { x: number; y: number }, b: { x: number; y: number }) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-export default function PhotoUploadBox({
-  label,
-  icon: Icon,
-  onFileSelect,
-  initialPreviewUrl,
-  aspectRatio = 1,
-}: PhotoUploadBoxProps) {
+export default function DualPhotoUploadBox({
+  onProfileImageSelect,
+  onFullBodyImageSelect,
+  initialProfilePreviewUrl,
+  initialFullBodyPreviewUrl,
+}: DualPhotoUploadBoxProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(initialPreviewUrl ?? null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [boxSize, setBoxSize] = useState<Size>({ w: 0, h: 0 });
   const [naturalSize, setNaturalSize] = useState<Size | null>(null);
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
-
-  // 새로 고른 파일에만 손가락/휠로 위치·크기를 조정할 수 있다 — 마이페이지에서 아직
-  // 안 바꾼 기존 사진(원격 URL)은 캔버스로 다시 그리면 CORS 때문에 잘릴 수 있어서
-  // 그대로만 보여주고, 실제로 새로 고른 사진(blob)일 때만 편집 가능하게 한다.
-  const isEditable = Boolean(file) && imageUrl?.startsWith("blob:");
 
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
   const dragStart = useRef<{ x: number; y: number; offset: Offset } | null>(null);
@@ -67,7 +64,7 @@ export default function PhotoUploadBox({
     };
   }, []);
 
-  // 박스가 flex-1이라 실제 픽셀 크기를 CSS만으로 알 수 없어서 관찰해서 읽는다.
+  // 박스가 반응형이라 실제 픽셀 크기를 CSS만으로 알 수 없어서 관찰해서 읽는다.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -79,6 +76,34 @@ export default function PhotoUploadBox({
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // 세로 틀(전신샷)을 박스 안에 먼저 배치하고, 그 위쪽에 정사각형 틀(얼굴사진)을 겹쳐 넣는다.
+  const verticalGuide: Rect | null =
+    boxSize.w > 0 && boxSize.h > 0
+      ? (() => {
+          const maxW = boxSize.w * 0.82;
+          const maxH = boxSize.h * 0.82;
+          let w = maxW;
+          let h = w / VERTICAL_ASPECT;
+          if (h > maxH) {
+            h = maxH;
+            w = h * VERTICAL_ASPECT;
+          }
+          return { x: (boxSize.w - w) / 2, y: (boxSize.h - h) / 2, w, h };
+        })()
+      : null;
+
+  const squareGuide: Rect | null = verticalGuide
+    ? (() => {
+        const side = verticalGuide.w * 0.62;
+        return {
+          x: verticalGuide.x + (verticalGuide.w - side) / 2,
+          y: verticalGuide.y + verticalGuide.h * 0.14,
+          w: side,
+          h: side,
+        };
+      })()
+    : null;
 
   const baseScale =
     naturalSize && boxSize.w > 0 ? Math.max(boxSize.w / naturalSize.w, boxSize.h / naturalSize.h) : 1;
@@ -97,36 +122,45 @@ export default function PhotoUploadBox({
 
   const clampedOffset = clampAt(offset, displayScale);
 
-  const commitCrop = (offsetToUse: Offset, scaleToUse: number) => {
-    if (!naturalSize || !imgRef.current || !file || boxSize.w === 0) return;
-    const outW = aspectRatio >= 1 ? OUTPUT_LONG_SIDE : Math.round(OUTPUT_LONG_SIDE * aspectRatio);
-    const outH = aspectRatio >= 1 ? Math.round(OUTPUT_LONG_SIDE / aspectRatio) : OUTPUT_LONG_SIDE;
+  const cropRect = (guide: Rect, offsetToUse: Offset, scaleToUse: number, outW: number, outH: number) => {
+    if (!imgRef.current) return null;
     const canvas = document.createElement("canvas");
     canvas.width = outW;
     canvas.height = outH;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const sx = -offsetToUse.x / scaleToUse;
-    const sy = -offsetToUse.y / scaleToUse;
-    const sw = boxSize.w / scaleToUse;
-    const sh = boxSize.h / scaleToUse;
+    if (!ctx) return null;
+    const sx = (guide.x - offsetToUse.x) / scaleToUse;
+    const sy = (guide.y - offsetToUse.y) / scaleToUse;
+    const sw = guide.w / scaleToUse;
+    const sh = guide.h / scaleToUse;
     ctx.drawImage(imgRef.current, sx, sy, sw, sh, 0, 0, outW, outH);
+    return canvas;
+  };
 
-    canvas.toBlob(
+  const commitCrop = (offsetToUse: Offset, scaleToUse: number) => {
+    if (!naturalSize || !file || !verticalGuide || !squareGuide) return;
+
+    cropRect(squareGuide, offsetToUse, scaleToUse, OUTPUT_LONG_SIDE, OUTPUT_LONG_SIDE)?.toBlob(
       (blob) => {
-        if (!blob) return;
-        onFileSelect(new File([blob], file.name, { type: "image/jpeg" }));
+        if (blob) onProfileImageSelect(new File([blob], file.name, { type: "image/jpeg" }));
+      },
+      "image/jpeg",
+      0.92,
+    );
+
+    const vOutW = Math.round(OUTPUT_LONG_SIDE * VERTICAL_ASPECT);
+    cropRect(verticalGuide, offsetToUse, scaleToUse, vOutW, OUTPUT_LONG_SIDE)?.toBlob(
+      (blob) => {
+        if (blob) onFullBodyImageSelect(new File([blob], file.name, { type: "image/jpeg" }));
       },
       "image/jpeg",
       0.92,
     );
   };
 
-  // 사진을 처음 고르면 중앙 정렬된 기본 위치로 한 번 잘라서 바로 올려둔다 —
-  // 손가락으로 아무것도 조정하지 않아도 가운데를 기준으로 채운 사진이 들어간다.
+  // 사진을 처음 고르면 중앙 정렬된 기본 위치로 두 크롭을 즉시 한 번 반영해둔다.
   useEffect(() => {
-    if (!isEditable || !naturalSize || boxSize.w === 0) return;
+    if (!file || !naturalSize || boxSize.w === 0) return;
     if (initializedForFile.current === file) return;
     initializedForFile.current = file;
     const centered = clampAt(
@@ -136,13 +170,12 @@ export default function PhotoUploadBox({
     setOffset(centered);
     commitCrop(centered, baseScale);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditable, naturalSize, boxSize.w, boxSize.h]);
+  }, [file, naturalSize, boxSize.w, boxSize.h]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextFile = e.target.files?.[0];
     e.currentTarget.value = "";
     if (!nextFile) return;
-    // 이전 사진에 걸려있던 휠 확대 디바운스가 새 사진에 잘못 적용되지 않게 취소한다.
     if (wheelCommitTimer.current) clearTimeout(wheelCommitTimer.current);
     setFile(nextFile);
     setNaturalSize(null);
@@ -155,7 +188,7 @@ export default function PhotoUploadBox({
   };
 
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isEditable || !naturalSize) return;
+    if (!naturalSize) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
@@ -177,7 +210,7 @@ export default function PhotoUploadBox({
   };
 
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isEditable || !naturalSize || !pointers.current.has(e.pointerId)) return;
+    if (!naturalSize || !pointers.current.has(e.pointerId)) return;
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (pointers.current.size === 2 && pinchStart.current) {
@@ -186,7 +219,6 @@ export default function PhotoUploadBox({
       const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchStart.current.zoom * ratio));
       const oldScale = baseScale * pinchStart.current.zoom;
       const newScale = baseScale * newZoom;
-      // 두 손가락 사이 중심 아래 있던 사진 위치가 확대/축소 후에도 같은 자리에 남게 한다.
       const imagePoint = {
         x: (pinchStart.current.local.x - pinchStart.current.offset.x) / oldScale,
         y: (pinchStart.current.local.y - pinchStart.current.offset.y) / oldScale,
@@ -208,9 +240,7 @@ export default function PhotoUploadBox({
   };
 
   const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isEditable) return;
     pointers.current.delete(e.pointerId);
-
     if (pointers.current.size === 0) {
       dragStart.current = null;
       pinchStart.current = null;
@@ -222,9 +252,8 @@ export default function PhotoUploadBox({
     }
   };
 
-  // 데스크톱에서는 손가락 대신 마우스 휠로 확대/축소한다(드래그는 포인터 이벤트로 이미 된다).
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    if (!isEditable || !naturalSize) return;
+    if (!naturalSize) return;
     e.preventDefault();
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -247,12 +276,40 @@ export default function PhotoUploadBox({
     wheelCommitTimer.current = setTimeout(() => commitCrop(nextOffset, newScale), WHEEL_COMMIT_DELAY_MS);
   };
 
+  const hasExistingPreview = Boolean(initialProfilePreviewUrl || initialFullBodyPreviewUrl);
+
+  // 아직 새로 안 골랐으면 기존 두 사진을 그대로 보여준다(원격 서명 URL이라 캔버스로 다시 못 그림).
+  if (!imageUrl && hasExistingPreview) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-3">
+          <div className="aspect-square flex-1 overflow-hidden rounded-2xl bg-forest-light">
+            {initialProfilePreviewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={initialProfilePreviewUrl} alt="얼굴사진" className="h-full w-full object-cover" />
+            ) : null}
+          </div>
+          <div className="flex-1 overflow-hidden rounded-2xl bg-forest-light" style={{ aspectRatio: VERTICAL_ASPECT }}>
+            {initialFullBodyPreviewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={initialFullBodyPreviewUrl} alt="전신샷" className="h-full w-full object-cover" />
+            ) : null}
+          </div>
+        </div>
+        <label className="cursor-pointer self-center text-xs text-forest underline underline-offset-2">
+          사진 바꾸기 (한 장으로 두 사진 다시 만들기)
+          <input type="file" accept="image/*" className="sr-only" onChange={handleInputChange} />
+        </label>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-1 flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5">
       <div
         ref={containerRef}
         className="relative w-full touch-none overflow-hidden rounded-2xl border border-dashed border-line bg-cream-card"
-        style={{ aspectRatio }}
+        style={{ aspectRatio: 4 / 5 }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -260,12 +317,12 @@ export default function PhotoUploadBox({
         onWheel={handleWheel}
       >
         {imageUrl ? (
-          isEditable ? (
-            // eslint-disable-next-line @next/next/no-img-element
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               ref={imgRef}
               src={imageUrl}
-              alt={label}
+              alt="업로드한 사진"
               draggable={false}
               onLoad={(e) =>
                 setNaturalSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })
@@ -278,24 +335,38 @@ export default function PhotoUploadBox({
                 top: clampedOffset.y,
               }}
             />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageUrl} alt={label} className="h-full w-full object-cover" />
-          )
+            {verticalGuide ? (
+              <div
+                className="pointer-events-none absolute rounded-lg ring-2 ring-white/90"
+                style={{ left: verticalGuide.x, top: verticalGuide.y, width: verticalGuide.w, height: verticalGuide.h }}
+              />
+            ) : null}
+            {squareGuide ? (
+              <div
+                className="pointer-events-none absolute rounded-md ring-2 ring-forest"
+                style={{ left: squareGuide.x, top: squareGuide.y, width: squareGuide.w, height: squareGuide.h }}
+              />
+            ) : null}
+          </>
         ) : (
           <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 focus-within:ring-2 focus-within:ring-forest focus-within:ring-offset-2 focus-within:ring-offset-cream">
-            <Icon size={28} strokeWidth={1.5} className="text-muted" />
-            <span className="text-xs text-muted">{label}</span>
+            <Camera size={28} strokeWidth={1.5} className="text-muted" />
+            <span className="text-xs text-muted">사진 업로드</span>
             <input type="file" accept="image/*" className="sr-only" onChange={handleInputChange} />
           </label>
         )}
       </div>
 
       {imageUrl ? (
-        <label className="cursor-pointer self-center text-xs text-forest underline underline-offset-2">
-          사진 바꾸기
-          <input type="file" accept="image/*" className="sr-only" onChange={handleInputChange} />
-        </label>
+        <>
+          <p className="text-center text-[11px] text-muted">
+            초록 네모는 얼굴사진, 흰 테두리는 전신샷으로 각각 쓰여요. 손가락으로 확대·이동해서 맞춰주세요
+          </p>
+          <label className="cursor-pointer self-center text-xs text-forest underline underline-offset-2">
+            다른 사진 선택
+            <input type="file" accept="image/*" className="sr-only" onChange={handleInputChange} />
+          </label>
+        </>
       ) : null}
     </div>
   );

@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PersonStanding, Smile } from "lucide-react";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
-import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
+import DualPhotoUploadBox from "@/components/ui/DualPhotoUploadBox";
 import JobCategoryModal from "@/features/auth/components/JobCategoryModal";
 import InterestTags from "@/features/auth/components/InterestTags";
 import MbtiSelector from "@/features/auth/components/MbtiSelector";
@@ -89,22 +88,12 @@ function ProfileEditFields({ profile }: { profile: ProfileResponse }) {
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
-      <div className="flex gap-3">
-        <PhotoUploadBox
-          label="얼굴사진"
-          icon={Smile}
-          aspectRatio={1}
-          initialPreviewUrl={profile.profileImageUrl}
-          onFileSelect={setProfileImage}
-        />
-        <PhotoUploadBox
-          label="전신샷"
-          icon={PersonStanding}
-          aspectRatio={3 / 4}
-          initialPreviewUrl={profile.fullBodyImageUrl}
-          onFileSelect={setFullBodyImage}
-        />
-      </div>
+      <DualPhotoUploadBox
+        initialProfilePreviewUrl={profile.profileImageUrl}
+        initialFullBodyPreviewUrl={profile.fullBodyImageUrl}
+        onProfileImageSelect={setProfileImage}
+        onFullBodyImageSelect={setFullBodyImage}
+      />
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-ink">기본 정보</span>
