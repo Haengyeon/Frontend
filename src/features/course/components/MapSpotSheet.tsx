@@ -18,7 +18,7 @@ export default function MapSpotSheet({ courseId, spot, onClose }: MapSpotSheetPr
       aria-label={`${spot.order}번 장소 ${spot.name}`}
       className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-md animate-sheet-up px-3 pb-3 motion-reduce:animate-none"
     >
-      <div className="relative max-h-[50svh] overflow-y-auto overscroll-contain rounded-2xl shadow-[0_-8px_24px_rgba(30,30,26,0.14)]">
+      <div className="relative max-h-[68svh] overflow-y-auto overscroll-contain rounded-2xl shadow-[0_-8px_24px_rgba(30,30,26,0.14)]">
         <button
           type="button"
           onClick={onClose}

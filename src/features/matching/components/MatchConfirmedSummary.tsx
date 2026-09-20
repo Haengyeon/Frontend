@@ -29,7 +29,11 @@ export default function MatchConfirmedSummary() {
         <p className="text-lg font-semibold text-ink">매칭이 확정되었어요!</p>
         <div className="flex items-center gap-1.5">
           <span className="rounded-full bg-forest-light px-3 py-1 text-xs font-medium text-forest">
-            {dDay === null ? "일정 미정" : dDay === 0 ? "D-DAY" : `D-${dDay}`}
+            {dDay === null
+              ? "일정 미정"
+              : dDay === 0
+                ? "D-DAY"
+                : `D${dDay > 0 ? "-" : "+"}${Math.abs(dDay)}`}
           </span>
           <span className="rounded-full bg-forest-light px-3 py-1 text-xs font-medium text-forest">
             {location}

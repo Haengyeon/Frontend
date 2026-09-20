@@ -30,11 +30,11 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-line bg-cream-card p-5">
+    <div className="flex flex-col gap-3 rounded-2xl border border-line bg-cream-card p-5">
       <div className="flex items-start gap-3">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-forest-light">
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-forest-light">
           {spot.imageUrl ? (
-            <Image src={spot.imageUrl} alt={spot.name} fill sizes="64px" className="object-cover" />
+            <Image src={spot.imageUrl} alt={spot.name} fill sizes="56px" className="object-cover" />
           ) : null}
         </div>
 
@@ -45,7 +45,7 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
       </div>
 
       {spot.description ? (
-        <ExpandableText text={spot.description} className="text-sm leading-relaxed text-ink/80" />
+        <ExpandableText text={spot.description} lines={2} className="text-sm leading-relaxed text-ink/80" />
       ) : null}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted">
@@ -69,18 +69,15 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
         </button>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
+      <div className="flex items-center justify-between gap-3 border-t border-line pt-3">
         <div className="flex flex-col gap-1">
           <span className="flex items-center gap-1.5 text-sm font-semibold text-ink">
             <Camera size={16} strokeWidth={1.5} />
             사진 미션
           </span>
           <p className="text-xs leading-relaxed text-muted">{mission.description}</p>
-          <p className="text-xs text-muted">
-            상대방 인증샷 {mission.partnerPhotoUploaded ? "완료" : "대기중"}
-          </p>
-          <p className="text-[10px] text-muted/70">
-            여행일 다음날 00시부터, 그때까지 올린 사진과 한 줄로 추억 영상이 만들어져요
+          <p className="text-[11px] text-muted/80">
+            상대방 인증샷 {mission.partnerPhotoUploaded ? "완료" : "대기중"} · 다음날 00시부터 영상 제작
           </p>
         </div>
 

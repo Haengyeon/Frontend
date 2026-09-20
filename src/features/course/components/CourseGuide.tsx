@@ -84,6 +84,15 @@ export default function CourseGuide() {
     return <GuideNotice icon={MapPinOff} title="진행중인 코스가 없어요" />;
   }
 
+  // 완료된 코스는 후기를 안 쓰면 24시간 동안 GET /courses/current에 계속 잡힌다(홈의
+  // "여행 완료" 카드·후기 작성 버튼을 위해서다) — 여기 코스안내 탭에는 그 코스를 그대로
+  // 보여주지 않는다. 지난 코스는 스탬프에서 확인하고, 후기는 홈 배너에서 쓰면 된다.
+  if (current.course.status === "COMPLETED") {
+    return (
+      <GuideNotice icon={MapPinOff} title="여행이 완료됐어요" subtitle="다녀온 코스는 스탬프에서 확인할 수 있어요" />
+    );
+  }
+
   if (isDetailLoading || !detail) return null;
 
   const regionLabel = `${detail.regionLabel} ${detail.sigunguNames.join("·")}`.trim();
