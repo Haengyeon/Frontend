@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import DualPhotoUploadBox from "@/components/ui/DualPhotoUploadBox";
+import { PersonStanding, Smile } from "lucide-react";
+import PhotoUploadBox from "@/components/ui/PhotoUploadBox";
 import StepNavButtons from "@/components/ui/StepNavButtons";
 import { useProfileDraftStore } from "@/features/auth/store/profileDraftStore";
 
@@ -29,8 +30,16 @@ export default function ProfilePhotosForm() {
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8">
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-ink">프로필 사진</span>
-        <p className="text-xs text-muted">사진 한 장을 올리면 얼굴사진과 전신샷을 함께 만들어요</p>
-        <DualPhotoUploadBox onProfileImageSelect={setProfileImage} onFullBodyImageSelect={setFullBodyImage} />
+        <p className="text-xs text-muted">전신샷과 얼굴샷을 등록해주세요</p>
+        <div className="flex gap-3">
+          <PhotoUploadBox label="얼굴사진 업로드" icon={Smile} aspectRatio={1} onFileSelect={setProfileImage} />
+          <PhotoUploadBox
+            label="전신샷 업로드"
+            icon={PersonStanding}
+            aspectRatio={3 / 4}
+            onFileSelect={setFullBodyImage}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
