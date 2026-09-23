@@ -11,6 +11,9 @@ export type CourseStatus = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 export type CourseViewType = "LOCKED" | "PREVIEW" | "FULL";
 export type VideoStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
 
+// 주의: GET /courses/current 응답(CurrentCourseDto, 백엔드 course-list-response.dto.ts)엔
+// isExperience가 없다 — GET /courses/{id}에만 있다. 여기서 체험 여부가 필요하면
+// matchingDraftStore의 isExperience(매칭 응답 기준)를 대신 써야 한다.
 export type CurrentCourseSummary = {
   id: string;
   matchAttemptId?: string;
@@ -130,6 +133,7 @@ type CourseDetailBase = {
   travelDate: string;
   dday: number;
   partner: CoursePartner;
+  isExperience: boolean;
 };
 
 export type CourseDetailLocked = CourseDetailBase & { viewType: "LOCKED" };
@@ -162,6 +166,26 @@ export type CourseDetail = CourseDetailLocked | CourseDetailPreview | CourseDeta
 
 export type RegenerateCourseResponse = {
   id: string;
+};
+
+/** 체험 코스에서 상대 미션 사진으로 채워지는 가상 데이터. id가 "experience-"로 시작하면
+ * 실제 DB 레코드가 아니라는 뜻이라 신고·삭제 같은 요청을 보내면 안 된다. */
+export function isExperiencePhotoId(photoId: string): boolean {
+  return photoId.startsWith("experience-");
+}
+
+export type ExperienceSampleVideo = {
+  videoUrl: string;
+  thumbnailUrl: string;
+};
+
+// POST /courses/{courseId}/experience/finish 응답. 체험을 마치고 미리 만들어둔 샘플
+// 추억영상을 받는다 — 실제 코스처럼 AI가 만드는 게 아니라 고정된 예시 영상이다.
+// URL은 24시간 서명이라 다시 볼 때마다 이 API를 새로 호출해야 한다.
+export type ExperienceFinishResponse = {
+  courseId: string;
+  status: CourseStatus;
+  sampleVideo: ExperienceSampleVideo;
 };
 
 export type UploadMissionPhotoResponse = {

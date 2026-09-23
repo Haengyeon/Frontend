@@ -96,6 +96,8 @@ export type CreateMatchingRequest = {
   preferredGender: ApiPreferredGender;
   themes: ApiTheme[];
   availableDates: string[];
+  /** true면 체험(더미) 매칭. 기본 false. true일 땐 availableDates를 보내도 서버가 오늘로 덮어쓴다. */
+  isExperience?: boolean;
 };
 
 export type UpdateMatchingRequest = Partial<CreateMatchingRequest>;
@@ -105,6 +107,7 @@ export type CurrentMatchAttempt = {
   status: string; // "WAITING_RESPONSE" | "PAYMENT_PENDING" (서버 문서상 명시적 enum 아님)
   respondDeadlineAt: string;
   paymentDeadlineAt: string | null;
+  isExperience: boolean;
 };
 
 export type MatchingResponse = {
@@ -118,6 +121,7 @@ export type MatchingResponse = {
   status: ApiMatchingStatus;
   createdAt: string;
   currentAttempt: CurrentMatchAttempt | null;
+  isExperience: boolean;
 };
 
 export type PartnerProfile = {
@@ -134,6 +138,7 @@ export type PartnerProfile = {
 export type MatchAttemptDetail = {
   id: string;
   status: string;
+  isExperience: boolean;
   travelDate: string;
   /** 두 사람의 조건으로 확정된 코스 테마 (내가 고른 후보 목록이 아니라 최종 하나) */
   theme: ApiTheme;

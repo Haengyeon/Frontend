@@ -17,6 +17,8 @@ export type ChatRoomSummary = {
   partnerProfileImageUrl: string;
   lastMessageContent: string | null;
   lastMessageAt: string | null;
+  /** true면 실제 상대가 아니라 더미 유저와의 체험 매칭 채팅방. */
+  isExperience: boolean;
 };
 
 export type ChatRoomHistoryResponse = {

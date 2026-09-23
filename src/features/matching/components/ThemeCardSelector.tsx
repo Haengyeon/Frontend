@@ -6,7 +6,7 @@ import { Clover } from "lucide-react";
 import StepNavButtons from "@/components/ui/StepNavButtons";
 import ConditionConfirmSheet from "@/features/matching/components/ConditionConfirmSheet";
 import ThemeGrid from "@/features/matching/components/ThemeGrid";
-import { MAX_THEMES } from "@/features/matching/mocks";
+import { MAX_THEMES, toDateValue } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useCreateMatching, useUpdateMatching } from "@/features/matching/api/useMatchingApi";
 import {
@@ -27,6 +27,7 @@ export default function ThemeCardSelector() {
     availableDates,
     themeIds,
     setThemeIds,
+    isExperience,
     setStatus,
     setMatchingId,
     matchingId,
@@ -61,7 +62,10 @@ export default function ThemeCardSelector() {
       ageMax: ageRange[1],
       preferredGender: preferredGenderToApi(preferredGender),
       themes: themeIds.map(themeIdToApi),
-      availableDates,
+      // 서버가 체험 매칭이면 오늘로 덮어쓰긴 하지만, 요청 검증 자체가 날짜 1개 이상을
+      // 요구해서 체험이어도 유효한 날짜를 최소 하나는 채워 보내야 한다.
+      availableDates: isExperience ? [toDateValue(new Date())] : availableDates,
+      isExperience,
     };
     const handlers = {
       onSuccess: (data: MatchingResponse) => {

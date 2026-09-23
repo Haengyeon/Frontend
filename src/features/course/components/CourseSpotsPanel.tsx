@@ -12,9 +12,10 @@ import type { CourseSpot } from "@/features/course/api/types";
 type CourseSpotsPanelProps = {
   courseId: string;
   spots: CourseSpot[];
+  isExperience?: boolean;
 };
 
-export default function CourseSpotsPanel({ courseId, spots }: CourseSpotsPanelProps) {
+export default function CourseSpotsPanel({ courseId, spots, isExperience = false }: CourseSpotsPanelProps) {
   const [view, setView] = useState<CourseView>("card");
   // 두 뷰가 같이 쓴다 — 지도에서 고른 장소가 카드 뷰로 돌아가도 선택돼 있다.
   const [selectedSpotId, setSelectedSpotId] = useState(spots[0]?.id ?? "");
@@ -40,7 +41,12 @@ export default function CourseSpotsPanel({ courseId, spots }: CourseSpotsPanelPr
         <div key="card" className="flex animate-view-in flex-col gap-5 motion-reduce:animate-none">
           <MissionStoryPath spots={spots} selectedSpotId={selectedSpot.id} onSelect={setSelectedSpotId} />
           {/* 장소를 바꾸면 쓰던 한 줄 코멘트가 다른 장소 사진에 붙지 않게 새로 그린다 */}
-          <MissionCard key={selectedSpot.id} courseId={courseId} spot={selectedSpot} />
+          <MissionCard
+            key={selectedSpot.id}
+            courseId={courseId}
+            spot={selectedSpot}
+            isExperience={isExperience}
+          />
         </div>
       ) : (
         <div key="map" className="animate-view-in motion-reduce:animate-none">

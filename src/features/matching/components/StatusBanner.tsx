@@ -31,6 +31,7 @@ export default function StatusBanner() {
   const setStatus = useMatchingDraftStore((state) => state.setStatus);
   const setMatchingId = useMatchingDraftStore((state) => state.setMatchingId);
   const setMatchAttemptId = useMatchingDraftStore((state) => state.setMatchAttemptId);
+  const setIsExperience = useMatchingDraftStore((state) => state.setIsExperience);
   const syncDeadlines = useMatchingDraftStore((state) => state.syncDeadlines);
 
   // GET /matchings/me를 폴링해서 서버 상태를 로컬 상태에 그대로 반영한다 —
@@ -45,17 +46,21 @@ export default function StatusBanner() {
   const { data: currentCourse } = useCurrentCourse();
 
   useEffect(() => {
+    // 코스가 COMPLETED면 무조건 "여행 완료"를 우선한다. 매칭이 완료 처리와 함께(또는 그
+    // 직후) endedAt 처리돼서 GET /matchings/me가 404를 내도(체험 코스는 지금 이렇게 된다),
+    // data가 없다는 이유로 아래 매칭 기반 분기를 못 타 상태가 옛날 값에 멈춰있으면 안 된다.
+    if (currentCourse?.course?.status === "COMPLETED") {
+      setStatus("completed");
+      return;
+    }
+
     if (!data) return;
     setMatchingId(data.id);
     setMatchAttemptId(attemptId);
+    setIsExperience(data.isExperience);
     const baseStatus = matchingStatusToLocal(data.status);
-    const isTripCompleted =
-      baseStatus === "confirmed" && currentCourse?.course?.status === "COMPLETED";
-    const resolvedStatus = isTripCompleted
-      ? "completed"
-      : baseStatus === "found" && attempt?.myResponded
-        ? "pending"
-        : baseStatus;
+    const resolvedStatus =
+      baseStatus === "found" && attempt?.myResponded ? "pending" : baseStatus;
     setStatus(resolvedStatus);
 
     // setStatus는 상태가 막 바뀐 시점에만 로컬 추정 만료 시각(12h/6h)을 잡아준다 — 새로고침
@@ -68,7 +73,17 @@ export default function StatusBanner() {
     } else if (resolvedStatus === "payment_pending" && paymentDeadlineAt) {
       syncDeadlines({ paymentDeadlineAt: new Date(paymentDeadlineAt).getTime() });
     }
-  }, [data, attempt, attemptId, currentCourse, setMatchingId, setMatchAttemptId, setStatus, syncDeadlines]);
+  }, [
+    data,
+    attempt,
+    attemptId,
+    currentCourse,
+    setMatchingId,
+    setMatchAttemptId,
+    setIsExperience,
+    setStatus,
+    syncDeadlines,
+  ]);
 
   const Banner = STATUS_BANNERS[status];
   if (Banner) return <Banner />;

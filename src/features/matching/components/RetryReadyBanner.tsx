@@ -15,6 +15,7 @@ export default function RetryReadyBanner() {
   const setPreferredGender = useMatchingDraftStore((state) => state.setPreferredGender);
   const setAvailableDates = useMatchingDraftStore((state) => state.setAvailableDates);
   const setThemeIds = useMatchingDraftStore((state) => state.setThemeIds);
+  const setIsExperience = useMatchingDraftStore((state) => state.setIsExperience);
   const { data } = useMyMatching();
   const retryMatching = useRetryMatching(matchingId ?? "");
 
@@ -36,6 +37,7 @@ export default function RetryReadyBanner() {
     setPreferredGender(preferredGenderToLocal(data.preferredGender));
     setAvailableDates(data.availableDates);
     setThemeIds(data.themes.map(themeToLocalId));
+    setIsExperience(data.isExperience);
     router.push("/matching/condition");
   };
 

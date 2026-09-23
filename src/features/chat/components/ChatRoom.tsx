@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Lock } from "lucide-react";
+import { Lock, Sparkles } from "lucide-react";
 import CourseInfoAccordion from "@/features/chat/components/CourseInfoAccordion";
 import ChatBubble from "@/features/chat/components/ChatBubble";
 import ChatComposer from "@/features/chat/components/ChatComposer";
@@ -57,6 +57,17 @@ export default function ChatRoom({ room }: ChatRoomProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <CourseInfoAccordion matchAttemptId={room.matchAttemptId} />
+
+      {room.isExperience ? (
+        <div className="mx-6 mt-3 flex items-start gap-2 rounded-2xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-700">
+          <Sparkles size={14} strokeWidth={2} className="mt-0.5 shrink-0" />
+          <p>
+            💬 체험 매칭이에요. 상대는 가상 프로필이라 정해진 답변만 보내요.
+            <br />
+            (체험 대화는 여기까지예요. 실제 매칭에서는 상대와 자유롭게 대화할 수 있어요)
+          </p>
+        </div>
+      ) : null}
 
       {isError && !data ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">

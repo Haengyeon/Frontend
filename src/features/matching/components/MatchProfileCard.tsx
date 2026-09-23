@@ -4,6 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { X, Heart, CalendarHeart, Clover } from "lucide-react";
 import DemoDataNotice from "@/components/ui/DemoDataNotice";
+import ExperienceBadge from "@/components/ui/ExperienceBadge";
 import { formatDateLabel, getThemeLabels } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 import { useMatchAttempt, useRespondToMatchAttempt } from "@/features/matching/api/useMatchingApi";
@@ -68,6 +69,7 @@ export default function MatchProfileCard() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-4">
+      {data.isExperience ? <ExperienceBadge className="self-center" /> : null}
       <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-gradient-to-br from-forest-light to-forest/50">
         <Image
           src={partner.fullBodyImageUrl}
@@ -147,7 +149,7 @@ export default function MatchProfileCard() {
           <span className="text-xs">수락</span>
         </button>
       </div>
-      <DemoDataNotice />
+      {data.isExperience ? <DemoDataNotice /> : null}
     </div>
   );
 }

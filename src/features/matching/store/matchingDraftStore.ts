@@ -35,6 +35,7 @@ type MatchingDraftState = MatchingCondition & {
   setPreferredGender: (gender: MatchingCondition["preferredGender"]) => void;
   setAvailableDates: (dates: string[]) => void;
   setThemeIds: (themeIds: string[]) => void;
+  setIsExperience: (isExperience: boolean) => void;
   setMatchingId: (matchingId: string | null) => void;
   setMatchAttemptId: (matchAttemptId: string | null) => void;
   /** 서버가 내려준 실제 만료 시각으로 카운트다운을 덮어쓴다 (새로고침 시 로컬 추정치 대신 이 값을 신뢰). */
@@ -52,10 +53,11 @@ const INITIAL_STATE: MatchingCondition & {
 } = {
   status: "none",
   regionPreferences: [],
-  ageRange: [20, 35],
+  ageRange: [20, 70],
   preferredGender: "any",
   availableDates: [],
   themeIds: [],
+  isExperience: false,
   matchDeadlineAt: null,
   paymentDeadlineAt: null,
   matchingId: null,
@@ -111,6 +113,7 @@ export const useMatchingDraftStore = create<MatchingDraftState>()(
       setPreferredGender: (preferredGender) => set({ preferredGender }),
       setAvailableDates: (availableDates) => set({ availableDates }),
       setThemeIds: (themeIds) => set({ themeIds }),
+      setIsExperience: (isExperience) => set({ isExperience }),
       setMatchingId: (matchingId) => set({ matchingId }),
       setMatchAttemptId: (matchAttemptId) => set({ matchAttemptId }),
       syncDeadlines: (updates) => set(updates),

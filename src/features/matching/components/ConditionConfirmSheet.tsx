@@ -25,7 +25,7 @@ export default function ConditionConfirmSheet({
   onConfirm,
   isSubmitting = false,
 }: ConditionConfirmSheetProps) {
-  const { regionPreferences, ageRange, preferredGender, availableDates, themeIds } =
+  const { regionPreferences, ageRange, preferredGender, availableDates, themeIds, isExperience } =
     useMatchingDraftStore();
 
   const regionsLabel = regionPreferences.length
@@ -41,7 +41,11 @@ export default function ConditionConfirmSheet({
     {
       icon: CalendarDays,
       label: "매칭 가능 날짜",
-      value: availableDates.length ? availableDates.map(formatDateLabel).join(", ") : "미선택",
+      value: isExperience
+        ? "오늘 (체험 매칭)"
+        : availableDates.length
+          ? availableDates.map(formatDateLabel).join(", ")
+          : "미선택",
     },
     { icon: Clover, label: "선택한 테마", value: getThemeLabels(themeIds) || "미선택" },
   ];

@@ -5,19 +5,23 @@ import Image from "next/image";
 import { Camera, CheckCircle2, Clock, MessageSquare, Navigation } from "lucide-react";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
 import ExpandableText from "@/components/ui/ExpandableText";
+import PhotoSourceSheet from "@/components/ui/PhotoSourceSheet";
 import SpotReviewsSheet from "@/features/course/components/SpotReviewsSheet";
-import type { CourseSpot } from "@/features/course/api/types";
+import { isExperiencePhotoId, type CourseSpot } from "@/features/course/api/types";
 import { useUploadMissionPhoto } from "@/features/course/api/useCourseApi";
 import { ApiError, resolveAssetUrl } from "@/lib/api/client";
 
 type MissionCardProps = {
   courseId: string;
   spot: CourseSpot;
+  /** 체험 코스면 업로드 안내 문구가 달라지고, 상대 사진은 실제가 아니라 예시라는 걸 알려준다. */
+  isExperience?: boolean;
 };
 
-export default function MissionCard({ courseId, spot }: MissionCardProps) {
+export default function MissionCard({ courseId, spot, isExperience = false }: MissionCardProps) {
   const [comment, setComment] = useState("");
   const [isReviewsOpen, setIsReviewsOpen] = useState(false);
+  const [isPhotoSourceOpen, setIsPhotoSourceOpen] = useState(false);
   const upload = useUploadMissionPhoto(courseId);
   const { mission } = spot;
 
@@ -76,9 +80,15 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
             사진 미션
           </span>
           <p className="text-xs leading-relaxed text-muted">{mission.description}</p>
-          <p className="text-[11px] text-muted/80">
-            상대방 인증샷 {mission.partnerPhotoUploaded ? "완료" : "대기중"} · 다음날 00시부터 영상 제작
-          </p>
+          {isExperience ? (
+            <p className="text-[11px] text-muted/80">
+              사진 한 장만 올려 보세요 · 실제 여행에서는 장소마다 두 사람이 함께 사진을 남겨요
+            </p>
+          ) : (
+            <p className="text-[11px] text-muted/80">
+              상대방 인증샷 {mission.partnerPhotoUploaded ? "완료" : "대기중"} · 다음날 00시부터 영상 제작
+            </p>
+          )}
         </div>
 
         {mission.photoUploaded ? (
@@ -87,27 +97,17 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
             <span className="text-sm font-medium">완료!</span>
           </div>
         ) : (
-          <label
-            aria-disabled={upload.isPending}
-            className="flex shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl bg-forest px-6 py-4 text-white focus-within:ring-2 focus-within:ring-forest focus-within:ring-offset-2 focus-within:ring-offset-cream aria-disabled:opacity-50"
+          <button
+            type="button"
+            disabled={upload.isPending}
+            onClick={() => setIsPhotoSourceOpen(true)}
+            className="flex shrink-0 flex-col items-center justify-center gap-1 rounded-2xl bg-forest px-6 py-4 text-white focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-50"
           >
             <Camera size={20} strokeWidth={1.5} />
             <span className="text-sm font-medium">
-              {upload.isPending ? "업로드 중..." : "사진 촬영하기"}
+              {upload.isPending ? "업로드 중..." : "사진 첨부하기"}
             </span>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="sr-only"
-              disabled={upload.isPending}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.currentTarget.value = "";
-                handleFileChange(file);
-              }}
-            />
-          </label>
+          </button>
         )}
       </div>
 
@@ -121,6 +121,12 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
           className="rounded-xl border border-line bg-transparent px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:border-forest focus:outline-none"
         />
       ) : null}
+
+      <PhotoSourceSheet
+        open={isPhotoSourceOpen}
+        onClose={() => setIsPhotoSourceOpen(false)}
+        onSelect={handleFileChange}
+      />
 
       {upload.isError ? (
         <p className="text-sm text-red-500">
@@ -139,7 +145,10 @@ export default function MissionCard({ courseId, spot }: MissionCardProps) {
               >
                 <Image src={resolveAssetUrl(photo.imageUrl)} alt={photo.comment ?? spot.name} fill sizes="96px" className="object-cover" />
               </div>
-              <span className="text-[11px] font-medium text-muted">{photo.isMine ? "나" : "상대방"}</span>
+              <span className="text-[11px] font-medium text-muted">
+                {photo.isMine ? "나" : "상대방"}
+                {!photo.isMine && isExperiencePhotoId(photo.id) ? " (예시)" : ""}
+              </span>
               {photo.comment ? (
                 <p className="truncate text-[11px] text-ink/70">{photo.comment}</p>
               ) : null}
