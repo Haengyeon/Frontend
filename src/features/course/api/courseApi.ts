@@ -10,6 +10,7 @@ import type {
   RecommendedSpotsResponse,
   SpotReviewsResponse,
   VideoDetail,
+  ExperienceFinishResponse,
 } from "./types";
 
 type PageParams = { limit?: number; cursor?: string | null };
@@ -76,4 +77,13 @@ export function getSpotReviews(contentId: string, params: PageParams = {}) {
 // 백엔드 스케줄러가 매분 자동으로 만들기 시작한다. 여기선 진행 상태만 조회한다.
 export function getCourseVideo(courseId: string) {
   return apiRequest<VideoDetail>(`/courses/${courseId}/video`);
+}
+
+// 체험(더미) 코스 전용. 실제 코스와 달리 AI가 영상을 만드는 게 아니라 미리 준비된 샘플
+// 추억영상을 즉시 돌려준다. 이미 끝낸 체험이면 상태는 유지된 채 URL만 재발급된다.
+// 실제 코스에 호출하면 400("체험 매칭 코스가 아닙니다")이 난다.
+export function finishExperienceCourse(courseId: string) {
+  return apiRequest<ExperienceFinishResponse>(`/courses/${courseId}/experience/finish`, {
+    method: "POST",
+  });
 }

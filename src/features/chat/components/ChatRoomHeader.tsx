@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Flag } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Avatar from "@/components/ui/Avatar";
+import ExperienceBadge from "@/components/ui/ExperienceBadge";
 import { calculateDday } from "@/features/chat/lib/dday";
 import type { ChatRoomSummary } from "@/features/chat/api/types";
 
@@ -21,7 +22,10 @@ export default function ChatRoomHeader({ room }: ChatRoomHeaderProps) {
         <div className="flex items-center gap-3">
           <Avatar src={room.partnerProfileImageUrl} alt={room.partnerName} size={32} />
           <div>
-            <p className="text-sm font-medium text-ink">{room.partnerName}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-ink">{room.partnerName}</p>
+              {room.isExperience ? <ExperienceBadge /> : null}
+            </div>
             <p className="text-xs text-muted">{dday === 0 ? "D-Day" : `D${dday > 0 ? "-" : "+"}${Math.abs(dday)}`}</p>
           </div>
         </div>

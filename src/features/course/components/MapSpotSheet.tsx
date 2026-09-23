@@ -7,12 +7,13 @@ import type { CourseSpot } from "@/features/course/api/types";
 type MapSpotSheetProps = {
   courseId: string;
   spot: CourseSpot;
+  isExperience?: boolean;
   onClose: () => void;
 };
 
 // BottomSheet(모달)를 안 쓰는 이유: 열어둔 채 다른 마커를 눌러야 하고,
 // 등장 애니메이션이 끝나면 transform이 안 남아야 MissionCard 안 후기 시트(fixed)가 화면 기준으로 뜬다.
-export default function MapSpotSheet({ courseId, spot, onClose }: MapSpotSheetProps) {
+export default function MapSpotSheet({ courseId, spot, isExperience = false, onClose }: MapSpotSheetProps) {
   return (
     <section
       aria-label={`${spot.order}번 장소 ${spot.name}`}
@@ -27,7 +28,7 @@ export default function MapSpotSheet({ courseId, spot, onClose }: MapSpotSheetPr
         >
           <X size={16} strokeWidth={1.5} />
         </button>
-        <MissionCard courseId={courseId} spot={spot} />
+        <MissionCard courseId={courseId} spot={spot} isExperience={isExperience} />
       </div>
     </section>
   );

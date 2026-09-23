@@ -22,6 +22,8 @@ export type MatchingCondition = {
   preferredGender: "male" | "female" | "any";
   availableDates: string[];
   themeIds: string[];
+  /** true면 실제 상대가 아니라 더미 유저와 즉시 매칭되는 체험 매칭. 여행날짜는 서버가 오늘로 고정한다. */
+  isExperience: boolean;
 };
 
 export type MatchingTheme = {

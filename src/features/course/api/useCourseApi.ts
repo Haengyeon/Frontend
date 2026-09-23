@@ -12,6 +12,7 @@ import {
   getRecommendedSpots,
   getSpotReviews,
   getCourseVideo,
+  finishExperienceCourse,
 } from "./courseApi";
 import type { SubmitCourseReviewRequest } from "./types";
 
@@ -119,6 +120,23 @@ export function useCourseVideo(courseId: string | null, options: { enabled?: boo
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       return status === "PENDING" || status === "PROCESSING" ? 5000 : false;
+    },
+  });
+}
+
+/** 체험 코스 종료 — 샘플 추억영상을 발급받는다. 다시 눌러도 같은 영상을 재발급받을 뿐이라
+ * 여러 번 호출해도 안전하다. */
+export function useFinishExperienceCourse(courseId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => finishExperienceCourse(courseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: courseDetailKey(courseId) });
+      queryClient.invalidateQueries({ queryKey: HISTORY_KEY });
+      // 홈의 상태 배너가 "여행 완료" 카드를 띄우려면 course.status가 COMPLETED로
+      // 갱신된 이 쿼리를 다시 봐야 한다 — 안 그러면 캐시된 예전 상태 때문에
+      // StatusBanner가 completed로 판단한 걸 도로 confirmed로 덮어써 버린다.
+      queryClient.invalidateQueries({ queryKey: CURRENT_COURSE_KEY });
     },
   });
 }
