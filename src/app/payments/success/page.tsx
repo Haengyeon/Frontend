@@ -6,7 +6,8 @@ import Button from "@/components/ui/Button";
 import { approvePayment } from "@/features/payment/api/paymentApi";
 import { useCancelPayment } from "@/features/payment/api/usePaymentApi";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
-import { getKakaoLoginUrl } from "@/features/auth/api/authApi";
+import { getKakaoLoginUrl, refreshToken } from "@/features/auth/api/authApi";
+import { useAuthStore } from "@/features/auth/store/authStore";
 import { ApiError } from "@/lib/api/client";
 import { setPostLoginRedirect } from "@/lib/postLoginRedirect";
 
@@ -33,18 +34,34 @@ function PaymentSuccessContent() {
   useEffect(() => {
     if (!paymentId || !pgToken || approvedRef.current) return;
     approvedRef.current = true;
+
+    const handleSuccess = (data: { matchConfirmed: boolean; matchAttemptId: string }) => {
+      setMatchConfirmed(data.matchConfirmed);
+      setMatchAttemptId(data.matchAttemptId);
+      setPaidMatchAttemptId(data.matchAttemptId);
+    };
+
     approvePayment({ paymentId, pgToken })
-      .then((data) => {
-        setMatchConfirmed(data.matchConfirmed);
-        setMatchAttemptId(data.matchAttemptId);
-        setPaidMatchAttemptId(data.matchAttemptId);
-      })
-      .catch((err) => {
-        // 카카오페이 결제창에 머무는 동안 로그인 세션이 끊긴 경우(예: 다른 곳에서 로그아웃됨).
-        // 이 시점엔 아직 우리 서버가 pg_token을 카카오페이에 제출하지 않은 상태라(인증에서
-        // 막혀서), 다시 로그인해서 같은 paymentId/pg_token으로 재시도하면 정상 승인된다.
+      .then(handleSuccess)
+      .catch(async (err) => {
+        // 카카오페이 결제창에 머무는 동안 액세스 토큰이 401을 낸 경우. 액세스 토큰만
+        // 유실됐을 뿐(예: 결제창을 별도 웹뷰로 열어 로컬스토리지가 분리되는 환경) 로그인
+        // 자체는 아직 유효할 수 있어서, refresh 쿠키로 조용히 재발급을 먼저 시도한다 —
+        // 카카오 재로그인은 그것마저 실패했을 때만 요구되는 마지막 수단이어야 한다.
+        // (이 시점엔 아직 우리 서버가 pg_token을 카카오페이에 제출하지 않은 상태라 인증에서
+        // 막힌 거라, 새 토큰으로 같은 paymentId/pg_token을 다시 보내면 정상 승인된다.)
         if (err instanceof ApiError && err.statusCode === 401) {
-          setIsSessionExpired(true);
+          try {
+            const refreshed = await refreshToken();
+            // 여기선 setSession()을 쓰지 않는다 — 그건 계정 전환용으로 매칭 draft
+            // store를 통째로 reset()하는 부작용이 있다. 지금은 같은 사용자의 토큰만
+            // 갈아끼우는 거라 accessToken만 조용히 갱신한다(영속화도 그대로 된다).
+            useAuthStore.setState({ accessToken: refreshed.accessToken, hasProfile: refreshed.hasProfile });
+            const data = await approvePayment({ paymentId, pgToken });
+            handleSuccess(data);
+          } catch {
+            setIsSessionExpired(true);
+          }
           return;
         }
         setError(err instanceof ApiError ? err.message : "결제 승인에 실패했어요.");
