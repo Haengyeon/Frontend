@@ -14,6 +14,7 @@ import { useMyMatching, useMatchAttempt } from "@/features/matching/api/useMatch
 import { useCurrentCourse } from "@/features/course/api/useCourseApi";
 import { matchingStatusToLocal } from "@/features/matching/api/enumMap";
 import type { MatchingStatus } from "@/features/matching/types";
+import { ApiError } from "@/lib/api/client";
 
 const STATUS_BANNERS: Partial<Record<MatchingStatus, ComponentType>> = {
   none: NoMatchBanner,
@@ -36,7 +37,7 @@ export default function StatusBanner() {
 
   // GET /matchings/me를 폴링해서 서버 상태를 로컬 상태에 그대로 반영한다 —
   // "탐색 중 → 매칭 발견" 같은 전환은 더 이상 가짜 타이머가 아니라 실제 서버 응답으로 일어난다.
-  const { data } = useMyMatching();
+  const { data, isError, error } = useMyMatching();
   const attemptId = data?.currentAttempt?.id ?? null;
   // WAITING_RESPONSE 하나로는 "내가 아직 응답 안 함(found)"과 "내가 이미 수락하고 상대를
   // 기다리는 중(pending)"을 구분할 수 없어서, 상세 조회의 myResponded로 둘을 나눈다.
@@ -63,7 +64,16 @@ export default function StatusBanner() {
       return;
     }
 
-    if (!data) return;
+    if (!data) {
+      // 매칭이 진짜로 끝나서(예: 코스 완료 처리 시 endedAt까지 정리됨) /matchings/me가
+      // 404를 내는데, 보여줄 완료 코스도 이미 24시간 창을 넘겨 캐시에 없는 경우.
+      // 이때 아무 것도 안 하면 status가 예전 값("확정"/"완료" 등)에 그대로 멈춰서,
+      // 실제로는 매칭이 하나도 없는데 화면은 계속 예전 매칭을 보여주게 된다.
+      if (isError && error instanceof ApiError && error.statusCode === 404) {
+        setStatus("none");
+      }
+      return;
+    }
     setMatchingId(data.id);
     setMatchAttemptId(attemptId);
     setIsExperience(data.isExperience);
@@ -84,6 +94,8 @@ export default function StatusBanner() {
     }
   }, [
     data,
+    isError,
+    error,
     attempt,
     attemptId,
     currentCourse,
