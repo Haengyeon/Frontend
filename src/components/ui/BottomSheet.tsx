@@ -10,7 +10,7 @@ type BottomSheetProps = {
 };
 
 const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+  'a[href], button:not([disabled]), textarea, input:not([type="file"]), select, [tabindex]:not([tabindex="-1"])';
 
 export default function BottomSheet({ open, onClose, labelledBy, children }: BottomSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);

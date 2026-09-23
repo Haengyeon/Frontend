@@ -16,6 +16,7 @@ import {
   MIN_BIRTH_YEAR,
   MAX_BIRTH_YEAR,
   formatDateLabel,
+  toDateValue,
 } from "@/features/matching/mocks";
 import { useMatchingDraftStore } from "@/features/matching/store/matchingDraftStore";
 
@@ -60,6 +61,16 @@ export default function ConditionStepOne() {
     );
   };
 
+  const handleExperienceChange = (next: boolean) => {
+    setIsExperience(next);
+    if (next) return;
+
+    // 체험 매칭에서 넣어둔 오늘 날짜는 실제 매칭 캘린더(내일부터 선택 가능)로는 지울 수
+    // 없어서, 토글을 끌 때 직접 걷어낸다 — 안 그러면 오늘 날짜가 실제 매칭 요청에 섞여 간다.
+    const today = toDateValue(new Date());
+    setAvailableDates(availableDates.filter((date) => date !== today));
+  };
+
   return (
     <div className="flex flex-1 flex-col gap-8 px-6 pb-8 pt-4">
       <div className="flex flex-col gap-2 rounded-2xl border border-line bg-cream-card p-4">
@@ -68,7 +79,7 @@ export default function ConditionStepOne() {
             <Sparkles size={16} strokeWidth={1.5} className="text-forest" />
             체험 매칭으로 시작
           </span>
-          <Toggle checked={isExperience} onChange={setIsExperience} />
+          <Toggle checked={isExperience} onChange={handleExperienceChange} />
         </div>
         <p className="text-xs leading-relaxed text-muted">
           실제 상대 없이 가상 프로필과 바로 매칭돼서 결제·코스·채팅까지 미리 체험해볼 수 있어요.

@@ -49,7 +49,16 @@ export default function StatusBanner() {
     // 코스가 COMPLETED면 무조건 "여행 완료"를 우선한다. 매칭이 완료 처리와 함께(또는 그
     // 직후) endedAt 처리돼서 GET /matchings/me가 404를 내도(체험 코스는 지금 이렇게 된다),
     // data가 없다는 이유로 아래 매칭 기반 분기를 못 타 상태가 옛날 값에 멈춰있으면 안 된다.
-    if (currentCourse?.course?.status === "COMPLETED") {
+    // 단, 캐시에 남은 완료 코스가 "이번" 매칭 시도의 것인지 확인한다 — 새 매칭을 시작한
+    // 직후에는 이전 매칭의 COMPLETED 코스가 캐시에 남아있을 수 있어서, matchAttemptId가
+    // 다르면(=이전 시도 것이면) 완료 처리를 건너뛰고 아래에서 새 매칭 상태를 반영한다.
+    const completedCourseAttemptId = currentCourse?.course?.matchAttemptId;
+    const isCompletedForCurrentAttempt =
+      currentCourse?.course?.status === "COMPLETED" &&
+      (!data ||
+        (completedCourseAttemptId != null && completedCourseAttemptId === data.currentAttempt?.id));
+
+    if (isCompletedForCurrentAttempt) {
       setStatus("completed");
       return;
     }

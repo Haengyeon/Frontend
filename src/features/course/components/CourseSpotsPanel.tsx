@@ -64,6 +64,7 @@ export default function CourseSpotsPanel({ courseId, spots, isExperience = false
               key={selectedSpot.id}
               courseId={courseId}
               spot={selectedSpot}
+              isExperience={isExperience}
               onClose={() => setIsSheetOpen(false)}
             />
           ) : null}
