@@ -49,7 +49,7 @@ export default function Page() {
       </p>
       {matchDeadlineAt ? (
         <p className="text-sm font-medium text-forest">
-          <Countdown deadlineAt={matchDeadlineAt} /> 남음
+          <Countdown deadlineAt={matchDeadlineAt} className="text-base font-bold" /> 남음
         </p>
       ) : null}
       <p className="text-xs text-muted">
