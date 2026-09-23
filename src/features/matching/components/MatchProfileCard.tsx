@@ -77,6 +77,10 @@ export default function MatchProfileCard() {
           fill
           sizes="400px"
           className="object-cover"
+          // 상대 사진은 임의의 외부 호스트(더미풀은 뉴스/위키 등 60개 이상 도메인)에서
+          // 올 수 있어서 next.config.ts remotePatterns로 다 감당이 안 된다 — 최적화를
+          // 건너뛰어서 등록 안 된 호스트여도 깨지지 않게 한다.
+          unoptimized
         />
 
         <span className="absolute right-3 top-3 rounded-full bg-white/80 px-2.5 py-1 text-xs text-ink">
