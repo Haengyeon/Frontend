@@ -30,8 +30,8 @@ export default function MatchPendingBanner() {
       </p>
       {matchDeadlineAt ? (
         <p className="text-xs text-forest/60">
-          <Countdown deadlineAt={matchDeadlineAt} /> 이내에 상대방이 응답하지 않으면 매칭이
-          자동으로 취소돼요.
+          <Countdown deadlineAt={matchDeadlineAt} className="text-sm font-bold" /> 이내에 상대방이
+          응답하지 않으면 매칭이 자동으로 취소돼요.
         </p>
       ) : null}
 
