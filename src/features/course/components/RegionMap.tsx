@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useState } from "react";
 import CourseCard from "@/features/course/components/CourseCard";
 import RegionColorMap from "@/features/course/components/RegionColorMap";
+import ExperienceCellsCollector from "@/features/course/components/ExperienceCellsCollector";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
 import { useCourseHistory } from "@/features/course/api/useCourseApi";
 import { useStamps } from "@/features/reward/api/useRewardApi";
@@ -16,8 +18,23 @@ export default function RegionMap() {
     stamps?.stamps.flatMap((stamp) => stamp.mapSigunguCodes) ?? [],
   );
 
+  // 체험 매칭 완료 코스는 스탬프가 안 찍혀서(의도적) 지도에 안 잡힌다 — 목록엔
+  // isExperience가 없어서 코스마다 상세를 따로 확인해야 안다(ExperienceCellsCollector).
+  // 실제 스탬프와는 다른 색으로 구분해서 보여준다.
+  const [experienceCellsByCourse, setExperienceCellsByCourse] = useState<Record<string, string[]>>({});
+  const handleExperienceCells = useCallback((courseId: string, cells: string[]) => {
+    setExperienceCellsByCourse((prev) =>
+      prev[courseId]?.join(",") === cells.join(",") ? prev : { ...prev, [courseId]: cells },
+    );
+  }, []);
+  const experienceCodes = new Set(Object.values(experienceCellsByCourse).flat());
+
   return (
     <div className="flex flex-col gap-8">
+      {items.map((course) => (
+        <ExperienceCellsCollector key={course.id} courseId={course.id} onCells={handleExperienceCells} />
+      ))}
+
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-ink">다녀온 지역</span>
@@ -39,7 +56,21 @@ export default function RegionMap() {
             </button>
           </div>
         ) : (
-          <RegionColorMap visitedCodes={visitedCodes} />
+          <>
+            <RegionColorMap visitedCodes={visitedCodes} experienceCodes={experienceCodes} />
+            {experienceCodes.size > 0 ? (
+              <div className="flex items-center gap-4 text-[11px] text-muted">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-forest" />
+                  실제로 다녀온 곳
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-forest/45" />
+                  체험으로 다녀온 곳
+                </span>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
 

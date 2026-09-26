@@ -48,9 +48,11 @@ function districtLabelSizeAt(scale: number): number {
 
 type RegionColorMapProps = {
   visitedCodes: Set<string>;
+  /** 체험 매칭으로 완료한 코스의 지역 — 실제 스탬프(visitedCodes)와 구분해서 옅은 색으로 표시한다. */
+  experienceCodes?: Set<string>;
 };
 
-export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
+export default function RegionColorMap({ visitedCodes, experienceCodes }: RegionColorMapProps) {
   const { project, width, height } = useMemo(
     () => createProjection(municipalities.features, MAP_WIDTH),
     [],
@@ -289,12 +291,15 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
         >
           {districtShapes.map(({ feature, d, centroid }) => {
             const visited = visitedCodes.has(feature.properties.code);
+            const experienceVisited = !visited && (experienceCodes?.has(feature.properties.code) ?? false);
 
             return (
               <path
                 key={feature.properties.code}
                 d={d}
-                className={`cursor-pointer ${visited ? "fill-forest" : "fill-forest-light"}`}
+                className={`cursor-pointer ${
+                  visited ? "fill-forest" : experienceVisited ? "fill-forest/45" : "fill-forest-light"
+                }`}
                 stroke="var(--color-cream)"
                 strokeWidth={0.4 / transform.scale}
                 onClick={() => {
@@ -329,7 +334,13 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
                 r={DOKDO_MARKER_RADIUS / transform.scale}
                 strokeWidth={0.5 / transform.scale}
                 stroke="var(--color-cream)"
-                className={visitedCodes.has(ULLEUNGDO_CODE) ? "fill-forest" : "fill-forest-light"}
+                className={
+                  visitedCodes.has(ULLEUNGDO_CODE)
+                    ? "fill-forest"
+                    : experienceCodes?.has(ULLEUNGDO_CODE)
+                      ? "fill-forest/45"
+                      : "fill-forest-light"
+                }
               />
               {transform.scale > DISTRICT_LABEL_MIN_SCALE ? (
                 <text
@@ -348,7 +359,9 @@ export default function RegionColorMap({ visitedCodes }: RegionColorMapProps) {
 
           {districtLabelOpacity > 0
             ? visibleDistrictLabels.map(({ feature, centroid }) => {
-                const visited = visitedCodes.has(feature.properties.code);
+                const visited =
+                  visitedCodes.has(feature.properties.code) ||
+                  (experienceCodes?.has(feature.properties.code) ?? false);
 
                 return (
                   <text
