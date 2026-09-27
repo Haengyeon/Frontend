@@ -2,14 +2,59 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Camera, CheckCircle2, Clock, MessageSquare, Navigation } from "lucide-react";
+import { Camera, CheckCircle2, Clock, MessageSquare, Navigation, Pencil } from "lucide-react";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
 import ExpandableText from "@/components/ui/ExpandableText";
 import PhotoSourceSheet from "@/components/ui/PhotoSourceSheet";
 import SpotReviewsSheet from "@/features/course/components/SpotReviewsSheet";
-import { isExperiencePhotoId, type CourseSpot } from "@/features/course/api/types";
-import { useUploadMissionPhoto } from "@/features/course/api/useCourseApi";
+import { isExperiencePhotoId, type CourseSpot, type MissionPhoto } from "@/features/course/api/types";
+import { useUploadMissionPhoto, useUpdateMissionPhotoComment } from "@/features/course/api/useCourseApi";
 import { ApiError, resolveAssetUrl } from "@/lib/api/client";
+
+type MyPhotoCommentEditorProps = {
+  courseId: string;
+  missionId: string;
+  photo: MissionPhoto;
+};
+
+// 업로드 뒤에도 내 사진 한마디를 쓰거나 고칠 수 있게 하는 인라인 입력. 값이 서버에 저장된
+// 값과 달라졌을 때만 저장 버튼이 뜬다.
+function MyPhotoCommentEditor({ courseId, missionId, photo }: MyPhotoCommentEditorProps) {
+  const [value, setValue] = useState(photo.comment ?? "");
+  const update = useUpdateMissionPhotoComment(courseId);
+  const isDirty = value.trim() !== (photo.comment ?? "");
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          maxLength={100}
+          placeholder="이 순간을 한 줄로 남겨보세요"
+          className="flex-1 rounded-xl border border-line bg-transparent px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:border-forest focus:outline-none"
+        />
+        {isDirty ? (
+          <button
+            type="button"
+            onClick={() => update.mutate({ missionId, photoId: photo.id, comment: value.trim() })}
+            disabled={update.isPending}
+            className="flex shrink-0 items-center gap-1 rounded-xl bg-forest px-3 py-2.5 text-xs font-medium text-white disabled:opacity-50"
+          >
+            <Pencil size={12} strokeWidth={1.5} />
+            {update.isPending ? "저장 중..." : "저장"}
+          </button>
+        ) : null}
+      </div>
+      {update.isError ? (
+        <p className="text-xs text-red-500">
+          {update.error instanceof ApiError ? update.error.message : "한마디 저장에 실패했어요."}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 type MissionCardProps = {
   courseId: string;
@@ -24,6 +69,7 @@ export default function MissionCard({ courseId, spot, isExperience = false }: Mi
   const [isPhotoSourceOpen, setIsPhotoSourceOpen] = useState(false);
   const upload = useUploadMissionPhoto(courseId);
   const { mission } = spot;
+  const myPhoto = mission.photos.find((photo) => photo.isMine) ?? null;
 
   const handleFileChange = (file: File | undefined) => {
     if (!file) return;
@@ -111,7 +157,9 @@ export default function MissionCard({ courseId, spot, isExperience = false }: Mi
         )}
       </div>
 
-      {!mission.photoUploaded ? (
+      {mission.photoUploaded && myPhoto ? (
+        <MyPhotoCommentEditor courseId={courseId} missionId={mission.id} photo={myPhoto} />
+      ) : !mission.photoUploaded ? (
         <input
           type="text"
           value={comment}
@@ -135,12 +183,12 @@ export default function MissionCard({ courseId, spot, isExperience = false }: Mi
       ) : null}
 
       {mission.photos.length > 0 ? (
-        <HorizontalScroller className="gap-2">
+        <HorizontalScroller className="gap-2 p-1">
           {mission.photos.map((photo) => (
             <div key={photo.id} className="flex w-24 shrink-0 flex-col gap-1">
               <div
                 className={`relative aspect-square w-full overflow-hidden rounded-xl bg-forest-light ${
-                  photo.isMine ? "ring-2 ring-forest" : ""
+                  photo.isMine ? "outline outline-2 outline-offset-2 outline-forest/40" : ""
                 }`}
               >
                 <Image src={resolveAssetUrl(photo.imageUrl)} alt={photo.comment ?? spot.name} fill sizes="96px" className="object-cover" />
