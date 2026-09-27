@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { Info } from "lucide-react";
 import CourseCard from "@/features/course/components/CourseCard";
 import RegionColorMap from "@/features/course/components/RegionColorMap";
-import ExperienceCellsCollector from "@/features/course/components/ExperienceCellsCollector";
+import ExperienceCellsCollector, {
+  type CourseExperienceResult,
+} from "@/features/course/components/ExperienceCellsCollector";
 import HorizontalScroller from "@/components/ui/HorizontalScroller";
 import { useCourseHistory } from "@/features/course/api/useCourseApi";
 import { useStamps } from "@/features/reward/api/useRewardApi";
@@ -18,32 +21,74 @@ export default function RegionMap() {
     stamps?.stamps.flatMap((stamp) => stamp.mapSigunguCodes) ?? [],
   );
 
-  // 체험 매칭 완료 코스는 스탬프가 안 찍혀서(의도적) 지도에 안 잡힌다 — 목록엔
-  // isExperience가 없어서 코스마다 상세를 따로 확인해야 안다(ExperienceCellsCollector).
-  // 실제 스탬프와는 다른 색으로 구분해서 보여준다.
-  const [experienceCellsByCourse, setExperienceCellsByCourse] = useState<Record<string, string[]>>({});
-  const handleExperienceCells = useCallback((courseId: string, cells: string[]) => {
-    setExperienceCellsByCourse((prev) =>
-      prev[courseId]?.join(",") === cells.join(",") ? prev : { ...prev, [courseId]: cells },
-    );
+  // 완료 코스 목록엔 isExperience가 없어서(스펙엔 있다는데 실서버 DTO엔 빠짐), "실제 완료"와
+  // "체험으로 완료"를 나누려면 코스마다 상세를 따로 확인해야 한다(ExperienceCellsCollector).
+  // 체험은 스탬프가 안 찍혀서(의도적) 지도 카운트(0/229칸 등)엔 안 들어가지만, 지도 색으로는
+  // 별도 표시한다 — 숫자는 실제 기록만, 시각적 미리보기는 체험도 포함하는 절충.
+  const [courseInfo, setCourseInfo] = useState<Record<string, CourseExperienceResult>>({});
+  const handleResult = useCallback((courseId: string, result: CourseExperienceResult) => {
+    setCourseInfo((prev) => {
+      const existing = prev[courseId];
+      if (
+        existing &&
+        existing.isExperience === result.isExperience &&
+        existing.cells.join(",") === result.cells.join(",")
+      ) {
+        return prev;
+      }
+      return { ...prev, [courseId]: result };
+    });
   }, []);
-  const experienceCodes = new Set(Object.values(experienceCellsByCourse).flat());
+
+  const experienceCodes = new Set(
+    Object.values(courseInfo).flatMap((info) => info.cells),
+  );
+  // 아직 상세 조회가 안 끝난 항목은 일단 "실제"로 취급한다 — 목록이 잠깐 비어 보이는 것보다
+  // 나중에 체험 다시보기로 옮겨가는 편이 자연스럽다.
+  const realItems = items.filter((course) => courseInfo[course.id]?.isExperience !== true);
+  const experienceItems = items.filter((course) => courseInfo[course.id]?.isExperience === true);
+
+  const [showLegend, setShowLegend] = useState(false);
 
   return (
     <div className="flex flex-col gap-8">
       {items.map((course) => (
-        <ExperienceCellsCollector key={course.id} courseId={course.id} onCells={handleExperienceCells} />
+        <ExperienceCellsCollector key={course.id} courseId={course.id} onResult={handleResult} />
       ))}
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-ink">다녀온 지역</span>
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-medium text-ink">다녀온 지역</span>
+            {experienceCodes.size > 0 ? (
+              <button
+                type="button"
+                onClick={() => setShowLegend((prev) => !prev)}
+                aria-label="지도 색상 안내"
+                className="text-muted"
+              >
+                <Info size={13} strokeWidth={1.5} />
+              </button>
+            ) : null}
+          </div>
           {stamps ? (
             <span className="text-xs text-muted">
               {stamps.collectedCount}/{stamps.totalCount}칸 · {stamps.regionCount}/{stamps.totalRegionCount}개 시도
             </span>
           ) : null}
         </div>
+        {showLegend && experienceCodes.size > 0 ? (
+          <div className="flex items-center gap-4 text-[11px] text-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm bg-forest" />
+              실제로 다녀온 곳
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm bg-forest/45" />
+              체험으로 다녀온 곳
+            </span>
+          </div>
+        ) : null}
         {isStampsError ? (
           <div className="flex flex-col items-center gap-2 py-6 text-sm text-muted">
             <p>{stampsError instanceof ApiError ? stampsError.message : "지역 정보를 불러오지 못했어요."}</p>
@@ -56,21 +101,7 @@ export default function RegionMap() {
             </button>
           </div>
         ) : (
-          <>
-            <RegionColorMap visitedCodes={visitedCodes} experienceCodes={experienceCodes} />
-            {experienceCodes.size > 0 ? (
-              <div className="flex items-center gap-4 text-[11px] text-muted">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-sm bg-forest" />
-                  실제로 다녀온 곳
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-sm bg-forest/45" />
-                  체험으로 다녀온 곳
-                </span>
-              </div>
-            ) : null}
-          </>
+          <RegionColorMap visitedCodes={visitedCodes} experienceCodes={experienceCodes} />
         )}
       </div>
 
@@ -78,12 +109,12 @@ export default function RegionMap() {
         <span className="text-sm font-medium text-ink">완료한 코스</span>
         {isLoading ? (
           <p className="text-sm text-muted">불러오는 중...</p>
-        ) : items.length === 0 ? (
+        ) : realItems.length === 0 ? (
           <p className="text-sm text-muted">아직 완료한 코스가 없어요</p>
         ) : (
           <div className="-mx-6">
             <HorizontalScroller className="gap-3 px-6 pb-2">
-              {items.map((course) => (
+              {realItems.map((course) => (
                 <Link key={course.id} href={`/course/${course.id}`}>
                   <CourseCard
                     title={course.title}
@@ -106,6 +137,25 @@ export default function RegionMap() {
           </div>
         )}
       </div>
+
+      {experienceItems.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          <span className="text-sm font-medium text-ink">체험 다시보기</span>
+          <div className="-mx-6">
+            <HorizontalScroller className="gap-3 px-6 pb-2">
+              {experienceItems.map((course) => (
+                <Link key={course.id} href={`/course/${course.id}`}>
+                  <CourseCard
+                    title={course.title}
+                    region={`${course.regionLabel} ${course.sigunguNames.join("·")}`.trim()}
+                    imageUrl={course.thumbnailUrl ?? ""}
+                  />
+                </Link>
+              ))}
+            </HorizontalScroller>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
