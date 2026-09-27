@@ -7,6 +7,7 @@ import ExpandableText from "@/components/ui/ExpandableText";
 import InfoRow from "@/features/matching/components/InfoRow";
 import CourseSpotsPanel from "@/features/course/components/CourseSpotsPanel";
 import CourseMemoryVideo from "@/features/course/components/CourseMemoryVideo";
+import CourseCompletionAction from "@/features/course/components/CourseCompletionAction";
 import ExperienceVideoAction from "@/features/course/components/ExperienceVideoAction";
 import PartnerReviewStatus from "@/features/course/components/PartnerReviewStatus";
 import { useCourseDetail } from "@/features/course/api/useCourseApi";
@@ -123,6 +124,9 @@ export default function CourseDetail({ courseId }: CourseDetailProps) {
         </div>
 
         <CourseSpotsPanel courseId={detail.id} spots={detail.spots} isExperience={detail.isExperience} />
+        {!detail.isExperience && detail.status !== "COMPLETED" ? (
+          <CourseCompletionAction courseId={detail.id} completionRequest={detail.completionRequest} />
+        ) : null}
         {detail.isExperience ? (
           <ExperienceVideoAction courseId={detail.id} isCompleted={detail.status === "COMPLETED"} />
         ) : (

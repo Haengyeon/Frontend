@@ -146,6 +146,16 @@ export type CourseDetailPreview = CourseDetailBase & {
   preview: CoursePreviewInfo;
 };
 
+/** 당일 "여행 완료하기" 버튼 상태. FULL 코스 상세에만 있다. */
+export type CompletionRequestState = {
+  /** 내가 완료 버튼을 눌렀는지 */
+  mine: boolean;
+  /** 상대가 눌렀는지 — true면 "OO님이 완료 버튼을 눌렀어요" 안내 */
+  partner: boolean;
+  /** 내가 누를 수 있는지(여행 당일 이후 + 내 사진·한마디 2개 이상). false면 버튼을 끈다 */
+  available: boolean;
+};
+
 export type CourseDetailFull = CourseDetailBase & {
   viewType: "FULL";
   title: string;
@@ -153,6 +163,7 @@ export type CourseDetailFull = CourseDetailBase & {
   thumbnailUrl: string;
   preview: CoursePreviewInfo;
   status: CourseStatus;
+  completionRequest: CompletionRequestState;
   durationMinutes: number;
   totalDistanceKm: number;
   mapSigunguCodes: string[];
@@ -188,6 +199,26 @@ export type ExperienceFinishResponse = {
   sampleVideo: ExperienceSampleVideo;
 };
 
+export type EarnedStamp = {
+  region: ApiRegion;
+  regionLabel: string;
+  sigunguName: string | null;
+  mapSigunguCodes: string[];
+  earnedAt: string;
+};
+
+/** 코스가 완료되는 순간(자동 완료든 완료 버튼이든)의 결과. 사진 업로드/한마디 수정/완료
+ * 버튼 응답 전부 이 모양의 completion 필드를 같이 내려줄 수 있다 — 4곳 모두 두 사람의
+ * 사진·한마디가 그 요청으로 다 채워지면 그 자리에서 바로 완료 처리되기 때문이다. */
+export type CourseCompletion = {
+  id: string;
+  status: CourseStatus;
+  completedAt: string | null;
+  earnedStamps: EarnedStamp[];
+  earnedPoints: number;
+  pointsAfter: number;
+};
+
 export type UploadMissionPhotoResponse = {
   id: string;
   missionId: string;
@@ -196,6 +227,21 @@ export type UploadMissionPhotoResponse = {
   createdAt: string;
   missionCompleted: boolean;
   courseProgress: { completedMissions: number; totalMissions: number };
+  /** 이 업로드로 코스가 완료됐으면 결과, 아니면 null */
+  completion: CourseCompletion | null;
+};
+
+/** PATCH .../photos/{photoId} 응답 — 업로드 응답과 모양이 같다(한마디로도 완료될 수 있어서) */
+export type UpdateMissionPhotoResponse = UploadMissionPhotoResponse;
+
+/** POST /courses/{courseId}/completions ("여행 완료하기" 버튼) 응답 */
+export type RequestCourseCompletionResponse = {
+  /** 두 사람 다 눌러 코스가 끝났는지 */
+  completed: boolean;
+  /** 상대가 이미 눌렀는지 — 아직이면 이번 요청으로 상대에게 알림이 감 */
+  partnerRequested: boolean;
+  /** 이 요청으로 완료됐으면 결과, 아니면 null */
+  completion: CourseCompletion | null;
 };
 
 export type SubmitCourseReviewRequest = {

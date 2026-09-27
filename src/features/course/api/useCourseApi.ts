@@ -7,6 +7,8 @@ import {
   getCourseDetail,
   regenerateCourse,
   uploadMissionPhoto,
+  updateMissionPhotoComment,
+  requestCourseCompletion,
   submitCourseReview,
   getCourseHistory,
   getRecommendedSpots,
@@ -65,9 +67,46 @@ export function useUploadMissionPhoto(courseId: string) {
       file: File;
       comment?: string;
     }) => uploadMissionPhoto(courseId, missionId, file, comment),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: courseDetailKey(courseId) });
       queryClient.invalidateQueries({ queryKey: CURRENT_COURSE_KEY });
+      // 이 업로드로 4곳이 다 채워져서 바로 완료됐을 수 있다(응답의 completion) —
+      // 그럴 땐 완료 목록에도 곧바로 잡히게 같이 무효화한다.
+      if (data.completion) queryClient.invalidateQueries({ queryKey: HISTORY_KEY });
+    },
+  });
+}
+
+// 올린 인증샷에 한마디를 쓰거나 고친다. 이 한마디로 코스가 바로 완료될 수 있다(completion).
+export function useUpdateMissionPhotoComment(courseId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      missionId,
+      photoId,
+      comment,
+    }: {
+      missionId: string;
+      photoId: string;
+      comment: string;
+    }) => updateMissionPhotoComment(courseId, missionId, photoId, comment),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: courseDetailKey(courseId) });
+      queryClient.invalidateQueries({ queryKey: CURRENT_COURSE_KEY });
+      if (data.completion) queryClient.invalidateQueries({ queryKey: HISTORY_KEY });
+    },
+  });
+}
+
+// 당일 "여행 완료하기" 버튼.
+export function useRequestCourseCompletion(courseId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => requestCourseCompletion(courseId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: courseDetailKey(courseId) });
+      queryClient.invalidateQueries({ queryKey: CURRENT_COURSE_KEY });
+      if (data.completion) queryClient.invalidateQueries({ queryKey: HISTORY_KEY });
     },
   });
 }
