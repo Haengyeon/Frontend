@@ -284,16 +284,3 @@ export function getSigunguOptions(region: ApiRegion): { code: string; name: stri
 export function sigunguNameOf(region: ApiRegion, code: string): string {
   return SIGUNGU_NAME[region]?.[code] ?? code;
 }
-
-const SIGUNGU_CODE_BY_NAME: Partial<Record<ApiRegion, Record<string, string>>> = {};
-
-/** 이름 → 코드 역방향 조회 (예: "안양시" → "17"). 못 찾으면 null. 지도 색칠처럼
- * 코스가 내려주는 시군구 "이름"만 갖고 있을 때 코드가 필요한 경우에 쓴다. */
-export function sigunguCodeOf(region: ApiRegion, name: string): string | null {
-  if (!SIGUNGU_CODE_BY_NAME[region]) {
-    SIGUNGU_CODE_BY_NAME[region] = Object.fromEntries(
-      Object.entries(SIGUNGU_NAME[region]).map(([code, n]) => [n, code]),
-    );
-  }
-  return SIGUNGU_CODE_BY_NAME[region]?.[name] ?? null;
-}
